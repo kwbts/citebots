@@ -201,8 +201,8 @@ const handleRequest = async () => {
       message.value = 'Processing Super Admin account creation...'
       messageType.value = 'success'
 
-      // TODO: Call API to create super admin account
-      const response = await $fetch('/api/auth/provision', {
+      // Call Netlify function to create super admin account
+      const response = await $fetch('/.netlify/functions/auth-provision', {
         method: 'POST',
         body: {
           firstName: requestForm.value.firstName,

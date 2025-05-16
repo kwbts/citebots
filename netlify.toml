@@ -1,20 +1,14 @@
 [build]
-  command = "npm run build"
+  command = "npm run generate"
   publish = ".output/public"
 
 [build.environment]
   NODE_VERSION = "18"
 
 [functions]
-  directory = ".output/server"
+  directory = "netlify/functions"
 
-# API routes
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/server"
-  status = 200
-
-# SPA fallback for client-side routing
+# SPA fallback for client-side routing  
 [[redirects]]
   from = "/*"
   to = "/index.html"

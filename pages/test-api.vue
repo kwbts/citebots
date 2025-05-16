@@ -27,7 +27,7 @@ const testAPI = async () => {
   error.value = null
   
   try {
-    const response = await $fetch('/api/auth/provision', {
+    const response = await $fetch('/.netlify/functions/auth-provision', {
       method: 'POST',
       body: {
         firstName: 'Jon',
