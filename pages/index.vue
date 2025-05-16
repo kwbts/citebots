@@ -80,17 +80,29 @@
       <div v-else class="card">
         <form @submit.prevent="handleRequest">
           <div class="mb-4">
-            <label for="request-name" class="form-label">Full Name</label>
+            <label for="first-name" class="form-label">First Name</label>
             <input
               type="text"
-              id="request-name"
-              v-model="requestForm.name"
+              id="first-name"
+              v-model="requestForm.firstName"
               class="input-field"
-              placeholder="John Doe"
+              placeholder="John"
               required
             />
           </div>
-          
+
+          <div class="mb-4">
+            <label for="last-name" class="form-label">Last Name</label>
+            <input
+              type="text"
+              id="last-name"
+              v-model="requestForm.lastName"
+              class="input-field"
+              placeholder="Doe"
+              required
+            />
+          </div>
+
           <div class="mb-4">
             <label for="request-email" class="form-label">Email</label>
             <input
@@ -102,8 +114,8 @@
               required
             />
           </div>
-          
-          <div class="mb-4">
+
+          <div class="mb-6">
             <label for="company" class="form-label">Company</label>
             <input
               type="text"
@@ -114,24 +126,9 @@
               required
             />
           </div>
-          
-          <div class="mb-6">
-            <label for="role" class="form-label">Your Role</label>
-            <select
-              id="role"
-              v-model="requestForm.role"
-              class="input-field"
-              required
-            >
-              <option value="">Select a role</option>
-              <option value="client">Client</option>
-              <option value="agency">Agency Partner</option>
-              <option value="consultant">Consultant</option>
-            </select>
-          </div>
 
-          <button type="submit" class="w-full btn-primary">
-            Request Access
+          <button type="submit" class="w-full btn-primary" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Processing...' : 'Request Access' }}
           </button>
         </form>
       </div>
@@ -153,6 +150,7 @@ const router = useRouter()
 const activeForm = ref('login')
 const message = ref('')
 const messageType = ref('')
+const isSubmitting = ref(false)
 
 const loginForm = ref({
   email: '',
@@ -160,10 +158,10 @@ const loginForm = ref({
 })
 
 const requestForm = ref({
-  name: '',
+  firstName: '',
+  lastName: '',
   email: '',
-  company: '',
-  role: ''
+  company: ''
 })
 
 const handleLogin = async () => {
@@ -189,24 +187,52 @@ const handleLogin = async () => {
 
 const handleRequest = async () => {
   message.value = ''
-  
+  isSubmitting.value = true
+
   try {
-    // TODO: Implement actual request submission
-    if (requestForm.value.name && requestForm.value.email) {
-      message.value = 'Access request submitted successfully. We\'ll be in touch soon!'
+    // Basic validation
+    if (!requestForm.value.firstName || !requestForm.value.lastName ||
+        !requestForm.value.email || !requestForm.value.company) {
+      throw new Error('Please fill in all fields')
+    }
+
+    // Check if email is jon@knowbots.ca
+    if (requestForm.value.email === 'jon@knowbots.ca') {
+      message.value = 'Processing Super Admin account creation...'
       messageType.value = 'success'
-      
+
+      // TODO: Call API to create super admin account
+      const response = await $fetch('/api/auth/provision', {
+        method: 'POST',
+        body: {
+          firstName: requestForm.value.firstName,
+          lastName: requestForm.value.lastName,
+          email: requestForm.value.email,
+          company: requestForm.value.company,
+          role: 'super_admin'
+        }
+      })
+
+      message.value = `Account created successfully! Your password is: ${response.password}`
+      messageType.value = 'success'
+
       // Reset form
       requestForm.value = {
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
-        company: '',
-        role: ''
+        company: ''
       }
+    } else {
+      // For other users, just store the request
+      message.value = 'Access request submitted. Super Admin approval required.'
+      messageType.value = 'success'
     }
   } catch (error) {
-    message.value = 'Failed to submit request. Please try again.'
+    message.value = error.message || 'Failed to submit request. Please try again.'
     messageType.value = 'error'
+  } finally {
+    isSubmitting.value = false
   }
 }
 </script>
