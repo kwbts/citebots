@@ -18,7 +18,9 @@
           </div>
           
           <div class="flex items-center gap-4">
-            <span class="text-sm text-citebots-gray-600">Welcome</span>
+            <span class="text-sm text-citebots-gray-600">
+              Welcome{{ profile ? `, ${profile.first_name}` : '' }}
+            </span>
             <button @click="logout" class="btn-secondary flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
@@ -33,10 +35,43 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div class="card">
+      <div v-if="isLoading" class="card">
+        <div class="animate-pulse">
+          <div class="h-8 bg-citebots-gray-200 rounded w-1/4 mb-4"></div>
+          <div class="h-4 bg-citebots-gray-200 rounded w-3/4"></div>
+        </div>
+      </div>
+
+      <div v-else class="card">
         <h2 class="text-2xl font-semibold text-citebots-dark mb-4">Welcome to Citebots</h2>
+        <div class="mb-6">
+          <p class="text-citebots-gray-600 mb-4">
+            You are logged in as a {{ profile?.role || 'user' }}.
+          </p>
+          <div class="bg-citebots-gray-50 p-4 rounded-lg">
+            <h3 class="font-medium text-citebots-dark mb-2">Your Profile</h3>
+            <dl class="grid grid-cols-1 gap-2 text-sm">
+              <div>
+                <dt class="font-medium text-citebots-gray-600">Name:</dt>
+                <dd class="text-citebots-dark">{{ profile?.first_name }} {{ profile?.last_name }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-citebots-gray-600">Email:</dt>
+                <dd class="text-citebots-dark">{{ profile?.email }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-citebots-gray-600">Company:</dt>
+                <dd class="text-citebots-dark">{{ profile?.company }}</dd>
+              </div>
+              <div>
+                <dt class="font-medium text-citebots-gray-600">Role:</dt>
+                <dd class="text-citebots-dark capitalize">{{ profile?.role }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
         <p class="text-citebots-gray-600">
-          This is your dashboard. We're building out the MVP functionality.
+          This is your dashboard. We're building out the MVP functionality. Coming soon: client management, analysis tools, and reporting.
         </p>
       </div>
     </main>
@@ -45,11 +80,54 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { useSupabase } from '~/composables/useSupabase'
+import { onMounted, ref } from 'vue'
+
+// Apply auth middleware
+definePageMeta({
+  middleware: 'auth'
+})
 
 const router = useRouter()
+const supabase = useSupabase()
+const user = ref(null)
+const profile = ref(null)
+const isLoading = ref(true)
 
-const logout = () => {
-  // TODO: Implement actual logout
-  router.push('/')
+onMounted(async () => {
+  try {
+    // Get the current user
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+
+    if (authUser) {
+      user.value = authUser
+
+      // Get the user's profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authUser.id)
+        .single()
+
+      profile.value = profileData
+    } else {
+      // If no user, redirect to login
+      router.push('/')
+    }
+  } catch (error) {
+    console.error('Error loading user:', error)
+    router.push('/')
+  } finally {
+    isLoading.value = false
+  }
+})
+
+const logout = async () => {
+  try {
+    await supabase.auth.signOut()
+    router.push('/')
+  } catch (error) {
+    console.error('Error logging out:', error)
+  }
 }
 </script>

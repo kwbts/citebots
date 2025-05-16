@@ -70,8 +70,8 @@
             />
           </div>
 
-          <button type="submit" class="w-full btn-primary">
-            Sign In
+          <button type="submit" class="w-full btn-primary" :disabled="isSubmitting">
+            {{ isSubmitting ? 'Signing in...' : 'Sign In' }}
           </button>
         </form>
       </div>
@@ -145,8 +145,10 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useSupabase } from '~/composables/useSupabase'
 
 const router = useRouter()
+const supabase = useSupabase()
 const activeForm = ref('login')
 const message = ref('')
 const messageType = ref('')
@@ -166,22 +168,38 @@ const requestForm = ref({
 
 const handleLogin = async () => {
   message.value = ''
-  
+  isSubmitting.value = true
+
   try {
-    // For MVP, we'll do a simple check
-    if (loginForm.value.email && loginForm.value.password) {
-      // TODO: Implement actual Supabase authentication
-      message.value = 'Logging in...'
-      messageType.value = 'success'
-      
-      // Simulate login
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 1000)
+    // Implement actual Supabase authentication
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: loginForm.value.email,
+      password: loginForm.value.password,
+    })
+
+    if (error) {
+      throw error
     }
+
+    message.value = 'Login successful! Redirecting...'
+    messageType.value = 'success'
+
+    // Check if we have a profile
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single()
+
+    // Redirect to dashboard
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 500)
   } catch (error) {
-    message.value = 'Login failed. Please try again.'
+    message.value = error.message || 'Login failed. Please check your credentials.'
     messageType.value = 'error'
+  } finally {
+    isSubmitting.value = false
   }
 }
 

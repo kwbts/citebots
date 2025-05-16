@@ -10,6 +10,7 @@ Citebots is an internal SEO/digital marketing tool that analyzes citations in LL
 - **Goal**: Working demo to show prospects
 - **Priority**: Backend functionality over UI polish
 - **Business**: Low revenue period, need this deal
+- **Current Status**: Authentication system deployed and working on Netlify
 
 ## Your Role
 
@@ -18,6 +19,65 @@ You are the technical development partner for this sprint. Focus on:
 2. Clear validation at each step
 3. Risk mitigation
 4. Working functionality over perfection
+
+## Important Configuration Details
+
+### Authentication System (COMPLETE ✓)
+- **Super Admin**: jon@knowbots.ca (auto-provisions with generated password)
+- **Database**: Supabase with profiles and access_requests tables
+- **API**: Netlify Function at `/.netlify/functions/auth-provision`
+- **Frontend**: Request Access form auto-creates super admin account
+
+### Environment Variables (Required in Netlify)
+```
+NUXT_PUBLIC_SUPABASE_URL = https://trmaeodthlywcjwfzdka.supabase.co
+NUXT_PUBLIC_SUPABASE_ANON_KEY = [your anon key]
+SUPABASE_SERVICE_KEY = [your service key]
+```
+
+### Deployment Architecture
+- **Frontend**: Static Nuxt 3 SPA (no SSR)
+- **Backend**: Netlify Functions (not Nuxt server routes)
+- **Database**: Supabase with RLS policies
+- **Hosting**: Netlify with automatic GitHub deployments
+
+### Key Technical Decisions
+1. **Static vs Server**: Using static generation + Netlify Functions
+2. **API Routes**: Netlify Functions instead of Nuxt server routes (avoids deployment issues)
+3. **Auth Flow**: Direct Supabase auth admin API calls
+4. **Password Generation**: Server-side 16-character secure passwords
+
+### Gotchas & Solutions
+1. **Duplicate User Error**: Fixed with upsert operations
+2. **API 404 on Netlify**: Solved by using Netlify Functions
+3. **Build Directory Error**: Use `.output/public` for static builds
+4. **Trigger Conflicts**: Removed Supabase trigger to avoid race conditions
+
+## Current Progress
+
+### Completed ✓
+- [x] GitHub repository connected
+- [x] Basic Nuxt 3 app with Tailwind CSS
+- [x] Login page UI matching design specs
+- [x] Supabase project setup
+- [x] Database schema (profiles, access_requests)
+- [x] Authentication system
+- [x] Super admin provisioning
+- [x] Netlify deployment working
+- [x] Environment variables configured
+
+### Next Steps
+- [ ] Implement actual login functionality
+- [ ] Create dashboard after login
+- [ ] Add client management
+- [ ] Implement web scraping integration
+- [ ] Add citation analysis
+- [ ] Create reporting features
+
+### Test URLs
+- **Production**: https://citebots.com (or Netlify URL)
+- **Test API**: `/test-api` page
+- **Environment Check**: `/env-check` page
 
 ## Project Structure
 
@@ -89,6 +149,49 @@ Polish for presentation:
 3. **Hosting**: Netlify (with Edge Functions)
 4. **Scraper**: Already built (to be integrated)
 
+## Implementation Details
+
+### Database Schema
+```sql
+-- profiles table
+- id (UUID, references auth.users)
+- email (TEXT, unique)
+- first_name (TEXT)
+- last_name (TEXT)
+- company (TEXT)
+- role (TEXT) - super_admin, partner, client, analyst
+- is_active (BOOLEAN)
+
+-- access_requests table
+- id (UUID)
+- email (TEXT, unique)
+- first_name, last_name, company (TEXT)
+- status (TEXT) - pending, approved
+- generated_password (TEXT)
+- approved_at (TIMESTAMP)
+```
+
+### API Endpoints
+```javascript
+// Netlify Functions (not Nuxt server routes!)
+/.netlify/functions/auth-provision - User provisioning
+```
+
+### Frontend Pages
+- `/` - Login page with Sign In / Request Access tabs
+- `/dashboard` - Main dashboard (after login)
+- `/test-api` - API testing page
+- `/env-check` - Environment variable checker
+
+### Authentication Flow
+1. User fills Request Access form
+2. If email is jon@knowbots.ca → auto-provision
+3. Generate 16-char password
+4. Create user in Supabase Auth
+5. Create profile with super_admin role
+6. Store in access_requests table
+7. Display password to user
+
 ## Code Generation Guidelines
 
 When writing code:
@@ -97,6 +200,8 @@ When writing code:
 3. Add comments for complex logic
 4. Focus on working over perfect
 5. Include error boundaries
+6. Use Netlify Functions for API endpoints
+7. Always use upsert for Supabase operations
 
 ## Progress Tracking
 
