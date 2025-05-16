@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '~/lib/supabase'
+// Server-side utilities are auto-imported
 
 // Generate secure password
 function generatePassword(length = 16) {
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   // Get request body
   const body = await readBody(event)
   const { firstName, lastName, email, company, role } = body
-  
+
   // Validate required fields
   if (!firstName || !lastName || !email || !company) {
     throw createError({
@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Missing required fields'
     })
   }
-  
+
   // Only allow super admin creation for jon@knowbots.ca
   if (email === 'jon@knowbots.ca' && role !== 'super_admin') {
     throw createError({
@@ -30,10 +30,13 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Invalid role for this email'
     })
   }
-  
+
+  // Get admin client
+  const supabaseAdmin = useSupabaseAdmin()
+
   // Generate password
   const password = generatePassword()
-  
+
   try {
     // Create auth user
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
