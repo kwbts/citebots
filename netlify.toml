@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  NITRO_PRESET = "static"
 
 # SPA fallback for client-side routing
 [[redirects]]
