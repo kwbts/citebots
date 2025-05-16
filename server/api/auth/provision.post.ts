@@ -38,40 +38,64 @@ export default defineEventHandler(async (event) => {
   const password = generatePassword()
 
   try {
-    console.log('Creating user with email:', email)
-
-    // Create auth user
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true
-    })
-
-    if (authError) {
-      console.error('Auth creation error:', authError)
-      throw authError
+    console.log('Processing user:', email)
+    
+    // First, check if user already exists
+    const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers()
+    const existingUser = existingUsers.users.find(u => u.email === email)
+    
+    let userId
+    
+    if (existingUser) {
+      console.log('User already exists, updating...')
+      // Update existing user's password
+      const { data: updatedUser, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+        existingUser.id,
+        { password }
+      )
+      if (updateError) throw updateError
+      userId = existingUser.id
+    } else {
+      console.log('Creating new user...')
+      // Create new auth user
+      const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true
+      })
+      
+      if (authError) {
+        console.error('Auth creation error:', authError)
+        throw authError
+      }
+      userId = authUser.user.id
     }
 
-    console.log('User created:', authUser.user.id)
-    
-    // Create profile
+    console.log('User ID:', userId)
+
+    // Create or update profile (upsert to handle any race conditions)
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
-      .insert({
-        id: authUser.user.id,
+      .upsert({
+        id: userId,
         email,
         first_name: firstName,
         last_name: lastName,
         company,
         role: role || 'client'
+      }, {
+        onConflict: 'id'
       })
+
+    if (profileError) {
+      console.error('Profile error:', profileError)
+      throw profileError
+    }
     
-    if (profileError) throw profileError
-    
-    // Store access request record
+    // Store or update access request record
     const { error: requestError } = await supabaseAdmin
       .from('access_requests')
-      .insert({
+      .upsert({
         email,
         first_name: firstName,
         last_name: lastName,
@@ -79,14 +103,19 @@ export default defineEventHandler(async (event) => {
         status: 'approved',
         approved_at: new Date().toISOString(),
         generated_password: password
+      }, {
+        onConflict: 'email'
       })
     
-    if (requestError) throw requestError
+    if (requestError) {
+      console.error('Access request error:', requestError)
+      throw requestError
+    }
     
     return {
       success: true,
       password,
-      message: 'Account created successfully'
+      message: existingUser ? 'Account updated successfully' : 'Account created successfully'
     }
   } catch (error) {
     console.error('Provisioning error:', error)
