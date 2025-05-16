@@ -38,14 +38,21 @@ export default defineEventHandler(async (event) => {
   const password = generatePassword()
 
   try {
+    console.log('Creating user with email:', email)
+
     // Create auth user
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true
     })
-    
-    if (authError) throw authError
+
+    if (authError) {
+      console.error('Auth creation error:', authError)
+      throw authError
+    }
+
+    console.log('User created:', authUser.user.id)
     
     // Create profile
     const { error: profileError } = await supabaseAdmin
