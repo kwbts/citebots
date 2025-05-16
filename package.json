@@ -1,0 +1,21 @@
+{
+  "name": "citebots",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "deploy": "npm run build && netlify deploy --prod"
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "latest",
+    "nuxt": "^3.11.0"
+  },
+  "dependencies": {
+    "@nuxtjs/tailwindcss": "^6.11.4",
+    "@supabase/supabase-js": "^2.42.0",
+    "@vueuse/nuxt": "^10.9.0"
+  }
+}

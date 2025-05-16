@@ -1,0 +1,31 @@
+{
+  "name": "citebots",
+  "version": "0.1.0",
+  "description": "A tool to track business appearances in large language models",
+  "main": "citebots.js",
+  "scripts": {
+    "start": "node citebots.js",
+    "dev": "nodemon citebots.js",
+    "test:crawler": "node test-crawlers.js"
+  },
+  "keywords": [
+    "LLM",
+    "analysis",
+    "citations",
+    "AI",
+    "marketing"
+  ],
+  "author": "Knowbots",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.5.0",
+    "openai": "^4.20.1",
+    "scrapingbee": "^1.6.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
