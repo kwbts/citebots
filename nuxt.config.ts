@@ -18,6 +18,12 @@ export default defineNuxtConfig({
   },
   ssr: false, // SPA mode for MVP
   nitro: {
-    preset: 'static' // Generate static files
+    static: true,
+    publicAssets: [
+      {
+        baseURL: '/',
+        dir: 'public'
+      }
+    ]
   }
 })
