@@ -97,26 +97,43 @@ const isLoading = ref(true)
 onMounted(async () => {
   try {
     // Get the current user
-    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+
+    if (authError) {
+      console.error('Auth error:', authError)
+      throw authError
+    }
 
     if (authUser) {
+      console.log('Auth user:', authUser)
       user.value = authUser
 
       // Get the user's profile
-      const { data: profileData } = await supabase
+      const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', authUser.id)
         .single()
 
-      profile.value = profileData
+      if (profileError) {
+        console.error('Profile error:', profileError)
+        console.log('User ID:', authUser.id)
+
+        // Check if profile exists at all
+        const { data: allProfiles } = await supabase
+          .from('profiles')
+          .select('*')
+        console.log('All profiles:', allProfiles)
+      } else {
+        console.log('Profile data:', profileData)
+        profile.value = profileData
+      }
     } else {
       // If no user, redirect to login
       router.push('/')
     }
   } catch (error) {
     console.error('Error loading user:', error)
-    router.push('/')
   } finally {
     isLoading.value = false
   }
