@@ -18,6 +18,6 @@ export default defineNuxtConfig({
   },
   ssr: false, // SPA mode for MVP
   nitro: {
-    preset: 'netlify'
+    preset: 'static' // Generate static files
   }
 })

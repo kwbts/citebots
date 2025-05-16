@@ -5,13 +5,12 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# SPA fallback for client-side routing
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/index"
+  to = "/index.html"
   status = 200
-  force = true
-  headers = {X-From = "Netlify"}
 
-[functions]
-  node_bundler = "esbuild"
-  directory = "netlify/functions/"
+[dev]
+  command = "npm run dev"
+  port = 3000
