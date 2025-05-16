@@ -25,9 +25,9 @@ export default defineNuxtConfig({
   },
   ssr: false, // SPA mode for MVP
   nitro: {
-    preset: 'static',
-    output: {
-      publicDir: '.output/public'
+    preset: 'netlify',
+    prerender: {
+      routes: ['/']
     }
   }
 })
