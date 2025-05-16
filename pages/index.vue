@@ -231,9 +231,14 @@ const handleRequest = async () => {
         }
       })
 
-      message.value = `Account created successfully! Your password is: ${response.password}`
-      messageType.value = 'success'
+      console.log('API Response:', response) // Debug log
 
+      if (response && response.password) {
+        message.value = `Account created successfully! Your password is: ${response.password}`
+      } else {
+        message.value = 'Account created but password not received. Check the access_requests table in Supabase.'
+        console.error('No password in response:', response)
+      }
       // Reset form
       requestForm.value = {
         firstName: '',
@@ -247,6 +252,10 @@ const handleRequest = async () => {
       messageType.value = 'success'
     }
   } catch (error) {
+    console.error('Request error:', error)
+    if (error.data) {
+      console.error('Error data:', error.data)
+    }
     message.value = error.message || 'Failed to submit request. Please try again.'
     messageType.value = 'error'
   } finally {
