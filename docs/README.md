@@ -25,6 +25,7 @@
 
 ### Development
 - [`/development/immediate-action-plan.md`](./development/immediate-action-plan.md) - Weekend timeline
+- [`/development/github-integration.md`](./development/github-integration.md) - GitHub setup and workflow
 - [`/development/supabase-implementation.md`](./development/supabase-implementation.md) - Backend setup
 - [`/development/deployment.md`](./development/deployment.md) - Deployment guide
 - [`/development/standards.md`](./development/standards.md) - Code standards
