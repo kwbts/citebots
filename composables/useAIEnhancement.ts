@@ -1,16 +1,23 @@
+import { useSupabase } from '~/composables/useSupabase'
+
 export const useAIEnhancement = () => {
+  const supabase = useSupabase()
+  
   const enhanceClientWithAI = async (clientId: string, clientName: string, clientDomain: string) => {
     try {
-      const response = await $fetch('/api/enhance-client-ai', {
-        method: 'POST',
+      const response = await supabase.functions.invoke('enhance-client-with-ai', {
         body: {
           clientId,
           clientName,
           clientDomain
         }
       })
-
-      return response
+      
+      if (response.error) {
+        throw response.error
+      }
+      
+      return response.data
     } catch (error) {
       console.error('Error enhancing client with AI:', error)
       console.error('Full error details:', {
@@ -21,7 +28,7 @@ export const useAIEnhancement = () => {
       throw error
     }
   }
-
+  
   return {
     enhanceClientWithAI
   }
