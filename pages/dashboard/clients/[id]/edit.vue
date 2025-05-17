@@ -142,6 +142,7 @@ const form = ref({
 const originalCompetitors = ref([])
 
 const loadClient = async () => {
+  console.log('Loading client with ID:', clientId)
   try {
     const { data, error: fetchError } = await supabase
       .from('clients')
@@ -155,17 +156,22 @@ const loadClient = async () => {
       `)
       .eq('id', clientId)
       .single()
-    
+
     if (fetchError) throw fetchError
-    
+
+    console.log('Loaded client data:', data)
+
     // Populate form with existing data
     form.value.brandName = data.name
     form.value.domain = data.domain
     form.value.competitors = data.competitors || []
-    
+
     // Store original competitors for comparison
     originalCompetitors.value = JSON.parse(JSON.stringify(data.competitors || []))
+
+    console.log('Form populated:', form.value)
   } catch (err) {
+    console.error('Error loading client:', err)
     error.value = err.message
   } finally {
     isLoading.value = false
@@ -186,10 +192,11 @@ const removeCompetitor = (index) => {
 
 const handleSubmit = async () => {
   if (isSubmitting.value) return
-  
+
+  console.log('Submitting form:', form.value)
   isSubmitting.value = true
   error.value = null
-  
+
   try {
     // Update client basic info
     const { error: updateError } = await supabase
@@ -199,7 +206,8 @@ const handleSubmit = async () => {
         domain: form.value.domain
       })
       .eq('id', clientId)
-    
+
+    console.log('Update error:', updateError)
     if (updateError) throw updateError
     
     // Process competitors
