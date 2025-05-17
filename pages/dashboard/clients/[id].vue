@@ -21,7 +21,7 @@
         </div>
         <div class="flex gap-2">
           <button
-            @click="navigateTo(`/dashboard/clients/${client.id}/edit`)"
+            @click="goToEdit"
             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
             Edit Client
@@ -164,15 +164,19 @@ const loadClient = async () => {
   }
 }
 
+const goToEdit = () => {
+  navigateTo(`/dashboard/clients/${route.params.id}/edit`)
+}
+
 const deleteClient = async () => {
   try {
     const { error: deleteError } = await supabase
       .from('clients')
       .delete()
       .eq('id', route.params.id)
-    
+
     if (deleteError) throw deleteError
-    
+
     // Navigate back to manage page after successful deletion
     navigateTo('/dashboard/clients/manage')
   } catch (err) {
