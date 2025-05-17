@@ -1,9 +1,9 @@
 <template>
   <div class="container mx-auto px-4 py-8 max-w-3xl">
-    <h1 class="text-3xl font-bold mb-8">Edit Client</h1>
+    <h1 class="text-3xl font-bold mb-8 text-gray-900">Edit Client</h1>
     
     <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-8">
+    <div v-if="isLoading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       <p class="mt-4 text-gray-600">Loading client data...</p>
     </div>
@@ -21,8 +21,11 @@
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Brand Name</label>
+            <label for="brandName" class="block text-sm font-medium text-gray-700 mb-1">
+              Brand Name
+            </label>
             <input
+              id="brandName"
               v-model="form.brandName"
               type="text"
               required
@@ -31,8 +34,11 @@
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Domain</label>
+            <label for="domain" class="block text-sm font-medium text-gray-700 mb-1">
+              Domain
+            </label>
             <input
+              id="domain"
               v-model="form.domain"
               type="text"
               required
@@ -112,6 +118,10 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { navigateTo } from '#app'
 import { useSupabase } from '~/composables/useSupabase'
+
+definePageMeta({
+  middleware: 'auth'
+})
 
 const route = useRoute()
 const supabase = useSupabase()

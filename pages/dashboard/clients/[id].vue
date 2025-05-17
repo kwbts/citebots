@@ -24,25 +24,7 @@
             @click="goToEdit"
             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Edit Client (Working)
-          </button>
-          <button
-            @click="goToSimpleEdit"
-            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            Simple Edit (Test)
-          </button>
-          <NuxtLink
-            :to="`/dashboard/clients/test-edit?id=${client.id}`"
-            class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 inline-block"
-          >
-            Test Page
-          </NuxtLink>
-          <button
-            @click="goToMinimalEdit"
-            class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
-          >
-            Minimal Edit
+            Edit Client
           </button>
           <button
             @click="showDeleteConfirm = true"
@@ -53,42 +35,6 @@
         </div>
       </div>
 
-      <!-- Diagnostic Links -->
-      <div class="mt-4 p-4 bg-gray-100 rounded">
-        <p class="font-semibold mb-2">Diagnostic Tools:</p>
-        <div class="flex gap-2 flex-wrap">
-          <NuxtLink
-            to="/dashboard/clients/diagnostic"
-            class="px-3 py-1 bg-gray-600 text-white rounded text-sm"
-          >
-            Diagnostic Page
-          </NuxtLink>
-          <NuxtLink
-            :to="`/dashboard/clients/edit-standalone?id=${client.id}`"
-            class="px-3 py-1 bg-indigo-600 text-white rounded text-sm"
-          >
-            Standalone Edit
-          </NuxtLink>
-          <NuxtLink
-            to="/dashboard/clients/compare-test"
-            class="px-3 py-1 bg-pink-600 text-white rounded text-sm"
-          >
-            Compare Test
-          </NuxtLink>
-          <NuxtLink
-            :to="`/dashboard/clients/edit-fixed?id=${client.id}`"
-            class="px-3 py-1 bg-orange-600 text-white rounded text-sm"
-          >
-            Edit Fixed
-          </NuxtLink>
-          <NuxtLink
-            to="/dashboard/clients/route-debug"
-            class="px-3 py-1 bg-cyan-600 text-white rounded text-sm"
-          >
-            Route Debug
-          </NuxtLink>
-        </div>
-      </div>
 
       <!-- Brand Information -->
       <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -220,17 +166,9 @@ const loadClient = async () => {
 }
 
 const goToEdit = () => {
-  // Use the working top-level dynamic route instead of nested
-  navigateTo(`/client-edit-${route.params.id}`)
+  navigateTo(`/dashboard/clients/edit-client-${route.params.id}`)
 }
 
-const goToSimpleEdit = () => {
-  navigateTo(`/dashboard/clients/${route.params.id}/edit-simple`)
-}
-
-const goToMinimalEdit = () => {
-  navigateTo(`/dashboard/clients/${route.params.id}/edit-minimal`)
-}
 
 const deleteClient = async () => {
   try {
