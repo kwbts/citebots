@@ -121,12 +121,20 @@ kb-citebots/
 
 ## Current State
 
-- **Authentication**: Working (login as jon@knowbots.ca)
-- **Dashboard**: Working with profile display
-- **Deployment**: Live on Netlify
+- **Authentication**: ✅ Working (login as jon@knowbots.ca)
+- **Dashboard**: ✅ Working with profile display at `/dashboard/user`
+- **Routing**: ✅ Fixed - proper Nuxt structure `/pages/dashboard/index.vue`
+- **Deployment**: ✅ Live on Netlify
+- **Database**: ✅ Profiles table with working RLS policies
 - **Next Priority**: Client management CRUD
 - **Web scraping algorithm**: READY (to be integrated)
 - **Technology**: Nuxt.js + Supabase + Netlify
+
+### Current Routes
+- `/` - Login page (Sign In / Request Access)
+- `/dashboard` - Main dashboard with navigation cards
+- `/dashboard/user` - User profile page
+- `/dashboard/clients` - (To be implemented) Client management
 
 ## Development Approach
 
