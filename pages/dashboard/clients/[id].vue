@@ -53,6 +53,25 @@
         </div>
       </div>
 
+      <!-- Diagnostic Links -->
+      <div class="mt-4 p-4 bg-gray-100 rounded">
+        <p class="font-semibold mb-2">Diagnostic Tools:</p>
+        <div class="flex gap-2 flex-wrap">
+          <NuxtLink
+            to="/dashboard/clients/diagnostic"
+            class="px-3 py-1 bg-gray-600 text-white rounded text-sm"
+          >
+            Diagnostic Page
+          </NuxtLink>
+          <NuxtLink
+            :to="`/dashboard/clients/edit-standalone?id=${client.id}`"
+            class="px-3 py-1 bg-indigo-600 text-white rounded text-sm"
+          >
+            Standalone Edit
+          </NuxtLink>
+        </div>
+      </div>
+
       <!-- Brand Information -->
       <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Brand Information</h2>
