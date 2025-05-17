@@ -72,13 +72,14 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { navigateTo } from '#app'
-import { useSupabase } from '~/composables/useSupabase'
+// Using built-in Supabase composable
 
 definePageMeta({
   middleware: 'auth'
 })
 
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const clients = ref([])
 const isLoading = ref(true)
 const error = ref(null)

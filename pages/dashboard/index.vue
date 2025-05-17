@@ -52,19 +52,19 @@
         </NuxtLink>
 
         <!-- Analysis Card -->
-        <div class="card opacity-50 cursor-not-allowed">
+        <NuxtLink to="/dashboard/analysis" class="card hover:shadow-lg transition-shadow">
           <div class="flex items-center justify-between mb-4">
-            <div class="bg-gray-100 p-3 rounded-lg">
-              <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+            <div class="bg-citebots-orange/10 p-3 rounded-lg">
+              <svg class="w-6 h-6 text-citebots-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
             </div>
-            <span class="text-sm text-gray-400">Coming Soon</span>
+            <span class="text-sm text-citebots-gray-500">→</span>
           </div>
-          <h3 class="text-lg font-semibold text-gray-600 mb-2">Analysis</h3>
-          <p class="text-gray-500">Run citation analysis on LLM responses</p>
-        </div>
+          <h3 class="text-lg font-semibold text-citebots-dark mb-2">Analysis</h3>
+          <p class="text-citebots-gray-600">Run citation analysis on LLM responses</p>
+        </NuxtLink>
 
         <!-- Reports Card -->
         <div class="card opacity-50 cursor-not-allowed">
@@ -98,7 +98,6 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useSupabase } from '~/composables/useSupabase'
 import { onMounted } from 'vue'
 
 // Apply auth middleware
@@ -107,7 +106,7 @@ definePageMeta({
 })
 
 const router = useRouter()
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 
 onMounted(async () => {
   // Verify authentication

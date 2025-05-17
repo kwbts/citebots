@@ -124,7 +124,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { navigateTo } from '#app'
-import { useSupabase } from '~/composables/useSupabase'
+// Using built-in Supabase composable
 
 definePageMeta({
   middleware: 'auth'
@@ -132,7 +132,7 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 
 const client = ref(null)
 const isLoading = ref(true)

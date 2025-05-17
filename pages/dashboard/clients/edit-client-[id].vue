@@ -298,7 +298,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { navigateTo } from '#app'
-import { useSupabase } from '~/composables/useSupabase'
+// Using built-in Supabase composable
 import { useAIEnhancement } from '~/composables/useAIEnhancement'
 import TagInput from '~/components/TagInput.vue'
 
@@ -307,7 +307,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 
 // Get client ID from route params
 const clientId = route.params.id

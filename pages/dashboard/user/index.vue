@@ -83,7 +83,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { useSupabase } from '~/composables/useSupabase'
+// Using built-in Supabase composable
 import { onMounted, ref } from 'vue'
 
 // Apply auth middleware
@@ -92,7 +92,7 @@ definePageMeta({
 })
 
 const router = useRouter()
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 const user = ref(null)
 const profile = ref(null)
 const isLoading = ref(true)

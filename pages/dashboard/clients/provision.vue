@@ -294,7 +294,7 @@
 <script setup>
 import { ref } from 'vue'
 import { navigateTo } from '#app'
-import { useSupabase } from '~/composables/useSupabase'
+// Using built-in Supabase composable
 import { useAIEnhancement } from '~/composables/useAIEnhancement'
 import TagInput from '~/components/TagInput.vue'
 
@@ -302,7 +302,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 const { enhanceClientWithAI } = useAIEnhancement()
 
 const isSubmitting = ref(false)

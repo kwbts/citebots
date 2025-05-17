@@ -1,5 +1,5 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const supabase = useSupabase()
+  const supabase = useSupabaseClient()
 
   // Get the current session
   const { data: { session } } = await supabase.auth.getSession()

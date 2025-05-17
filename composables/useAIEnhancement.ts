@@ -1,7 +1,7 @@
-import { useSupabase } from '~/composables/useSupabase'
+// Using built-in Supabase composable
 
 export const useAIEnhancement = () => {
-  const supabase = useSupabase()
+  const supabase = useSupabaseClient()
   
   const enhanceClientWithAI = async (clientId: string, clientName: string, clientDomain: string) => {
     try {

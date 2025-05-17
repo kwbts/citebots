@@ -145,10 +145,9 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSupabase } from '~/composables/useSupabase'
 
 const router = useRouter()
-const supabase = useSupabase()
+const supabase = useSupabaseClient()
 const activeForm = ref('login')
 const message = ref('')
 const messageType = ref('')
