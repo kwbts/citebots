@@ -39,6 +39,12 @@
             Test Page
           </NuxtLink>
           <button
+            @click="goToMinimalEdit"
+            class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+          >
+            Minimal Edit
+          </button>
+          <button
             @click="showDeleteConfirm = true"
             class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
           >
@@ -182,6 +188,10 @@ const goToEdit = () => {
 
 const goToSimpleEdit = () => {
   navigateTo(`/dashboard/clients/${route.params.id}/edit-simple`)
+}
+
+const goToMinimalEdit = () => {
+  navigateTo(`/dashboard/clients/${route.params.id}/edit-minimal`)
 }
 
 const deleteClient = async () => {

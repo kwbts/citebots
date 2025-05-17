@@ -48,7 +48,7 @@ const route = useRoute()
 const supabase = useSupabase()
 
 const testValue = ref('Initial value')
-const clientId = ref(route.params.id)
+const clientId = ref(route.query.id || route.params.id)
 const clientData = ref(null)
 
 const loadClient = async () => {
