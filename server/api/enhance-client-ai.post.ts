@@ -1,13 +1,10 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import OpenAI from 'openai'
+import { useSupabaseAdmin } from '../utils/supabase'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+const perplexityApiKey = process.env.PERPLEXITY_API_KEY
+const openAIApiKey = process.env.OPENAI_API_KEY
 
-// Perplexity API prompts
+// Same prompts as edge function
 const prompts = {
   industryClassification: (clientName: string) => 
     `What is the primary and secondary industry classification for ${clientName}? Also identify their specific sub-industry or niche within these broader categories. Format your response with clear headings for Primary Industry, Secondary Industry, and Sub-industry Specifics.`,
@@ -31,79 +28,7 @@ const prompts = {
     `Compile a glossary of industry-specific terminology or jargon commonly used by ${clientName} and their industry. Also identify any major regulatory considerations, compliance requirements, or legal frameworks that affect ${clientName}'s business operations and marketing activities.`
 }
 
-async function queryPerplexity(prompt: string, apiKey: string) {
-  const response = await fetch('https://api.perplexity.ai/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'llama-3.1-sonar-small-128k-online',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.2,
-      top_p: 0.9,
-      max_tokens: 1000
-    })
-  })
-
-  if (!response.ok) {
-    throw new Error(`Perplexity API error: ${response.statusText}`)
-  }
-
-  const data = await response.json()
-  return data.choices[0].message.content
-}
-
-async function parseWithChatGPT(perplexityResponse: string, parsePrompt: string, openAIKey: string) {
-  // Clean the Perplexity response first
-  const cleanedResponse = perplexityResponse
-    .replace(/#+\s*/g, '') // Remove markdown headers
-    .replace(/\*\*/g, '') // Remove bold markers
-    .replace(/\*/g, '') // Remove italic markers
-    .replace(/`/g, '') // Remove code markers
-    .replace(/###/g, '') // Remove ### headers
-    .replace(/##/g, '') // Remove ## headers
-    .replace(/#/g, '') // Remove # headers
-    .trim()
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${openAIKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a data parser that extracts clean, structured information from text. Remove all markdown formatting, headings, and special characters. Return only valid JSON with short, concise values as specified. Never include the original formatting or structure from the input text.'
-        },
-        {
-          role: 'user',
-          content: `${parsePrompt}\n\nText to parse:\n${cleanedResponse}`
-        }
-      ],
-      temperature: 0.1,
-      max_tokens: 500
-    })
-  })
-
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`)
-  }
-
-  const data = await response.json()
-  try {
-    return JSON.parse(data.choices[0].message.content)
-  } catch (e) {
-    console.error('Failed to parse ChatGPT response:', data.choices[0].message.content)
-    return null
-  }
-}
-
-// Parsing prompts for ChatGPT
+// Parsing prompts
 const parsePrompts = {
   industry: `Extract the primary industry, secondary industry, and sub-industry from the text. Remove any headings, markdown formatting, or special characters. Return clean values only.
 
@@ -154,45 +79,78 @@ Example: {"terms": ["ESP", "CTR", "Open rate", "Deliverability", "Segmentation"]
 Example: {"regulations": ["GDPR compliance", "CAN-SPAM Act", "Data privacy", "Email consent"]}`
 }
 
-serve(async (req) => {
-  console.log('Edge function called:', req.method, req.url);
-
-  // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders
+async function queryPerplexity(prompt: string) {
+  const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${perplexityApiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-sonar-small-128k-online',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.2,
+      top_p: 0.9,
+      max_tokens: 1000
     })
+  })
+
+  if (!response.ok) {
+    throw new Error(`Perplexity API error: ${response.statusText}`)
   }
 
+  const data = await response.json()
+  return data.choices[0].message.content
+}
+
+async function parseWithChatGPT(perplexityResponse: string, parsePrompt: string) {
+  const openai = new OpenAI({ apiKey: openAIApiKey })
+  
+  // Clean the Perplexity response first
+  const cleanedResponse = perplexityResponse
+    .replace(/#+\s*/g, '') // Remove markdown headers
+    .replace(/\*\*/g, '') // Remove bold markers
+    .replace(/\*/g, '') // Remove italic markers
+    .replace(/`/g, '') // Remove code markers
+    .trim()
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-3.5-turbo',
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a data parser that extracts clean, structured information from text. Remove all markdown formatting, headings, and special characters. Return only valid JSON with short, concise values as specified. Never include the original formatting or structure from the input text.'
+      },
+      {
+        role: 'user',
+        content: `${parsePrompt}\n\nText to parse:\n${cleanedResponse}`
+      }
+    ],
+    temperature: 0.1,
+    max_tokens: 500
+  })
+
   try {
-    console.log('Parsing request body...');
-    const { clientName, clientDomain, clientId } = await req.json()
-    console.log('Request data:', { clientName, clientDomain, clientId })
-    
+    return JSON.parse(response.choices[0].message.content!)
+  } catch (e) {
+    console.error('Failed to parse ChatGPT response:', response.choices[0].message.content)
+    return null
+  }
+}
+
+export default defineEventHandler(async (event) => {
+  try {
+    const body = await readBody(event)
+    const { clientName, clientDomain, clientId } = body
+
     if (!clientName || !clientDomain) {
       throw new Error('Client name and domain are required')
     }
-    
-    const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
-    if (!perplexityApiKey) {
-      throw new Error('Perplexity API key not configured')
+
+    if (!perplexityApiKey || !openAIApiKey) {
+      throw new Error('API keys not configured')
     }
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not configured')
-    }
-    
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    
-    if (!supabaseUrl || !supabaseServiceKey) {
-      throw new Error('Supabase configuration missing')
-    }
-    
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
-    
     // Execute all Perplexity queries
     const [
       industryResponse,
@@ -203,13 +161,13 @@ serve(async (req) => {
       problemsResponse,
       terminologyResponse
     ] = await Promise.all([
-      queryPerplexity(prompts.industryClassification(clientName), perplexityApiKey),
-      queryPerplexity(prompts.businessModelAndAudience(clientName), perplexityApiKey),
-      queryPerplexity(prompts.competitors(clientName), perplexityApiKey),
-      queryPerplexity(prompts.productsAndUsps(clientName), perplexityApiKey),
-      queryPerplexity(prompts.geographicAndBrand(clientName), perplexityApiKey),
-      queryPerplexity(prompts.problemsAndUseCases(clientName), perplexityApiKey),
-      queryPerplexity(prompts.terminologyAndRegulations(clientName), perplexityApiKey)
+      queryPerplexity(prompts.industryClassification(clientName)),
+      queryPerplexity(prompts.businessModelAndAudience(clientName)),
+      queryPerplexity(prompts.competitors(clientName)),
+      queryPerplexity(prompts.productsAndUsps(clientName)),
+      queryPerplexity(prompts.geographicAndBrand(clientName)),
+      queryPerplexity(prompts.problemsAndUseCases(clientName)),
+      queryPerplexity(prompts.terminologyAndRegulations(clientName))
     ])
 
     // Parse all responses with ChatGPT
@@ -227,20 +185,20 @@ serve(async (req) => {
       terminology,
       regulations
     ] = await Promise.all([
-      parseWithChatGPT(industryResponse, parsePrompts.industry, openAIApiKey),
-      parseWithChatGPT(businessModelResponse, parsePrompts.businessModel, openAIApiKey),
-      parseWithChatGPT(businessModelResponse, parsePrompts.targetAudience, openAIApiKey),
-      parseWithChatGPT(competitorsResponse, parsePrompts.competitors, openAIApiKey),
-      parseWithChatGPT(productsResponse, parsePrompts.keyProducts, openAIApiKey),
-      parseWithChatGPT(productsResponse, parsePrompts.usps, openAIApiKey),
-      parseWithChatGPT(geographicResponse, parsePrompts.geographicFocus, openAIApiKey),
-      parseWithChatGPT(geographicResponse, parsePrompts.brandVoice, openAIApiKey),
-      parseWithChatGPT(problemsResponse, parsePrompts.customerProblems, openAIApiKey),
-      parseWithChatGPT(problemsResponse, parsePrompts.useCases, openAIApiKey),
-      parseWithChatGPT(terminologyResponse, parsePrompts.terminology, openAIApiKey),
-      parseWithChatGPT(terminologyResponse, parsePrompts.regulations, openAIApiKey)
+      parseWithChatGPT(industryResponse, parsePrompts.industry),
+      parseWithChatGPT(businessModelResponse, parsePrompts.businessModel),
+      parseWithChatGPT(businessModelResponse, parsePrompts.targetAudience),
+      parseWithChatGPT(competitorsResponse, parsePrompts.competitors),
+      parseWithChatGPT(productsResponse, parsePrompts.keyProducts),
+      parseWithChatGPT(productsResponse, parsePrompts.usps),
+      parseWithChatGPT(geographicResponse, parsePrompts.geographicFocus),
+      parseWithChatGPT(geographicResponse, parsePrompts.brandVoice),
+      parseWithChatGPT(problemsResponse, parsePrompts.customerProblems),
+      parseWithChatGPT(problemsResponse, parsePrompts.useCases),
+      parseWithChatGPT(terminologyResponse, parsePrompts.terminology),
+      parseWithChatGPT(terminologyResponse, parsePrompts.regulations)
     ])
-    
+
     // Structure all the data as arrays
     const enhancedData = {
       industry_primary: industry?.primary || '',
@@ -260,9 +218,11 @@ serve(async (req) => {
       ai_enhanced_at: new Date().toISOString(),
       ai_enhancement_count: 1
     }
-    
+
     // Update client with enhanced data
     if (clientId) {
+      const supabase = useSupabaseAdmin()
+
       const { error: updateError } = await supabase
         .from('clients')
         .update(enhancedData)
@@ -289,40 +249,17 @@ serve(async (req) => {
         }
       }
     }
-    
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data: enhancedData,
-        competitors
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200
-      }
-    )
-  } catch (error) {
-    console.error('Edge function error:', error);
-    console.error('Error stack:', error.stack);
 
-    // Detailed error response for debugging
-    const errorResponse = {
-      error: error.message,
-      type: error.constructor.name,
-      details: {
-        perplexityKey: Deno.env.get('PERPLEXITY_API_KEY') ? 'Set' : 'Missing',
-        openAIKey: Deno.env.get('OPENAI_API_KEY') ? 'Set' : 'Missing',
-        supabaseUrl: Deno.env.get('SUPABASE_URL') ? 'Set' : 'Missing',
-        supabaseServiceKey: Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ? 'Set' : 'Missing'
-      }
-    };
-
-    return new Response(
-      JSON.stringify(errorResponse),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400
-      }
-    )
+    return {
+      success: true,
+      data: enhancedData,
+      competitors
+    }
+  } catch (error: any) {
+    console.error('API Error:', error)
+    throw createError({
+      statusCode: 400,
+      statusMessage: error.message
+    })
   }
 })

@@ -612,6 +612,10 @@ const enhanceWithAI = async () => {
     }
   } catch (err) {
     console.error('Error enhancing client:', err)
+    console.error('Full error object:', err)
+    if (err.response) {
+      console.error('Response data:', err.response)
+    }
     error.value = err.message || 'Failed to enhance client with AI'
   } finally {
     isEnhancing.value = false

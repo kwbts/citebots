@@ -415,9 +415,9 @@ const enhanceWithAI = async () => {
       }
       
       // Add AI competitors
-      if (result.competitors?.length) {
-        for (const aiCompetitor of result.competitors) {
-          const exists = form.value.competitors.some(c => 
+      if (result.competitors?.competitors?.length) {
+        for (const aiCompetitor of result.competitors.competitors) {
+          const exists = form.value.competitors.some(c =>
             c.domain === aiCompetitor.domain
           )
           if (!exists) {
