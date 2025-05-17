@@ -91,6 +91,19 @@
           <li>Generate reports to share insights</li>
         </ol>
       </div>
+
+      <!-- Test Links -->
+      <div class="mt-8 p-4 bg-yellow-50 rounded-lg">
+        <h3 class="font-semibold mb-2">Debug Links</h3>
+        <div class="space-y-2">
+          <div>
+            <NuxtLink to="/dashboard/test" class="text-blue-600 hover:underline">Test Page</NuxtLink>
+          </div>
+          <div>
+            <NuxtLink to="/dashboard/user" class="text-blue-600 hover:underline">User Profile</NuxtLink>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 </template>
@@ -109,6 +122,7 @@ const router = useRouter()
 const supabase = useSupabase()
 
 onMounted(async () => {
+  console.log('Dashboard mounted')
   // Verify authentication
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
