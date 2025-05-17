@@ -69,6 +69,18 @@
           >
             Standalone Edit
           </NuxtLink>
+          <NuxtLink
+            to="/dashboard/clients/compare-test"
+            class="px-3 py-1 bg-pink-600 text-white rounded text-sm"
+          >
+            Compare Test
+          </NuxtLink>
+          <NuxtLink
+            :to="`/dashboard/clients/edit-fixed?id=${client.id}`"
+            class="px-3 py-1 bg-orange-600 text-white rounded text-sm"
+          >
+            Edit Fixed
+          </NuxtLink>
         </div>
       </div>
 
