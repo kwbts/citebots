@@ -24,7 +24,7 @@
             @click="goToEdit"
             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Edit Client
+            Edit Client (Working)
           </button>
           <button
             @click="goToSimpleEdit"
@@ -220,7 +220,8 @@ const loadClient = async () => {
 }
 
 const goToEdit = () => {
-  navigateTo(`/dashboard/clients/${route.params.id}/edit`)
+  // Use the working top-level dynamic route instead of nested
+  navigateTo(`/client-edit-${route.params.id}`)
 }
 
 const goToSimpleEdit = () => {
