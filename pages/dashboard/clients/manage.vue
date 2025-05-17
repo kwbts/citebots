@@ -40,14 +40,15 @@
     
     <!-- Clients List -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div
+      <NuxtLink
         v-for="client in clients"
         :key="client.id"
-        class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+        :to="`/dashboard/clients/${client.id}`"
+        class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer"
       >
         <h3 class="text-lg font-semibold text-gray-900 mb-2">{{ client.name }}</h3>
         <p class="text-gray-600 mb-4">{{ client.domain }}</p>
-        
+
         <div v-if="client.competitors?.length > 0" class="mt-4 border-t pt-4">
           <h4 class="text-sm font-medium text-gray-700 mb-2">Competitors</h4>
           <ul class="text-sm text-gray-600 space-y-1">
@@ -56,11 +57,14 @@
             </li>
           </ul>
         </div>
-        
-        <div class="mt-4 text-xs text-gray-500">
-          Created {{ new Date(client.created_at).toLocaleDateString() }}
+
+        <div class="mt-4 flex justify-between items-center">
+          <span class="text-xs text-gray-500">
+            Created {{ new Date(client.created_at).toLocaleDateString() }}
+          </span>
+          <span class="text-blue-600 text-sm">View →</span>
         </div>
-      </div>
+      </NuxtLink>
     </div>
   </div>
 </template>
