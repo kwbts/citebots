@@ -52,6 +52,8 @@ SUPABASE_SERVICE_KEY = [your service key]
 2. **API 404 on Netlify**: Solved by using Netlify Functions
 3. **Build Directory Error**: Use `.output/public` for static builds
 4. **Trigger Conflicts**: Removed Supabase trigger to avoid race conditions
+5. **RLS Infinite Recursion**: Fixed by simplifying policies - only check auth.uid() = id, no cross-table references
+6. **Profile Loading**: Resolved by creating profile during auth provision and fixing RLS policies
 
 ## Current Progress
 
@@ -65,19 +67,23 @@ SUPABASE_SERVICE_KEY = [your service key]
 - [x] Super admin provisioning
 - [x] Netlify deployment working
 - [x] Environment variables configured
+- [x] Actual login functionality with Supabase
+- [x] Dashboard with user profile display
+- [x] RLS policies fixed (infinite recursion resolved)
+- [x] All test/debug pages cleaned up
 
 ### Next Steps
-- [ ] Implement actual login functionality
-- [ ] Create dashboard after login
-- [ ] Add client management
+- [ ] Add client management CRUD
 - [ ] Implement web scraping integration
 - [ ] Add citation analysis
+- [ ] Create results display
+- [ ] Create share links for client access
 - [ ] Create reporting features
 
 ### Test URLs
 - **Production**: https://citebots.com (or Netlify URL)
-- **Test API**: `/test-api` page
-- **Environment Check**: `/env-check` page
+- **Login**: `/` - Sign in with your email and password
+- **Dashboard**: `/dashboard` - Main authenticated area
 
 ## Project Structure
 
@@ -115,9 +121,12 @@ kb-citebots/
 
 ## Current State
 
-- Web scraping algorithm: READY
-- Next step: Frontend deployment on Netlify
-- Technology: Nuxt.js + Supabase + Netlify
+- **Authentication**: Working (login as jon@knowbots.ca)
+- **Dashboard**: Working with profile display
+- **Deployment**: Live on Netlify
+- **Next Priority**: Client management CRUD
+- **Web scraping algorithm**: READY (to be integrated)
+- **Technology**: Nuxt.js + Supabase + Netlify
 
 ## Development Approach
 
@@ -169,6 +178,20 @@ Polish for presentation:
 - status (TEXT) - pending, approved
 - generated_password (TEXT)
 - approved_at (TIMESTAMP)
+```
+
+### RLS Policies (Working)
+```sql
+-- Simple policies that avoid infinite recursion
+CREATE POLICY "Enable read for authenticated users own profile"
+ON public.profiles
+FOR SELECT
+USING (auth.uid() = id);
+
+CREATE POLICY "Enable all for service role"
+ON public.profiles
+FOR ALL
+USING (auth.role() = 'service_role');
 ```
 
 ### API Endpoints
