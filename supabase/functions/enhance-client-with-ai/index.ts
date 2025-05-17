@@ -45,52 +45,77 @@ async function queryPerplexity(prompt: string, apiKey: string) {
       max_tokens: 1000
     })
   })
-  
+
   if (!response.ok) {
     throw new Error(`Perplexity API error: ${response.statusText}`)
   }
-  
+
   const data = await response.json()
   return data.choices[0].message.content
 }
 
-function parseIndustryResponse(response: string) {
-  const lines = response.split('\n')
-  const result = {
-    primary: '',
-    secondary: '',
-    subIndustry: ''
+async function parseWithChatGPT(perplexityResponse: string, parsePrompt: string, openAIKey: string) {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openAIKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a data parser that extracts structured information from text. Always return valid JSON.'
+        },
+        {
+          role: 'user',
+          content: `${parsePrompt}\n\nText to parse:\n${perplexityResponse}`
+        }
+      ],
+      temperature: 0.1,
+      max_tokens: 500
+    })
+  })
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${response.statusText}`)
   }
-  
-  for (const line of lines) {
-    if (line.toLowerCase().includes('primary industry')) {
-      result.primary = line.split(':').pop()?.trim() || ''
-    } else if (line.toLowerCase().includes('secondary industry')) {
-      result.secondary = line.split(':').pop()?.trim() || ''
-    } else if (line.toLowerCase().includes('sub-industry')) {
-      result.subIndustry = line.split(':').pop()?.trim() || ''
-    }
+
+  const data = await response.json()
+  try {
+    return JSON.parse(data.choices[0].message.content)
+  } catch (e) {
+    console.error('Failed to parse ChatGPT response:', data.choices[0].message.content)
+    return null
   }
-  
-  return result
 }
 
-function parseCompetitorsResponse(response: string) {
-  const competitors = []
-  const lines = response.split('\n')
-  
-  for (const line of lines) {
-    // Look for patterns like "1. CompanyName (website.com)"
-    const match = line.match(/\d+\.\s*([^(]+)\s*\(([^)]+)\)/)
-    if (match) {
-      competitors.push({
-        name: match[1].trim(),
-        domain: match[2].trim()
-      })
-    }
-  }
-  
-  return competitors
+// Parsing prompts for ChatGPT
+const parsePrompts = {
+  industry: 'Extract the primary industry, secondary industry, and sub-industry. Return as JSON: {"primary": "string", "secondary": "string", "subIndustry": "string"}',
+
+  businessModel: 'Extract the business model. Return as JSON: {"model": "B2B/B2C/B2B2C/etc"}',
+
+  targetAudience: 'Extract target audience segments. Return as JSON: {"segments": ["segment1", "segment2", ...]} where each segment is 1-3 words maximum',
+
+  competitors: 'Extract competitors with their domains. Return as JSON: {"competitors": [{"name": "name", "domain": "domain.com"}, ...]}',
+
+  keyProducts: 'Extract key products/services. Return as JSON: {"products": ["product1", "product2", ...]} where each product is 1-3 words maximum',
+
+  usps: 'Extract unique selling propositions. Return as JSON: {"usps": ["usp1", "usp2", ...]} where each USP is 1-5 words maximum',
+
+  geographicFocus: 'Extract geographic focus. Return as JSON: {"focus": "global/regional/local", "regions": ["region1", "region2", ...]}',
+
+  brandVoice: 'Extract brand voice descriptors. Return as JSON: {"voice": ["descriptor1", "descriptor2", ...]} where each descriptor is 1-2 words',
+
+  customerProblems: 'Extract customer problems solved. Return as JSON: {"problems": ["problem1", "problem2", ...]} where each is 1-5 words maximum',
+
+  useCases: 'Extract use cases. Return as JSON: {"cases": ["case1", "case2", ...]} where each is 1-5 words maximum',
+
+  terminology: 'Extract industry terminology. Return as JSON: {"terms": ["term1", "term2", ...]} where each is 1-3 words maximum',
+
+  regulations: 'Extract regulatory considerations. Return as JSON: {"regulations": ["regulation1", "regulation2", ...]} where each is 1-5 words maximum'
 }
 
 serve(async (req) => {
@@ -109,6 +134,11 @@ serve(async (req) => {
     const perplexityApiKey = Deno.env.get('PERPLEXITY_API_KEY')
     if (!perplexityApiKey) {
       throw new Error('Perplexity API key not configured')
+    }
+
+    const openAIApiKey = Deno.env.get('OPENAI_API_KEY')
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key not configured')
     }
     
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -138,26 +168,52 @@ serve(async (req) => {
       queryPerplexity(prompts.problemsAndUseCases(clientName), perplexityApiKey),
       queryPerplexity(prompts.terminologyAndRegulations(clientName), perplexityApiKey)
     ])
+
+    // Parse all responses with ChatGPT
+    const [
+      industry,
+      businessModel,
+      targetAudience,
+      competitors,
+      keyProducts,
+      usps,
+      geographic,
+      brandVoice,
+      customerProblems,
+      useCases,
+      terminology,
+      regulations
+    ] = await Promise.all([
+      parseWithChatGPT(industryResponse, parsePrompts.industry, openAIApiKey),
+      parseWithChatGPT(businessModelResponse, parsePrompts.businessModel, openAIApiKey),
+      parseWithChatGPT(businessModelResponse, parsePrompts.targetAudience, openAIApiKey),
+      parseWithChatGPT(competitorsResponse, parsePrompts.competitors, openAIApiKey),
+      parseWithChatGPT(productsResponse, parsePrompts.keyProducts, openAIApiKey),
+      parseWithChatGPT(productsResponse, parsePrompts.usps, openAIApiKey),
+      parseWithChatGPT(geographicResponse, parsePrompts.geographicFocus, openAIApiKey),
+      parseWithChatGPT(geographicResponse, parsePrompts.brandVoice, openAIApiKey),
+      parseWithChatGPT(problemsResponse, parsePrompts.customerProblems, openAIApiKey),
+      parseWithChatGPT(problemsResponse, parsePrompts.useCases, openAIApiKey),
+      parseWithChatGPT(terminologyResponse, parsePrompts.terminology, openAIApiKey),
+      parseWithChatGPT(terminologyResponse, parsePrompts.regulations, openAIApiKey)
+    ])
     
-    // Parse responses
-    const industry = parseIndustryResponse(industryResponse)
-    const competitors = parseCompetitorsResponse(competitorsResponse)
-    
-    // Structure all the data
+    // Structure all the data as arrays
     const enhancedData = {
-      industry_primary: industry.primary,
-      industry_secondary: industry.secondary,
-      sub_industry: industry.subIndustry,
-      business_model: businessModelResponse.match(/B2[BC]2?C?/)?.[0] || 'Unknown',
-      target_audience: { raw: businessModelResponse },
-      key_products: { raw: productsResponse },
-      unique_selling_props: { raw: productsResponse },
-      geographic_focus: geographicResponse.match(/(global|regional|local)/i)?.[0] || 'Unknown',
-      brand_voice: { raw: geographicResponse },
-      customer_problems: { raw: problemsResponse },
-      use_cases: { raw: problemsResponse },
-      industry_terminology: { raw: terminologyResponse },
-      regulatory_considerations: { raw: terminologyResponse },
+      industry_primary: industry?.primary || '',
+      industry_secondary: industry?.secondary || '',
+      sub_industry: industry?.subIndustry || '',
+      business_model: businessModel?.model || '',
+      target_audience: targetAudience?.segments || [],
+      key_products: keyProducts?.products || [],
+      unique_selling_props: usps?.usps || [],
+      geographic_focus: geographic?.focus || '',
+      geographic_regions: geographic?.regions || [],
+      brand_voice: brandVoice?.voice || [],
+      customer_problems: customerProblems?.problems || [],
+      use_cases: useCases?.cases || [],
+      industry_terminology: terminology?.terms || [],
+      regulatory_considerations: regulations?.regulations || [],
       ai_enhanced_at: new Date().toISOString(),
       ai_enhancement_count: 1
     }
@@ -172,19 +228,21 @@ serve(async (req) => {
       if (updateError) throw updateError
       
       // Add AI-sourced competitors
-      for (const competitor of competitors) {
-        const { error: competitorError } = await supabase
-          .from('competitors')
-          .insert({
-            client_id: clientId,
-            name: competitor.name,
-            domain: competitor.domain,
-            source: 'ai',
-            ai_data: { raw: competitorsResponse }
-          })
-        
-        if (competitorError) {
-          console.error('Error adding competitor:', competitorError)
+      if (competitors?.competitors) {
+        for (const competitor of competitors.competitors) {
+          const { error: competitorError } = await supabase
+            .from('competitors')
+            .insert({
+              client_id: clientId,
+              name: competitor.name,
+              domain: competitor.domain,
+              source: 'ai',
+              ai_data: { raw: competitorsResponse }
+            })
+
+          if (competitorError) {
+            console.error('Error adding competitor:', competitorError)
+          }
         }
       }
     }

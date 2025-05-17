@@ -191,101 +191,69 @@
 
         <!-- Text Areas for more complex data -->
         <div class="mt-4 space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Target Audience
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.targetAudience"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.targetAudience"
+            v-model:source="form.targetAudienceSource"
+            label="Target Audience"
+            placeholder="Add audience segment"
+            :isAI="hasAIData"
+          />
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Key Products/Services
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.keyProducts"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.keyProducts"
+            v-model:source="form.keyProductsSource"
+            label="Key Products/Services"
+            placeholder="Add product or service"
+            :isAI="hasAIData"
+          />
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Unique Selling Propositions
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.uniqueSellingProps"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.uniqueSellingProps"
+            v-model:source="form.uniqueSellingPropsSource"
+            label="Unique Selling Propositions"
+            placeholder="Add USP"
+            :isAI="hasAIData"
+          />
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Brand Voice/Tone
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.brandVoice"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.brandVoice"
+            v-model:source="form.brandVoiceSource"
+            label="Brand Voice/Tone"
+            placeholder="Add voice descriptor"
+            :isAI="hasAIData"
+          />
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Customer Problems Solved
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.customerProblems"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.customerProblems"
+            v-model:source="form.customerProblemsSource"
+            label="Customer Problems Solved"
+            placeholder="Add problem"
+            :isAI="hasAIData"
+          />
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Common Use Cases
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.useCases"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.useCases"
+            v-model:source="form.useCasesSource"
+            label="Common Use Cases"
+            placeholder="Add use case"
+            :isAI="hasAIData"
+          />
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Industry Terminology
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.industryTerminology"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.industryTerminology"
+            v-model:source="form.industryTerminologySource"
+            label="Industry Terminology"
+            placeholder="Add term"
+            :isAI="hasAIData"
+          />
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Regulatory Considerations
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <textarea
-              v-model="form.regulatoryConsiderations"
-              rows="3"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            ></textarea>
-          </div>
+          <TagInput
+            v-model="form.regulatoryConsiderations"
+            v-model:source="form.regulatoryConsiderationsSource"
+            label="Regulatory Considerations"
+            placeholder="Add regulation"
+            :isAI="hasAIData"
+          />
         </div>
 
         <div v-if="form.aiEnhancedAt" class="mt-4 text-sm text-gray-500">
@@ -320,6 +288,7 @@ import { useRoute } from 'vue-router'
 import { navigateTo } from '#app'
 import { useSupabase } from '~/composables/useSupabase'
 import { useAIEnhancement } from '~/composables/useAIEnhancement'
+import TagInput from '~/components/TagInput.vue'
 
 definePageMeta({
   middleware: 'auth'
@@ -339,20 +308,31 @@ const form = ref({
   brandName: '',
   domain: '',
   competitors: [],
-  // AI fields
+  // Single value AI fields
   industryPrimary: '',
   industrySecondary: '',
   subIndustry: '',
   businessModel: '',
-  targetAudience: '',
-  keyProducts: '',
-  uniqueSellingProps: '',
   geographicFocus: '',
-  brandVoice: '',
-  customerProblems: '',
-  useCases: '',
-  industryTerminology: '',
-  regulatoryConsiderations: '',
+  // Array AI fields with sources
+  targetAudience: [],
+  targetAudienceSource: [],
+  keyProducts: [],
+  keyProductsSource: [],
+  uniqueSellingProps: [],
+  uniqueSellingPropsSource: [],
+  brandVoice: [],
+  brandVoiceSource: [],
+  customerProblems: [],
+  customerProblemsSource: [],
+  useCases: [],
+  useCasesSource: [],
+  industryTerminology: [],
+  industryTerminologySource: [],
+  regulatoryConsiderations: [],
+  regulatoryConsiderationsSource: [],
+  geographicRegions: [],
+  geographicRegionsSource: [],
   aiEnhancedAt: null,
   aiEnhancementCount: 0
 })
@@ -395,25 +375,39 @@ onMounted(async () => {
       source: c.source || 'manual'
     }))
 
-    // Populate AI fields if they exist
-    if (data.industry_primary || data.industry_secondary) {
-      hasAIData.value = true
-      form.value.industryPrimary = data.industry_primary || ''
-      form.value.industrySecondary = data.industry_secondary || ''
-      form.value.subIndustry = data.sub_industry || ''
-      form.value.businessModel = data.business_model || ''
-      form.value.targetAudience = data.target_audience?.raw || ''
-      form.value.keyProducts = data.key_products?.raw || ''
-      form.value.uniqueSellingProps = data.unique_selling_props?.raw || ''
-      form.value.geographicFocus = data.geographic_focus || ''
-      form.value.brandVoice = data.brand_voice?.raw || ''
-      form.value.customerProblems = data.customer_problems?.raw || ''
-      form.value.useCases = data.use_cases?.raw || ''
-      form.value.industryTerminology = data.industry_terminology?.raw || ''
-      form.value.regulatoryConsiderations = data.regulatory_considerations?.raw || ''
-      form.value.aiEnhancedAt = data.ai_enhanced_at
-      form.value.aiEnhancementCount = data.ai_enhancement_count || 0
-    }
+    // Populate all fields
+    form.value.industryPrimary = data.industry_primary || ''
+    form.value.industrySecondary = data.industry_secondary || ''
+    form.value.subIndustry = data.sub_industry || ''
+    form.value.businessModel = data.business_model || ''
+    form.value.geographicFocus = data.geographic_focus || ''
+
+    // Populate array fields
+    form.value.targetAudience = data.target_audience || []
+    form.value.keyProducts = data.key_products || []
+    form.value.uniqueSellingProps = data.unique_selling_props || []
+    form.value.brandVoice = data.brand_voice || []
+    form.value.customerProblems = data.customer_problems || []
+    form.value.useCases = data.use_cases || []
+    form.value.industryTerminology = data.industry_terminology || []
+    form.value.regulatoryConsiderations = data.regulatory_considerations || []
+    form.value.geographicRegions = data.geographic_regions || []
+
+    // Set source arrays (assume all existing data is from ai if aiEnhancedAt exists)
+    const source = data.ai_enhanced_at ? 'ai' : 'manual'
+    form.value.targetAudienceSource = form.value.targetAudience.map(() => source)
+    form.value.keyProductsSource = form.value.keyProducts.map(() => source)
+    form.value.uniqueSellingPropsSource = form.value.uniqueSellingProps.map(() => source)
+    form.value.brandVoiceSource = form.value.brandVoice.map(() => source)
+    form.value.customerProblemsSource = form.value.customerProblems.map(() => source)
+    form.value.useCasesSource = form.value.useCases.map(() => source)
+    form.value.industryTerminologySource = form.value.industryTerminology.map(() => source)
+    form.value.regulatoryConsiderationsSource = form.value.regulatoryConsiderations.map(() => source)
+    form.value.geographicRegionsSource = form.value.geographicRegions.map(() => source)
+
+    form.value.aiEnhancedAt = data.ai_enhanced_at
+    form.value.aiEnhancementCount = data.ai_enhancement_count || 0
+    hasAIData.value = !!data.ai_enhanced_at
 
     // Store original for comparison
     originalCompetitors.value = JSON.parse(JSON.stringify(data.competitors || []))
@@ -452,22 +446,21 @@ const handleSubmit = async () => {
       domain: form.value.domain
     }
 
-    // Include AI fields if they exist
-    if (hasAIData.value) {
-      updateData.industry_primary = form.value.industryPrimary
-      updateData.industry_secondary = form.value.industrySecondary
-      updateData.sub_industry = form.value.subIndustry
-      updateData.business_model = form.value.businessModel
-      updateData.target_audience = { raw: form.value.targetAudience }
-      updateData.key_products = { raw: form.value.keyProducts }
-      updateData.unique_selling_props = { raw: form.value.uniqueSellingProps }
-      updateData.geographic_focus = form.value.geographicFocus
-      updateData.brand_voice = { raw: form.value.brandVoice }
-      updateData.customer_problems = { raw: form.value.customerProblems }
-      updateData.use_cases = { raw: form.value.useCases }
-      updateData.industry_terminology = { raw: form.value.industryTerminology }
-      updateData.regulatory_considerations = { raw: form.value.regulatoryConsiderations }
-    }
+    // Add all fields (including empty ones)
+    updateData.industry_primary = form.value.industryPrimary
+    updateData.industry_secondary = form.value.industrySecondary
+    updateData.sub_industry = form.value.subIndustry
+    updateData.business_model = form.value.businessModel
+    updateData.target_audience = form.value.targetAudience
+    updateData.key_products = form.value.keyProducts
+    updateData.unique_selling_props = form.value.uniqueSellingProps
+    updateData.geographic_focus = form.value.geographicFocus
+    updateData.brand_voice = form.value.brandVoice
+    updateData.customer_problems = form.value.customerProblems
+    updateData.use_cases = form.value.useCases
+    updateData.industry_terminology = form.value.industryTerminology
+    updateData.regulatory_considerations = form.value.regulatoryConsiderations
+    updateData.geographic_regions = form.value.geographicRegions
 
     const { error: updateError } = await supabase
       .from('clients')
@@ -551,21 +544,53 @@ const enhanceWithAI = async () => {
       hasAIData.value = true
       const data = result.data
 
-      form.value.industryPrimary = data.industry_primary || ''
-      form.value.industrySecondary = data.industry_secondary || ''
-      form.value.subIndustry = data.sub_industry || ''
-      form.value.businessModel = data.business_model || ''
-      form.value.targetAudience = data.target_audience?.raw || ''
-      form.value.keyProducts = data.key_products?.raw || ''
-      form.value.uniqueSellingProps = data.unique_selling_props?.raw || ''
-      form.value.geographicFocus = data.geographic_focus || ''
-      form.value.brandVoice = data.brand_voice?.raw || ''
-      form.value.customerProblems = data.customer_problems?.raw || ''
-      form.value.useCases = data.use_cases?.raw || ''
-      form.value.industryTerminology = data.industry_terminology?.raw || ''
-      form.value.regulatoryConsiderations = data.regulatory_considerations?.raw || ''
+      // Update single value fields
+      form.value.industryPrimary = data.industry_primary || form.value.industryPrimary
+      form.value.industrySecondary = data.industry_secondary || form.value.industrySecondary
+      form.value.subIndustry = data.sub_industry || form.value.subIndustry
+      form.value.businessModel = data.business_model || form.value.businessModel
+      form.value.geographicFocus = data.geographic_focus || form.value.geographicFocus
+
+      // Merge array fields (don't replace, add to existing)
+      if (data.target_audience?.length) {
+        form.value.targetAudience = [...form.value.targetAudience, ...data.target_audience]
+        form.value.targetAudienceSource = [...form.value.targetAudienceSource, ...data.target_audience.map(() => 'ai')]
+      }
+      if (data.key_products?.length) {
+        form.value.keyProducts = [...form.value.keyProducts, ...data.key_products]
+        form.value.keyProductsSource = [...form.value.keyProductsSource, ...data.key_products.map(() => 'ai')]
+      }
+      if (data.unique_selling_props?.length) {
+        form.value.uniqueSellingProps = [...form.value.uniqueSellingProps, ...data.unique_selling_props]
+        form.value.uniqueSellingPropsSource = [...form.value.uniqueSellingPropsSource, ...data.unique_selling_props.map(() => 'ai')]
+      }
+      if (data.brand_voice?.length) {
+        form.value.brandVoice = [...form.value.brandVoice, ...data.brand_voice]
+        form.value.brandVoiceSource = [...form.value.brandVoiceSource, ...data.brand_voice.map(() => 'ai')]
+      }
+      if (data.customer_problems?.length) {
+        form.value.customerProblems = [...form.value.customerProblems, ...data.customer_problems]
+        form.value.customerProblemsSource = [...form.value.customerProblemsSource, ...data.customer_problems.map(() => 'ai')]
+      }
+      if (data.use_cases?.length) {
+        form.value.useCases = [...form.value.useCases, ...data.use_cases]
+        form.value.useCasesSource = [...form.value.useCasesSource, ...data.use_cases.map(() => 'ai')]
+      }
+      if (data.industry_terminology?.length) {
+        form.value.industryTerminology = [...form.value.industryTerminology, ...data.industry_terminology]
+        form.value.industryTerminologySource = [...form.value.industryTerminologySource, ...data.industry_terminology.map(() => 'ai')]
+      }
+      if (data.regulatory_considerations?.length) {
+        form.value.regulatoryConsiderations = [...form.value.regulatoryConsiderations, ...data.regulatory_considerations]
+        form.value.regulatoryConsiderationsSource = [...form.value.regulatoryConsiderationsSource, ...data.regulatory_considerations.map(() => 'ai')]
+      }
+      if (data.geographic_regions?.length) {
+        form.value.geographicRegions = [...form.value.geographicRegions, ...data.geographic_regions]
+        form.value.geographicRegionsSource = [...form.value.geographicRegionsSource, ...data.geographic_regions.map(() => 'ai')]
+      }
+
       form.value.aiEnhancedAt = data.ai_enhanced_at
-      form.value.aiEnhancementCount = data.ai_enhancement_count || 1
+      form.value.aiEnhancementCount = (form.value.aiEnhancementCount || 0) + 1
 
       // Add AI competitors if they don't exist
       if (result.competitors && result.competitors.length > 0) {
