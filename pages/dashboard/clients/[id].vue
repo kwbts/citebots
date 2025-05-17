@@ -81,6 +81,12 @@
           >
             Edit Fixed
           </NuxtLink>
+          <NuxtLink
+            to="/dashboard/clients/route-debug"
+            class="px-3 py-1 bg-cyan-600 text-white rounded text-sm"
+          >
+            Route Debug
+          </NuxtLink>
         </div>
       </div>
 

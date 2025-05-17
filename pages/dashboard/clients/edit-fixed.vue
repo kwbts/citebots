@@ -64,8 +64,13 @@ const brandName = ref('')
 const domain = ref('')
 
 onMounted(async () => {
-  const clientId = useRoute().params.id
-  console.log('Edit-fixed mounted with ID:', clientId)
+  const route = useRoute()
+  // Try different ways to get the ID
+  const clientId = route.params.id || route.query.id || route.hash.replace('#', '')
+  console.log('Edit-fixed mounted')
+  console.log('Route params:', route.params)
+  console.log('Route query:', route.query)
+  console.log('Extracted ID:', clientId)
   
   if (clientId) {
     isLoading.value = true
