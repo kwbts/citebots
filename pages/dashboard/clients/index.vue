@@ -1,5 +1,5 @@
 <template>
-  <div class="container mx-auto px-4 py-8">
+  <div>
     <h1 class="text-3xl font-bold mb-8 text-gray-900">Client Management</h1>
     
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -52,6 +52,7 @@
 import { navigateTo } from '#app'
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
+  layout: 'dashboard'
 })
 </script>

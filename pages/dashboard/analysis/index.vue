@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 max-w-4xl mx-auto">
+  <div>
     <h1 class="text-2xl font-bold mb-6">Run Analysis</h1>
     
     <!-- Client Selection -->
@@ -166,6 +166,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+
+definePageMeta({
+  middleware: 'auth',
+  layout: 'dashboard'
+})
 
 const supabase = useSupabaseClient()
 const user = useSupabaseUser()
