@@ -32,6 +32,12 @@
           >
             Simple Edit (Test)
           </button>
+          <NuxtLink
+            :to="`/dashboard/clients/test-edit?id=${client.id}`"
+            class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 inline-block"
+          >
+            Test Page
+          </NuxtLink>
           <button
             @click="showDeleteConfirm = true"
             class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
