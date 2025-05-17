@@ -80,6 +80,31 @@
         </div>
       </div>
 
+      <!-- AI Enhancement -->
+      <div v-if="savedClientId" class="bg-green-50 rounded-lg p-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Client Created Successfully!</h3>
+            <p class="text-gray-600 mt-1">Would you like to enhance this client with AI-powered data?</p>
+          </div>
+          <button
+            @click="enhanceWithAI"
+            :disabled="isEnhancing"
+            class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400 flex items-center gap-2"
+          >
+            <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isEnhancing ? 'Enhancing...' : 'Enhance with AI' }}
+          </button>
+        </div>
+
+        <div v-if="aiError" class="mt-4 p-3 bg-red-100 text-red-700 rounded">
+          {{ aiError }}
+        </div>
+      </div>
+
       <!-- Actions -->
       <div class="flex justify-between">
         <button
@@ -89,13 +114,23 @@
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          :disabled="isSubmitting"
-          class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400"
-        >
-          {{ isSubmitting ? 'Saving...' : 'Save Client' }}
-        </button>
+        <div class="flex gap-3">
+          <button
+            v-if="savedClientId"
+            @click="navigateTo('/dashboard/clients/manage')"
+            class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          >
+            View Clients
+          </button>
+          <button
+            v-else
+            type="submit"
+            :disabled="isSubmitting"
+            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400"
+          >
+            {{ isSubmitting ? 'Saving...' : 'Save Client' }}
+          </button>
+        </div>
       </div>
     </form>
   </div>
@@ -105,13 +140,19 @@
 import { ref } from 'vue'
 import { navigateTo } from '#app'
 import { useSupabase } from '~/composables/useSupabase'
+import { useAIEnhancement } from '~/composables/useAIEnhancement'
 
 definePageMeta({
   middleware: 'auth'
 })
 
 const supabase = useSupabase()
+const { enhanceClientWithAI } = useAIEnhancement()
+
 const isSubmitting = ref(false)
+const isEnhancing = ref(false)
+const savedClientId = ref(null)
+const aiError = ref(null)
 
 const form = ref({
   brandName: '',
@@ -163,13 +204,40 @@ const handleSubmit = async () => {
       }
     }
     
-    // Success - navigate to manage page
-    navigateTo('/dashboard/clients/manage')
+    // Success - save client ID and show AI enhancement option
+    savedClientId.value = client.id
   } catch (error) {
     console.error('Error creating client:', error)
     alert(`Error creating client: ${error.message}`)
   } finally {
     isSubmitting.value = false
+  }
+}
+
+const enhanceWithAI = async () => {
+  if (isEnhancing.value || !savedClientId.value) return
+
+  isEnhancing.value = true
+  aiError.value = null
+
+  try {
+    const result = await enhanceClientWithAI(
+      savedClientId.value,
+      form.value.brandName,
+      form.value.domain
+    )
+
+    if (result.success) {
+      // Success - navigate to edit page to see enhanced data
+      navigateTo(`/dashboard/clients/edit-client-${savedClientId.value}`)
+    } else {
+      throw new Error(result.error || 'Enhancement failed')
+    }
+  } catch (error) {
+    console.error('Error enhancing client:', error)
+    aiError.value = error.message || 'Failed to enhance client with AI'
+  } finally {
+    isEnhancing.value = false
   }
 }
 </script>

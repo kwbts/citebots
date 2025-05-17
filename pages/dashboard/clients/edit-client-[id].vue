@@ -53,27 +53,43 @@
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Competitors</h2>
         
         <div class="space-y-4">
-          <div v-for="(competitor, index) in form.competitors" :key="competitor.id || competitor.tempId" 
+          <div v-for="(competitor, index) in form.competitors" :key="competitor.id || competitor.tempId"
                class="flex gap-3">
-            <input
-              v-model="competitor.name"
-              type="text"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Competitor name"
-            />
-            <input
-              v-model="competitor.domain"
-              type="text"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Competitor domain"
-            />
+            <div class="flex-1 relative">
+              <input
+                v-model="competitor.name"
+                type="text"
+                :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Competitor name"
+              />
+              <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7h4v2H8V7zm0 4h4v2H8v-2z"/>
+                </svg>
+              </span>
+            </div>
+            <div class="flex-1 relative">
+              <input
+                v-model="competitor.domain"
+                type="text"
+                :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
+                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Competitor domain"
+              />
+              <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7h4v2H8V7zm0 4h4v2H8v-2z"/>
+                </svg>
+              </span>
+            </div>
             <button
               type="button"
               @click="removeCompetitor(index)"
               class="p-2 text-red-600 hover:text-red-800"
             >
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
               </svg>
             </button>
@@ -89,6 +105,191 @@
             </svg>
             Add Competitor
           </button>
+        </div>
+      </div>
+
+      <!-- AI Enhanced Fields -->
+      <div v-if="hasAIData" class="bg-white rounded-lg shadow-md p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-semibold text-gray-900">AI-Enhanced Information</h2>
+          <button
+            type="button"
+            @click="enhanceWithAI"
+            :disabled="isEnhancing"
+            class="px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400 text-sm flex items-center gap-2"
+          >
+            <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isEnhancing ? 'Refreshing...' : 'Refresh AI Data' }}
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Industry Classification -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Primary Industry
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <input
+              v-model="form.industryPrimary"
+              type="text"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Secondary Industry
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <input
+              v-model="form.industrySecondary"
+              type="text"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Sub-Industry
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <input
+              v-model="form.subIndustry"
+              type="text"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Business Model
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <input
+              v-model="form.businessModel"
+              type="text"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Geographic Focus
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <input
+              v-model="form.geographicFocus"
+              type="text"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+          </div>
+        </div>
+
+        <!-- Text Areas for more complex data -->
+        <div class="mt-4 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Target Audience
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.targetAudience"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Key Products/Services
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.keyProducts"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Unique Selling Propositions
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.uniqueSellingProps"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Brand Voice/Tone
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.brandVoice"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Customer Problems Solved
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.customerProblems"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Common Use Cases
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.useCases"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Industry Terminology
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.industryTerminology"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Regulatory Considerations
+              <span class="ml-1 text-xs text-purple-600">(AI)</span>
+            </label>
+            <textarea
+              v-model="form.regulatoryConsiderations"
+              rows="3"
+              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            ></textarea>
+          </div>
+        </div>
+
+        <div v-if="form.aiEnhancedAt" class="mt-4 text-sm text-gray-500">
+          Last enhanced: {{ new Date(form.aiEnhancedAt).toLocaleString() }}
         </div>
       </div>
 
@@ -118,6 +319,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { navigateTo } from '#app'
 import { useSupabase } from '~/composables/useSupabase'
+import { useAIEnhancement } from '~/composables/useAIEnhancement'
 
 definePageMeta({
   middleware: 'auth'
@@ -136,8 +338,28 @@ const error = ref(null)
 const form = ref({
   brandName: '',
   domain: '',
-  competitors: []
+  competitors: [],
+  // AI fields
+  industryPrimary: '',
+  industrySecondary: '',
+  subIndustry: '',
+  businessModel: '',
+  targetAudience: '',
+  keyProducts: '',
+  uniqueSellingProps: '',
+  geographicFocus: '',
+  brandVoice: '',
+  customerProblems: '',
+  useCases: '',
+  industryTerminology: '',
+  regulatoryConsiderations: '',
+  aiEnhancedAt: null,
+  aiEnhancementCount: 0
 })
+
+const { enhanceClientWithAI } = useAIEnhancement()
+const isEnhancing = ref(false)
+const hasAIData = ref(false)
 
 const originalCompetitors = ref([])
 
@@ -168,8 +390,31 @@ onMounted(async () => {
     // Populate form
     form.value.brandName = data.name
     form.value.domain = data.domain
-    form.value.competitors = data.competitors || []
-    
+    form.value.competitors = (data.competitors || []).map(c => ({
+      ...c,
+      source: c.source || 'manual'
+    }))
+
+    // Populate AI fields if they exist
+    if (data.industry_primary || data.industry_secondary) {
+      hasAIData.value = true
+      form.value.industryPrimary = data.industry_primary || ''
+      form.value.industrySecondary = data.industry_secondary || ''
+      form.value.subIndustry = data.sub_industry || ''
+      form.value.businessModel = data.business_model || ''
+      form.value.targetAudience = data.target_audience?.raw || ''
+      form.value.keyProducts = data.key_products?.raw || ''
+      form.value.uniqueSellingProps = data.unique_selling_props?.raw || ''
+      form.value.geographicFocus = data.geographic_focus || ''
+      form.value.brandVoice = data.brand_voice?.raw || ''
+      form.value.customerProblems = data.customer_problems?.raw || ''
+      form.value.useCases = data.use_cases?.raw || ''
+      form.value.industryTerminology = data.industry_terminology?.raw || ''
+      form.value.regulatoryConsiderations = data.regulatory_considerations?.raw || ''
+      form.value.aiEnhancedAt = data.ai_enhanced_at
+      form.value.aiEnhancementCount = data.ai_enhancement_count || 0
+    }
+
     // Store original for comparison
     originalCompetitors.value = JSON.parse(JSON.stringify(data.competitors || []))
   } catch (err) {
@@ -201,13 +446,32 @@ const handleSubmit = async () => {
   error.value = null
   
   try {
-    // Update client basic info
+    // Update client basic info and AI fields
+    const updateData = {
+      name: form.value.brandName,
+      domain: form.value.domain
+    }
+
+    // Include AI fields if they exist
+    if (hasAIData.value) {
+      updateData.industry_primary = form.value.industryPrimary
+      updateData.industry_secondary = form.value.industrySecondary
+      updateData.sub_industry = form.value.subIndustry
+      updateData.business_model = form.value.businessModel
+      updateData.target_audience = { raw: form.value.targetAudience }
+      updateData.key_products = { raw: form.value.keyProducts }
+      updateData.unique_selling_props = { raw: form.value.uniqueSellingProps }
+      updateData.geographic_focus = form.value.geographicFocus
+      updateData.brand_voice = { raw: form.value.brandVoice }
+      updateData.customer_problems = { raw: form.value.customerProblems }
+      updateData.use_cases = { raw: form.value.useCases }
+      updateData.industry_terminology = { raw: form.value.industryTerminology }
+      updateData.regulatory_considerations = { raw: form.value.regulatoryConsiderations }
+    }
+
     const { error: updateError } = await supabase
       .from('clients')
-      .update({
-        name: form.value.brandName,
-        domain: form.value.domain
-      })
+      .update(updateData)
       .eq('id', clientId)
     
     if (updateError) throw updateError
@@ -229,7 +493,8 @@ const handleSubmit = async () => {
         .insert(toAdd.map(competitor => ({
           client_id: clientId,
           name: competitor.name,
-          domain: competitor.domain
+          domain: competitor.domain,
+          source: competitor.source || 'manual'
         })))
       
       if (addError) throw addError
@@ -264,6 +529,67 @@ const handleSubmit = async () => {
     error.value = err.message
   } finally {
     isSubmitting.value = false
+  }
+}
+
+// Enhance with AI
+const enhanceWithAI = async () => {
+  if (isEnhancing.value) return
+
+  isEnhancing.value = true
+  error.value = null
+
+  try {
+    const result = await enhanceClientWithAI(
+      clientId,
+      form.value.brandName,
+      form.value.domain
+    )
+
+    if (result.success) {
+      // Update form with AI data
+      hasAIData.value = true
+      const data = result.data
+
+      form.value.industryPrimary = data.industry_primary || ''
+      form.value.industrySecondary = data.industry_secondary || ''
+      form.value.subIndustry = data.sub_industry || ''
+      form.value.businessModel = data.business_model || ''
+      form.value.targetAudience = data.target_audience?.raw || ''
+      form.value.keyProducts = data.key_products?.raw || ''
+      form.value.uniqueSellingProps = data.unique_selling_props?.raw || ''
+      form.value.geographicFocus = data.geographic_focus || ''
+      form.value.brandVoice = data.brand_voice?.raw || ''
+      form.value.customerProblems = data.customer_problems?.raw || ''
+      form.value.useCases = data.use_cases?.raw || ''
+      form.value.industryTerminology = data.industry_terminology?.raw || ''
+      form.value.regulatoryConsiderations = data.regulatory_considerations?.raw || ''
+      form.value.aiEnhancedAt = data.ai_enhanced_at
+      form.value.aiEnhancementCount = data.ai_enhancement_count || 1
+
+      // Add AI competitors if they don't exist
+      if (result.competitors && result.competitors.length > 0) {
+        for (const aiCompetitor of result.competitors) {
+          const exists = form.value.competitors.some(c =>
+            c.domain === aiCompetitor.domain
+          )
+          if (!exists) {
+            form.value.competitors.push({
+              ...aiCompetitor,
+              tempId: Date.now() + Math.random(),
+              source: 'ai'
+            })
+          }
+        }
+      }
+    } else {
+      throw new Error(result.error || 'Enhancement failed')
+    }
+  } catch (err) {
+    console.error('Error enhancing client:', err)
+    error.value = err.message || 'Failed to enhance client with AI'
+  } finally {
+    isEnhancing.value = false
   }
 }
 </script>
