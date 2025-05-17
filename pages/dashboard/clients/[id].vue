@@ -27,6 +27,12 @@
             Edit Client
           </button>
           <button
+            @click="goToSimpleEdit"
+            class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          >
+            Simple Edit (Test)
+          </button>
+          <button
             @click="showDeleteConfirm = true"
             class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
           >
@@ -166,6 +172,10 @@ const loadClient = async () => {
 
 const goToEdit = () => {
   navigateTo(`/dashboard/clients/${route.params.id}/edit`)
+}
+
+const goToSimpleEdit = () => {
+  navigateTo(`/dashboard/clients/${route.params.id}/edit-simple`)
 }
 
 const deleteClient = async () => {

@@ -2,19 +2,26 @@
   <div class="container mx-auto px-4 py-8 max-w-3xl">
     <h1 class="text-3xl font-bold mb-8 text-gray-900">Edit Client</h1>
     
-    <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p class="mt-4 text-gray-600">Loading client...</p>
+    <!-- Debug State Display -->
+    <div class="mb-4 p-2 bg-gray-100 rounded text-sm">
+      <p>Loading: {{ isLoading }}</p>
+      <p>Error: {{ error || 'none' }}</p>
+      <p>Client ID: {{ clientId }}</p>
+      <p>Form: {{ JSON.stringify(form) }}</p>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 rounded-lg p-4 mb-6">
+    <div v-if="error" class="bg-red-50 rounded-lg p-4 mb-6">
       <p class="text-red-700">Error: {{ error }}</p>
     </div>
 
-    <!-- Edit Form -->
-    <form v-else @submit.prevent="handleSubmit" class="space-y-6">
+    <!-- Edit Form (Always show) -->
+    <form @submit.prevent="handleSubmit" class="space-y-6">
+      <!-- Loading Overlay -->
+      <div v-if="isLoading" class="mb-4 p-4 bg-blue-50 rounded-lg">
+        <p class="text-blue-700">Loading client data...</p>
+      </div>
+
       <!-- Brand Information -->
       <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Brand Information</h2>
