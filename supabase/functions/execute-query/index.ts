@@ -68,7 +68,7 @@ async function queryPerplexity(query: string) {
   }
 
   const requestBody = {
-    model: 'sonar-medium-online', // Available models: sonar-small-online, sonar-medium-online
+    model: 'sonar', // Use 'sonar' for Perplexity queries
     messages: [
       {
         role: 'system',
