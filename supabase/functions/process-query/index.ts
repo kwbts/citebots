@@ -92,20 +92,26 @@ serve(async (req) => {
         throw new Error(queryResult.error)
       }
 
+      // Extract the actual result data
+      const resultData = queryResult.result || queryResult
+
       // Update query with response
       await serviceClient
         .from('analysis_queries')
         .update({
-          model_response: queryResult.response,
-          citation_count: queryResult.citation_count,
-          brand_mentioned: queryResult.brand_mentioned,
+          model_response: resultData.response_content || resultData.response,
+          citation_count: resultData.citations ? resultData.citations.length : 0,
+          brand_mentioned: resultData.brand_mention || false,
           status: 'analyzing_citations'
         })
         .eq('id', queryRecord.id)
 
       // Process each citation
       let processedCitations = 0
-      for (const citation of queryResult.citations) {
+      const citations = resultData.citations || []
+
+      for (let i = 0; i < citations.length; i++) {
+        const citation = citations[i]
         try {
           // Analyze the citation
           const citationResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/analyze-citation`, {
@@ -117,7 +123,7 @@ serve(async (req) => {
             body: JSON.stringify({
               query_id: queryRecord.id,
               citation_url: citation.url,
-              citation_position: citation.position,
+              citation_position: citation.citation_number || i + 1,
               query_text,
               keyword,
               brand_name: client.name,

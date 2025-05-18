@@ -21,7 +21,18 @@ interface AnalyzeCitationRequest {
 async function crawlPage(url: string) {
   const apiKey = Deno.env.get('SCRAPINGBEE_API_KEY')
   if (!apiKey) {
+    console.error('ScrapingBee API key not found in environment')
     throw new Error('ScrapingBee API key not configured')
+  }
+
+  console.log(`Attempting to crawl URL: ${url}`)
+
+  // Validate URL
+  try {
+    new URL(url)
+  } catch (e) {
+    console.error(`Invalid URL provided: ${url}`)
+    throw new Error(`Invalid URL format: ${url}`)
   }
 
   const params = new URLSearchParams({
@@ -38,13 +49,29 @@ async function crawlPage(url: string) {
     timeout: '30000'
   })
 
+  console.log('Making request to ScrapingBee API...')
+
   const response = await fetch(`https://app.scrapingbee.com/api/v1/?${params}`)
-  
+
+  console.log(`ScrapingBee response status: ${response.status}`)
+
   if (!response.ok) {
-    throw new Error(`ScrapingBee error: ${response.statusText}`)
+    const errorText = await response.text()
+    console.error(`ScrapingBee error response: ${errorText}`)
+
+    if (response.status === 401) {
+      throw new Error('ScrapingBee authentication failed - check API key')
+    } else if (response.status === 429) {
+      throw new Error('ScrapingBee rate limit exceeded')
+    } else if (response.status === 404) {
+      throw new Error(`URL not found: ${url}`)
+    } else {
+      throw new Error(`ScrapingBee error (${response.status}): ${response.statusText}`)
+    }
   }
 
   const html = await response.text()
+  console.log(`Successfully crawled page: ${url} (received ${html.length} characters)`)
   return html
 }
 
@@ -200,9 +227,11 @@ serve(async (req) => {
 
   try {
     const body = await req.json() as AnalyzeCitationRequest
-    const { 
-      query_id, 
-      citation_url, 
+    console.log('Received analyze-citation request:', JSON.stringify(body, null, 2))
+
+    const {
+      query_id,
+      citation_url,
       citation_position,
       query_text,
       keyword,
@@ -210,6 +239,10 @@ serve(async (req) => {
       brand_domain,
       competitors
     } = body
+
+    if (!citation_url) {
+      throw new Error('citation_url is required')
+    }
 
     // Crawl the page
     console.log(`Crawling ${citation_url}`)
