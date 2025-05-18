@@ -54,6 +54,7 @@ SUPABASE_SERVICE_KEY = [your service key]
 4. **Trigger Conflicts**: Removed Supabase trigger to avoid race conditions
 5. **RLS Infinite Recursion**: Fixed by simplifying policies - only check auth.uid() = id, no cross-table references
 6. **Profile Loading**: Resolved by creating profile during auth provision and fixing RLS policies
+7. **Client Ownership Column**: Check both `created_by` and `user_id` columns in clients table
 
 ## Current Progress
 
@@ -71,14 +72,33 @@ SUPABASE_SERVICE_KEY = [your service key]
 - [x] Dashboard with user profile display
 - [x] RLS policies fixed (infinite recursion resolved)
 - [x] All test/debug pages cleaned up
+- [x] Client management CRUD
+- [x] Web scraping integration with ScrapingBee
+- [x] Citation analysis with AI
+- [x] Results display
+- [x] Competitor analysis from separate table
 
 ### Next Steps
-- [ ] Add client management CRUD
-- [ ] Implement web scraping integration
-- [ ] Add citation analysis
-- [ ] Create results display
 - [ ] Create share links for client access
 - [ ] Create reporting features
+
+### Important Database Structures
+
+#### Competitors
+The competitors are stored in a separate `competitors` table linked to clients by `client_id`:
+```sql
+competitors {
+  id UUID
+  client_id UUID (references clients.id)
+  name TEXT
+  domain TEXT
+}
+```
+
+This is different from having competitors as a JSON column in the clients table. Edge functions need to fetch competitors separately and format them with a pattern field.
+
+#### Client Ownership
+The clients table may use either `created_by` or `user_id` to track ownership. Always check both columns when verifying client ownership in edge functions.
 
 ### Test URLs
 - **Production**: https://citebots.com (or Netlify URL)
@@ -134,7 +154,8 @@ kb-citebots/
 - `/` - Login page (Sign In / Request Access)
 - `/dashboard` - Main dashboard with navigation cards
 - `/dashboard/user` - User profile page
-- `/dashboard/clients` - (To be implemented) Client management
+- `/dashboard/clients` - Client management
+- `/dashboard/analysis` - Run analysis
 
 ## Development Approach
 
@@ -186,6 +207,12 @@ Polish for presentation:
 - status (TEXT) - pending, approved
 - generated_password (TEXT)
 - approved_at (TIMESTAMP)
+
+-- competitors table (separate from clients)
+- id (UUID)
+- client_id (UUID, references clients.id)
+- name (TEXT)
+- domain (TEXT)
 ```
 
 ### RLS Policies (Working)
@@ -292,6 +319,33 @@ If time runs out:
 2. Use mockups for missing parts
 3. Emphasize validated backend
 4. Show future potential
+
+## Important Development Notes
+
+### Deployment Preferences
+
+The user prefers to **manually deploy** all:
+- Edge functions to Supabase
+- SQL migrations to the database
+
+**DO NOT** automatically deploy or run deployment scripts. Instead:
+1. Update files locally in the codebase
+2. Provide clear instructions on what needs to be deployed
+3. List the specific files that were changed
+4. Provide the exact SQL commands that need to be run
+5. Show the manual deployment commands needed
+
+Example deployment instructions format:
+```
+Files Updated:
+- /supabase/functions/[function-name]/index.ts
+
+SQL to Run:
+-- Your SQL here
+
+Manual Deployment:
+npx supabase functions deploy [function-name] --project-ref trmaeodthlywcjwfzdka
+```
 
 ## Remember
 

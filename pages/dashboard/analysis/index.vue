@@ -90,20 +90,35 @@
       </div>
     </div>
 
+    <!-- Analysis Options -->
+    <div class="mb-6" v-if="selectedClientId">
+      <div class="flex items-center">
+        <input
+          type="checkbox"
+          id="preview-queries"
+          v-model="previewQueries"
+          class="h-4 w-4 text-citebots-orange rounded focus:ring-citebots-orange"
+        />
+        <label for="preview-queries" class="ml-2 text-sm text-gray-700">
+          Preview and customize queries before running analysis
+        </label>
+      </div>
+    </div>
+
     <!-- Run Analysis Button -->
     <div class="mt-8">
       <button
         @click="runAnalysis"
         :disabled="!selectedClientId || !platform || loading"
-        class="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        class="w-full bg-citebots-orange text-white py-3 px-6 rounded-md hover:bg-citebots-orange/90 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
       >
-        <span v-if="!loading">Run Analysis</span>
+        <span v-if="!loading">{{ previewQueries ? 'Preview Queries' : 'Run Analysis' }}</span>
         <span v-else class="flex items-center justify-center">
           <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Running analysis...
+          {{ previewQueries ? 'Generating queries...' : 'Running analysis...' }}
         </span>
       </button>
 
@@ -186,6 +201,7 @@ const analysisResults = ref(null)
 const recentRuns = ref([])
 const testMode = ref(false)
 const testKeywords = ref('')
+const previewQueries = ref(true) // Default to preview mode
 
 // Computed properties
 const selectedClient = computed(() => {
@@ -243,18 +259,38 @@ const runAnalysis = async () => {
     return
   }
 
+  let keywords = null
+  if (testMode.value) {
+    // Parse test keywords (one per line)
+    keywords = testKeywords.value.split('\n')
+      .map(k => k.trim())
+      .filter(k => k.length > 0)
+  }
+
+  // If preview mode, redirect to query preview page
+  if (previewQueries.value) {
+    const effectiveKeywords = keywords || selectedClient.value?.keywords || []
+    if (effectiveKeywords.length === 0) {
+      showStatus('No keywords defined for this client', 'error')
+      return
+    }
+
+    await navigateTo({
+      path: '/dashboard/analysis/preview-queries',
+      query: {
+        client_id: selectedClientId.value,
+        platform: platform.value,
+        keywords: effectiveKeywords.join(',')
+      }
+    })
+    return
+  }
+
+  // Otherwise run analysis directly (old behavior)
   loading.value = true
   showStatus('Starting analysis...', 'info')
 
   try {
-    let keywords = null
-    if (testMode.value) {
-      // Parse test keywords (one per line)
-      keywords = testKeywords.value.split('\n')
-        .map(k => k.trim())
-        .filter(k => k.length > 0)
-    }
-
     // Call the edge function to run analysis
     const { data, error } = await supabase.functions.invoke('run-analysis', {
       body: {
