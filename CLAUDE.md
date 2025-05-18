@@ -344,8 +344,29 @@ SQL to Run:
 -- Your SQL here
 
 Manual Deployment:
-npx supabase functions deploy [function-name] --project-ref trmaeodthlywcjwfzdka
+npx supabase functions deploy [function-name] --project-ref trmaeodthlywcjwfzdka --no-verify-jwt
 ```
+
+### Supabase Edge Function Deployment Notes
+
+User manually deploys edge functions using:
+```bash
+npx supabase functions deploy [function-name] --project-ref trmaeodthlywcjwfzdka --no-verify-jwt
+```
+
+**Important Edge Function Notes:**
+1. Supabase Edge Functions only support single `index.ts` file per function
+2. No helper files or multiple files allowed in function directories
+3. All code must be in the single index.ts file
+4. User deploys functions manually after local updates
+5. Always include comprehensive defensive programming to avoid undefined errors
+
+**Common Edge Functions:**
+- analyze-citation
+- execute-query
+- process-query
+- run-custom-analysis
+- enhance-client-with-ai
 
 ## Remember
 
