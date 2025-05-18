@@ -130,10 +130,17 @@ serve(async (req) => {
     )
 
     const batch_id = `custom_${platform}_${Date.now()}`
-    
+
+    // Add validation for selectedQueries
+    console.log('Selected queries:', selectedQueries)
+
+    if (!selectedQueries || !Array.isArray(selectedQueries)) {
+      throw new Error('Invalid selectedQueries format')
+    }
+
     // Extract unique keywords and intents from selected queries
-    const keywords = [...new Set(selectedQueries.map(q => q.keyword))]
-    const intents = [...new Set(selectedQueries.map(q => q.intent))]
+    const keywords = [...new Set(selectedQueries.map(q => q.keyword).filter(k => k))]
+    const intents = [...new Set(selectedQueries.map(q => q.intent).filter(i => i))]
     
     const { data: analysisRun, error: runError } = await serviceClient
       .from('analysis_runs')
@@ -160,8 +167,12 @@ serve(async (req) => {
     console.log('Created custom analysis run:', analysisRun.id)
 
     // Process each selected query
+    console.log(`Processing ${selectedQueries.length} queries`)
+
     for (const query of selectedQueries) {
       try {
+        console.log(`Processing query: "${query.query_text}"`)
+
         // Call process-query edge function for each query
         const processResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/process-query`, {
           method: 'POST',
@@ -185,12 +196,14 @@ serve(async (req) => {
         })
 
         const processResult = await processResponse.json()
-        
+
         if (!processResult.success) {
           console.error(`Failed to process query "${query.query_text}":`, processResult.error)
+        } else {
+          console.log(`Successfully processed query: "${query.query_text}"`)
         }
       } catch (error) {
-        console.error(`Error processing query "${query.query_text}":`, error)
+        console.error(`Error processing query "${query.query_text}":`, error.message || error)
       }
     }
 
