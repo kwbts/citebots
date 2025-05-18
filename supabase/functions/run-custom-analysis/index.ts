@@ -21,6 +21,8 @@ interface RunCustomAnalysisRequest {
 }
 
 serve(async (req) => {
+  console.log('Custom analysis request received')
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -50,7 +52,7 @@ serve(async (req) => {
       }
     )
 
-    // Get the current user
+    // Get user
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     if (userError || !user) {
       throw new Error('Unauthorized')
@@ -58,6 +60,7 @@ serve(async (req) => {
 
     // Parse request body
     const { client_id, platform, queries } = await req.json() as RunCustomAnalysisRequest
+    console.log('Request data:', { client_id, platform, queryCount: queries?.length })
 
     // Validate input
     if (!client_id || !platform || !queries || queries.length === 0) {
@@ -66,6 +69,8 @@ serve(async (req) => {
 
     // Filter only selected queries
     const selectedQueries = queries.filter(q => q.selected)
+    console.log(`Selected queries: ${selectedQueries.length} out of ${queries.length}`)
+    
     if (selectedQueries.length === 0) {
       throw new Error('No queries selected')
     }
@@ -101,6 +106,8 @@ serve(async (req) => {
       throw new Error('Client not found or unauthorized')
     }
 
+    console.log('Client found:', client.id)
+
     // Fetch competitors from the competitors table
     const { data: competitors, error: competitorsError } = await supabaseClient
       .from('competitors')
@@ -118,6 +125,8 @@ serve(async (req) => {
       pattern: comp.domain // Use domain as pattern
     }))
 
+    console.log(`Competitors found: ${formattedCompetitors.length}`)
+
     // Create a new analysis run with service role client
     const serviceClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -130,17 +139,19 @@ serve(async (req) => {
     )
 
     const batch_id = `custom_${platform}_${Date.now()}`
-
+    
     // Add validation for selectedQueries
-    console.log('Selected queries:', selectedQueries)
-
+    console.log('Selected queries count:', selectedQueries.length)
+    
     if (!selectedQueries || !Array.isArray(selectedQueries)) {
       throw new Error('Invalid selectedQueries format')
     }
-
-    // Extract unique keywords and intents from selected queries
+    
+    // Extract unique keywords and intents from selected queries with safe filtering
     const keywords = [...new Set(selectedQueries.map(q => q.keyword).filter(k => k))]
     const intents = [...new Set(selectedQueries.map(q => q.intent).filter(i => i))]
+    
+    console.log('Creating analysis run with keywords:', keywords, 'intents:', intents)
     
     const { data: analysisRun, error: runError } = await serviceClient
       .from('analysis_runs')
@@ -161,23 +172,26 @@ serve(async (req) => {
       .single()
 
     if (runError) {
+      console.error('Analysis run creation error:', runError)
       throw new Error(`Failed to create analysis run: ${runError.message}`)
     }
 
     console.log('Created custom analysis run:', analysisRun.id)
 
-    // Process each selected query
-    console.log(`Processing ${selectedQueries ? selectedQueries.length : 0} queries`)
+    // Process each selected query with safe length access
+    const queryCount = Array.isArray(selectedQueries) ? selectedQueries.length : 0
+    console.log(`Processing ${queryCount} queries`)
 
     if (!selectedQueries || selectedQueries.length === 0) {
       console.error('No queries to process')
       throw new Error('No queries available for processing')
     }
 
-    for (const query of selectedQueries) {
+    for (let idx = 0; idx < selectedQueries.length; idx++) {
+      const query = selectedQueries[idx]
+      console.log(`Processing query ${idx + 1}/${selectedQueries.length}: "${query.query_text}"`)
+      
       try {
-        console.log(`Processing query: "${query.query_text}"`)
-
         // Call process-query edge function for each query
         const processResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/process-query`, {
           method: 'POST',
@@ -201,11 +215,11 @@ serve(async (req) => {
         })
 
         const processResult = await processResponse.json()
-
+        
         if (!processResult.success) {
           console.error(`Failed to process query "${query.query_text}":`, processResult.error)
         } else {
-          console.log(`Successfully processed query: "${query.query_text}"`)
+          console.log(`Successfully processed query ${idx + 1}`)
         }
       } catch (error) {
         console.error(`Error processing query "${query.query_text}":`, error.message || error)
@@ -215,14 +229,17 @@ serve(async (req) => {
     // Update run status to running
     await serviceClient
       .from('analysis_runs')
-      .update({ status: 'running' })
+      .update({
+        status: 'running',
+        started_at: new Date().toISOString()
+      })
       .eq('id', analysisRun.id)
 
     return new Response(
       JSON.stringify({
         success: true,
         analysis_run_id: analysisRun.id,
-        message: `Custom analysis started for ${selectedQueries.length} queries`
+        batch_id: analysisRun.batch_id
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -231,11 +248,11 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in run-custom-analysis:', error)
+    console.error('Custom analysis error:', error)
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message
+        error: error.message || String(error)
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

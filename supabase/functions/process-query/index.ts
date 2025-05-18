@@ -21,12 +21,16 @@ interface ProcessQueryRequest {
 }
 
 serve(async (req) => {
+  console.log('Process query request received')
+  
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
     const body = await req.json() as ProcessQueryRequest
+    console.log('Request body:', JSON.stringify(body, null, 2))
+    
     const { 
       analysis_run_id,
       query_text, 
@@ -50,6 +54,7 @@ serve(async (req) => {
     // Create query record
     const queryId = `${platform}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     
+    console.log('Creating query record')
     const { data: queryRecord, error: queryError } = await serviceClient
       .from('analysis_queries')
       .insert({
@@ -65,11 +70,15 @@ serve(async (req) => {
       .single()
 
     if (queryError) {
+      console.error('Query creation error:', queryError)
       throw new Error(`Failed to create query: ${queryError.message}`)
     }
 
+    console.log('Query record created:', queryRecord.id)
+
     try {
       // Execute the query using our existing edge function
+      console.log('Executing query via edge function')
       const queryResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/execute-query`, {
         method: 'POST',
         headers: {
@@ -86,9 +95,11 @@ serve(async (req) => {
         })
       })
 
+      console.log('Execute query response status:', queryResponse.status)
       const queryResult = await queryResponse.json()
-
-      console.log('Query result structure:', JSON.stringify(queryResult, null, 2))
+      
+      console.log('Query result keys:', Object.keys(queryResult || {}))
+      console.log('Query result success:', queryResult?.success)
 
       if (!queryResult || !queryResult.success) {
         throw new Error(queryResult?.error || 'Invalid query response')
@@ -102,14 +113,9 @@ serve(async (req) => {
         throw new Error('Empty query result')
       }
 
-      console.log('Result data structure:', JSON.stringify({
-        has_response_content: !!resultData.response_content,
-        has_response: !!resultData.response,
-        has_citations: !!resultData.citations,
-        citations_type: Array.isArray(resultData.citations) ? 'array' : typeof resultData.citations,
-        citations_length: Array.isArray(resultData.citations) ? resultData.citations.length : 'N/A',
-        result_keys: Object.keys(resultData)
-      }))
+      console.log('Result data keys:', Object.keys(resultData))
+      console.log('Has citations:', 'citations' in resultData)
+      console.log('Citations type:', typeof resultData.citations)
 
       // Update query with response
       await serviceClient
@@ -126,53 +132,60 @@ serve(async (req) => {
       let processedCitations = 0
       const citations = resultData.citations || []
 
-      console.log(`Processing ${citations ? citations.length : 0} citations`)
+      // SAFE LENGTH ACCESS
+      const citationCount = Array.isArray(citations) ? citations.length : 0
+      console.log(`Processing ${citationCount} citations`)
 
       if (!Array.isArray(citations)) {
-        console.error('Citations is not an array:', citations)
-        throw new Error('Invalid citations format')
-      }
-
-      for (let i = 0; i < citations.length; i++) {
-        const citation = citations[i]
-        if (!citation || typeof citation !== 'object') {
-          console.error(`Invalid citation at index ${i}:`, citation)
-          continue
-        }
-
-        try {
-          // Analyze the citation
-          const citationResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/analyze-citation`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
-            },
-            body: JSON.stringify({
-              query_id: queryRecord.id,
-              citation_url: citation.url,
-              citation_position: citation.citation_number || i + 1,
-              query_text,
-              keyword,
-              brand_name: client.name,
-              brand_domain: client.domain,
-              competitors: client.competitors
-            })
-          })
-
-          const citationResult = await citationResponse.json()
-          
-          if (citationResult.success) {
-            processedCitations++
-          } else {
-            console.error(`Failed to analyze citation ${citation.url}:`, citationResult.error)
+        console.error('Citations is not an array:', JSON.stringify(citations))
+        // Don't throw, just skip citation processing
+        console.log('Skipping citation processing due to invalid format')
+      } else {
+        for (let i = 0; i < citations.length; i++) {
+          const citation = citations[i]
+          if (!citation || typeof citation !== 'object') {
+            console.error(`Invalid citation at index ${i}:`, citation)
+            continue
           }
-        } catch (citationError) {
-          console.error(`Error processing citation ${citation.url}:`, citationError)
+          
+          console.log(`Processing citation ${i + 1}:`, citation.url || 'no url')
+          
+          try {
+            // Analyze the citation
+            const citationResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/analyze-citation`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+              },
+              body: JSON.stringify({
+                query_id: queryRecord.id,
+                citation_url: citation.url,
+                citation_position: citation.citation_number || i + 1,
+                query_text,
+                keyword,
+                brand_name: client.name,
+                brand_domain: client.domain,
+                competitors: client.competitors
+              })
+            })
+
+            const citationResult = await citationResponse.json()
+            
+            if (citationResult.success) {
+              processedCitations++
+              console.log(`Successfully analyzed citation ${i + 1}`)
+            } else {
+              console.error(`Failed to analyze citation ${citation.url}:`, citationResult.error)
+            }
+          } catch (citationError) {
+            console.error(`Error processing citation ${citation.url}:`, citationError.message || citationError)
+          }
         }
       }
 
       // Update query as completed
+      console.log('Updating query status to completed')
       await serviceClient
         .from('analysis_queries')
         .update({
@@ -183,6 +196,7 @@ serve(async (req) => {
         .eq('id', queryRecord.id)
 
       // Update analysis run progress
+      console.log('Updating analysis run progress')
       const { data: runData } = await serviceClient
         .from('analysis_runs')
         .select('queries_completed, queries_total')
@@ -190,15 +204,17 @@ serve(async (req) => {
         .single()
 
       if (runData) {
-        const newCompleted = (runData.queries_completed || 0) + 1
-        const isComplete = newCompleted >= runData.queries_total
+        const newQueriesCompleted = (runData.queries_completed || 0) + 1
+        const progress = runData.queries_total > 0 
+          ? Math.round((newQueriesCompleted / runData.queries_total) * 100) 
+          : 0
 
         await serviceClient
           .from('analysis_runs')
           .update({
-            queries_completed: newCompleted,
-            status: isComplete ? 'completed' : 'running',
-            completed_at: isComplete ? new Date().toISOString() : null
+            queries_completed: newQueriesCompleted,
+            progress,
+            status: newQueriesCompleted >= runData.queries_total ? 'completed' : 'running'
           })
           .eq('id', analysis_run_id)
       }
@@ -207,22 +223,22 @@ serve(async (req) => {
         JSON.stringify({
           success: true,
           query_id: queryRecord.id,
-          citations_processed: processedCitations,
-          total_citations: queryResult.citations.length
+          citations_processed: processedCitations
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200
         }
       )
 
     } catch (error) {
-      // Update query as failed
+      console.error('Process query error:', error)
+      
+      // Update query status to failed
       await serviceClient
         .from('analysis_queries')
         .update({
           status: 'failed',
-          error_message: error.message
+          error_message: error.message || String(error)
         })
         .eq('id', queryRecord.id)
 
@@ -231,11 +247,10 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Process query error:', error)
-    
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message
+        error: error.message || String(error)
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
