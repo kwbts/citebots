@@ -17,6 +17,37 @@ interface AnalyzeCitationRequest {
   competitors: any[]
 }
 
+// Helper function to escape regex special characters
+function escapeRegex(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// Safe function to find mentions with context
+function findMentionsWithContext(content: string, searchTerm: string, contextLength: number = 100): string[] {
+  const mentions: string[] = [];
+  
+  if (!searchTerm || !content) {
+    return mentions;
+  }
+  
+  try {
+    // Escape the search term to make it safe for regex
+    const escapedTerm = escapeRegex(searchTerm);
+    
+    // Create a safe regex pattern
+    const pattern = new RegExp(`(.{0,${contextLength}})\\b${escapedTerm}\\b(.{0,${contextLength}})`, 'gi');
+    
+    let match;
+    while ((match = pattern.exec(content)) !== null) {
+      mentions.push(match[0]);
+    }
+  } catch (error) {
+    console.error(`Error finding mentions for "${searchTerm}":`, error);
+  }
+  
+  return mentions;
+}
+
 // Function to crawl a page using ScrapingBee
 async function crawlPage(url: string) {
   const apiKey = Deno.env.get('SCRAPINGBEE_API_KEY')
@@ -26,7 +57,7 @@ async function crawlPage(url: string) {
   }
 
   console.log(`Attempting to crawl URL: ${url}`)
-
+  
   // Validate URL
   try {
     new URL(url)
@@ -50,15 +81,15 @@ async function crawlPage(url: string) {
   })
 
   console.log('Making request to ScrapingBee API...')
-
+  
   const response = await fetch(`https://app.scrapingbee.com/api/v1/?${params}`)
-
+  
   console.log(`ScrapingBee response status: ${response.status}`)
-
+  
   if (!response.ok) {
     const errorText = await response.text()
     console.error(`ScrapingBee error response: ${errorText}`)
-
+    
     if (response.status === 401) {
       throw new Error('ScrapingBee authentication failed - check API key')
     } else if (response.status === 429) {
@@ -75,22 +106,18 @@ async function crawlPage(url: string) {
   return html
 }
 
-// Function to extract data from HTML (simplified version)
+// Function to extract data from HTML
 function extractFromHtml(html: string, url: string) {
-  // This is a simplified extraction - in production, you'd use a proper HTML parser
   const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
   const metaDescMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']+)["']/i)
   
-  // Extract main content (very simplified)
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)
   const mainContent = bodyMatch ? bodyMatch[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : ''
   
-  // Count various elements
   const wordCount = mainContent.split(/\s+/).length
   const imageCount = (html.match(/<img[^>]*>/gi) || []).length
   const videoPresent = /<video[^>]*>|<iframe[^>]*youtube|<iframe[^>]*vimeo/i.test(html)
   
-  // Extract headings
   const headingCounts = {
     h1: (html.match(/<h1[^>]*>/gi) || []).length,
     h2: (html.match(/<h2[^>]*>/gi) || []).length,
@@ -102,7 +129,6 @@ function extractFromHtml(html: string, url: string) {
   
   const totalHeadings = Object.values(headingCounts).reduce((a, b) => a + b, 0)
   
-  // Check for various content features
   const hasTable = /<table[^>]*>/i.test(html)
   const tableCount = (html.match(/<table[^>]*>/gi) || []).length
   const hasUnorderedList = /<ul[^>]*>/i.test(html)
@@ -110,21 +136,17 @@ function extractFromHtml(html: string, url: string) {
   const hasOrderedList = /<ol[^>]*>/i.test(html)
   const orderedListCount = (html.match(/<ol[^>]*>/gi) || []).length
   
-  // Check for schema markup
   const schemaMarkupPresent = /<script[^>]*type=["']application\/ld\+json["'][^>]*>/i.test(html)
-  
-  // Check for ARIA labels
   const ariaLabelsPresent = /aria-label=|aria-labelledby=/i.test(html)
   
-  // Extract internal links count
   const domain = new URL(url).hostname
-  const internalLinkRegex = new RegExp(`<a[^>]*href=["'](?:https?:)?\/\/${domain}[^"']*["']`, 'gi')
+  const internalLinkRegex = new RegExp(`<a[^>]*href=["'](?:https?:)?\/\/${escapeRegex(domain)}[^"']*["']`, 'gi')
   const internalLinkCount = (html.match(internalLinkRegex) || []).length
   
   return {
     pageTitle: titleMatch ? titleMatch[1].trim() : '',
     metaDescription: metaDescMatch ? metaDescMatch[1].trim() : '',
-    mainContent: mainContent.substring(0, 5000), // Limit content size
+    mainContent: mainContent.substring(0, 5000),
     wordCount,
     imageCount,
     videoPresent,
@@ -144,10 +166,22 @@ function extractFromHtml(html: string, url: string) {
 }
 
 // Function to analyze content using OpenAI
-async function analyzeContentWithAI(pageData: any, queryText: string) {
+async function analyzeContentWithAI(pageData: any, queryText: string, brandName: string, competitors: any[]) {
   const apiKey = Deno.env.get('OPENAI_API_KEY')
   if (!apiKey) {
     throw new Error('OpenAI API key not configured')
+  }
+
+  // Find brand and competitor mentions safely
+  const brandMentions = findMentionsWithContext(pageData.mainContent, brandName);
+  const competitorAnalysis: any = {};
+  
+  for (const competitor of competitors || []) {
+    const compName = competitor.name || '';
+    if (compName) {
+      const mentions = findMentionsWithContext(pageData.mainContent, compName);
+      competitorAnalysis[compName] = mentions.length;
+    }
   }
 
   const prompt = `
@@ -158,6 +192,8 @@ URL: ${pageData.url}
 Title: ${pageData.pageTitle}
 Meta description: ${pageData.metaDescription}
 Word count: ${pageData.wordCount}
+Brand mentions: ${brandMentions.length}
+Competitor mentions: ${JSON.stringify(competitorAnalysis)}
 Content sample: ${pageData.mainContent.substring(0, 1000)}
 
 Please provide the following in JSON format:
@@ -199,7 +235,7 @@ Please provide the following in JSON format:
       messages: [
         {
           role: 'system',
-          content: 'You are a content analysis expert. Analyze web pages and provide structured data.'
+          content: 'You are an expert content analyst. Provide analysis in valid JSON format.'
         },
         {
           role: 'user',
@@ -217,7 +253,9 @@ Please provide the following in JSON format:
   }
 
   const data = await response.json()
-  return JSON.parse(data.choices[0].message.content)
+  const analysis = JSON.parse(data.choices[0].message.content)
+  
+  return analysis
 }
 
 serve(async (req) => {
@@ -228,10 +266,10 @@ serve(async (req) => {
   try {
     const body = await req.json() as AnalyzeCitationRequest
     console.log('Received analyze-citation request:', JSON.stringify(body, null, 2))
-
-    const {
-      query_id,
-      citation_url,
+    
+    const { 
+      query_id, 
+      citation_url, 
       citation_position,
       query_text,
       keyword,
@@ -253,7 +291,7 @@ serve(async (req) => {
     
     // Analyze with AI
     console.log('Analyzing content with AI')
-    const aiAnalysis = await analyzeContentWithAI(extractedData, query_text)
+    const aiAnalysis = await analyzeContentWithAI(extractedData, query_text, brand_name, competitors)
     
     // Determine if it's client or competitor domain
     const domain = new URL(citation_url).hostname
