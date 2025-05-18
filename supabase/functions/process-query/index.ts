@@ -88,12 +88,27 @@ serve(async (req) => {
 
       const queryResult = await queryResponse.json()
 
-      if (!queryResult.success) {
-        throw new Error(queryResult.error)
+      console.log('Query result structure:', JSON.stringify(queryResult, null, 2))
+
+      if (!queryResult || !queryResult.success) {
+        throw new Error(queryResult?.error || 'Invalid query response')
       }
 
       // Extract the actual result data
       const resultData = queryResult.result || queryResult
+
+      if (!resultData) {
+        console.error('No result data found in query response')
+        throw new Error('Empty query result')
+      }
+
+      console.log('Result data structure:', JSON.stringify({
+        has_response_content: !!resultData.response_content,
+        has_response: !!resultData.response,
+        has_citations: !!resultData.citations,
+        citations_type: Array.isArray(resultData.citations) ? 'array' : typeof resultData.citations,
+        citations_length: Array.isArray(resultData.citations) ? resultData.citations.length : 'N/A'
+      }))
 
       // Update query with response
       await serviceClient
@@ -110,8 +125,20 @@ serve(async (req) => {
       let processedCitations = 0
       const citations = resultData.citations || []
 
+      console.log(`Processing ${citations.length} citations`)
+
+      if (!Array.isArray(citations)) {
+        console.error('Citations is not an array:', citations)
+        throw new Error('Invalid citations format')
+      }
+
       for (let i = 0; i < citations.length; i++) {
         const citation = citations[i]
+        if (!citation || typeof citation !== 'object') {
+          console.error(`Invalid citation at index ${i}:`, citation)
+          continue
+        }
+
         try {
           // Analyze the citation
           const citationResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/analyze-citation`, {
