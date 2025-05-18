@@ -5,7 +5,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-citebots-orange"></div>
-      <p class="mt-4 text-gray-600">Generating natural language queries...</p>
+      <p class="mt-4 text-gray-600">{{ loadingMessage }}</p>
     </div>
     
     <!-- Error State -->
@@ -138,6 +138,7 @@ const keywords = ref([])
 
 // State
 const loading = ref(false)
+const loadingMessage = ref('Generating natural language queries...')
 const error = ref('')
 const queries = ref([])
 
@@ -174,9 +175,12 @@ const toggleQuery = (index) => {
 
 const generateQueries = async () => {
   loading.value = true
+  loadingMessage.value = 'Generating natural language queries...'
   error.value = ''
   
   try {
+    console.log('Generating queries for:', { clientId: clientId.value, keywords: keywords.value })
+    
     const { data, error: generateError } = await client.functions.invoke('generate-queries', {
       body: {
         client_id: clientId.value,
@@ -186,6 +190,8 @@ const generateQueries = async () => {
     })
     
     if (generateError) throw generateError
+    
+    console.log('Generate queries response:', data)
     
     if (data?.success && data.queries) {
       queries.value = data.queries.map(q => ({
@@ -216,9 +222,16 @@ const runAnalysis = async () => {
   }
   
   loading.value = true
+  loadingMessage.value = 'Starting analysis...'
   error.value = ''
   
   try {
+    console.log('Running analysis with:', {
+      client_id: clientId.value,
+      platform: selectedPlatform.value,
+      queries: selectedQueries.length
+    })
+    
     // Call run-custom-analysis with selected queries
     const { data, error: analysisError } = await client.functions.invoke('run-custom-analysis', {
       body: {
@@ -228,13 +241,20 @@ const runAnalysis = async () => {
       }
     })
     
-    if (analysisError) throw analysisError
+    console.log('Run analysis response:', data)
     
-    if (data?.success) {
+    if (analysisError) {
+      console.error('Analysis error:', analysisError)
+      throw analysisError
+    }
+    
+    if (data?.success && data.analysis_run_id) {
       // Redirect to analysis results page
+      console.log('Redirecting to:', `/dashboard/analysis/${data.analysis_run_id}`)
       await router.push(`/dashboard/analysis/${data.analysis_run_id}`)
     } else {
-      throw new Error(data?.error || 'Failed to start analysis')
+      console.error('Invalid response data:', data)
+      throw new Error(data?.error || 'Failed to start analysis - no analysis ID returned')
     }
   } catch (err) {
     console.error('Error running analysis:', err)
@@ -253,6 +273,12 @@ onMounted(async () => {
   if (route.query.keywords) {
     keywords.value = route.query.keywords.split(',').filter(k => k.trim())
   }
+  
+  console.log('Page initialized with:', {
+    clientId: clientId.value,
+    platform: selectedPlatform.value,
+    keywords: keywords.value
+  })
   
   // Validate parameters
   if (!clientId.value || keywords.value.length === 0) {
