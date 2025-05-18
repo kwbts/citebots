@@ -98,7 +98,7 @@ serve(async (req) => {
       const resultData = queryResult.result || queryResult
 
       if (!resultData) {
-        console.error('No result data found in query response')
+        console.error('No result data found in query response:', JSON.stringify(queryResult))
         throw new Error('Empty query result')
       }
 
@@ -107,7 +107,8 @@ serve(async (req) => {
         has_response: !!resultData.response,
         has_citations: !!resultData.citations,
         citations_type: Array.isArray(resultData.citations) ? 'array' : typeof resultData.citations,
-        citations_length: Array.isArray(resultData.citations) ? resultData.citations.length : 'N/A'
+        citations_length: Array.isArray(resultData.citations) ? resultData.citations.length : 'N/A',
+        result_keys: Object.keys(resultData)
       }))
 
       // Update query with response
@@ -125,7 +126,7 @@ serve(async (req) => {
       let processedCitations = 0
       const citations = resultData.citations || []
 
-      console.log(`Processing ${citations.length} citations`)
+      console.log(`Processing ${citations ? citations.length : 0} citations`)
 
       if (!Array.isArray(citations)) {
         console.error('Citations is not an array:', citations)

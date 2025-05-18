@@ -167,7 +167,12 @@ serve(async (req) => {
     console.log('Created custom analysis run:', analysisRun.id)
 
     // Process each selected query
-    console.log(`Processing ${selectedQueries.length} queries`)
+    console.log(`Processing ${selectedQueries ? selectedQueries.length : 0} queries`)
+
+    if (!selectedQueries || selectedQueries.length === 0) {
+      console.error('No queries to process')
+      throw new Error('No queries available for processing')
+    }
 
     for (const query of selectedQueries) {
       try {
