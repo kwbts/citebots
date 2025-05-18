@@ -67,32 +67,38 @@ async function queryPerplexity(query: string) {
     throw new Error('Perplexity API key not configured')
   }
 
+  const requestBody = {
+    model: 'sonar-medium-online', // Available models: sonar-small-online, sonar-medium-online
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a helpful assistant. When answering questions, provide detailed information and cite your sources where possible.'
+      },
+      {
+        role: 'user',
+        content: query
+      }
+    ],
+    temperature: 0.7,
+    max_tokens: 2000,
+    return_citations: true
+  }
+
+  console.log('Perplexity request:', JSON.stringify(requestBody))
+
   const response = await fetch('https://api.perplexity.ai/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
-    body: JSON.stringify({
-      model: 'sonar-medium-online',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful assistant. When answering questions, provide detailed information and cite your sources where possible.'
-        },
-        {
-          role: 'user',
-          content: query
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-      return_citations: true
-    })
+    body: JSON.stringify(requestBody)
   })
 
   if (!response.ok) {
-    throw new Error(`Perplexity API error: ${response.statusText}`)
+    const errorBody = await response.text()
+    console.error(`Perplexity API error - Status: ${response.status}, Body: ${errorBody}`)
+    throw new Error(`Perplexity API error: ${response.statusText} - ${errorBody}`)
   }
 
   const data = await response.json()
