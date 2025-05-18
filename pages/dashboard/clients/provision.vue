@@ -299,7 +299,8 @@ import { useAIEnhancement } from '~/composables/useAIEnhancement'
 import TagInput from '~/components/TagInput.vue'
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
+  layout: 'dashboard'
 })
 
 const supabase = useSupabaseClient()

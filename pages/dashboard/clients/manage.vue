@@ -75,7 +75,8 @@ import { navigateTo } from '#app'
 // Using built-in Supabase composable
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
+  layout: 'dashboard'
 })
 
 const supabase = useSupabaseClient()
