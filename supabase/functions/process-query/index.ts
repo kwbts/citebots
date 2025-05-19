@@ -88,6 +88,7 @@ serve(async (req) => {
         body: JSON.stringify({
           query_text,
           keyword,
+          query_intent,
           platform,
           brand_name: client.name,
           brand_domain: client.domain,
@@ -117,13 +118,28 @@ serve(async (req) => {
       console.log('Has citations:', 'citations' in resultData)
       console.log('Citations type:', typeof resultData.citations)
 
-      // Update query with response
+      // Update query with response - FIXED: include more metadata
       await serviceClient
         .from('analysis_queries')
         .update({
           model_response: resultData.response_content || resultData.response,
-          citation_count: resultData.citations ? resultData.citations.length : 0,
+          citation_count: Array.isArray(resultData.citations) ? resultData.citations.length : 0,
           brand_mentioned: resultData.brand_mention || false,
+          brand_sentiment: resultData.metadata?.brand_sentiment || 0,
+          competitor_mentioned_names: resultData.metadata?.competitor_names || [],
+          competitor_count: Array.isArray(resultData.metadata?.competitors_mentioned) ? resultData.metadata.competitors_mentioned.length : 0,
+          // Add metadata from the query result
+          query_category: resultData.metadata?.query_category || 'general',
+          query_topic: resultData.metadata?.query_topic || 'general',
+          query_type: resultData.metadata?.query_type || 'informational',
+          funnel_stage: resultData.metadata?.funnel_stage || 'awareness',
+          query_complexity: resultData.metadata?.query_complexity || 'simple',
+          response_match: resultData.metadata?.response_match || 'direct',
+          response_outcome: resultData.metadata?.response_outcome || 'answer',
+          action_orientation: resultData.metadata?.action_orientation || 'medium',
+          query_competition: resultData.metadata?.query_competition || 'opportunity',
+          brand_mention_type: resultData.metadata?.brand_mention_type || 'none',
+          competitor_context: resultData.metadata?.competitor_names?.join(', ') || 'none',
           status: 'analyzing_citations'
         })
         .eq('id', queryRecord.id)
@@ -131,6 +147,7 @@ serve(async (req) => {
       // Process each citation
       let processedCitations = 0
       const citations = resultData.citations || []
+      const pageAnalyses = []
 
       // SAFE LENGTH ACCESS
       const citationCount = Array.isArray(citations) ? citations.length : 0
@@ -172,8 +189,9 @@ serve(async (req) => {
 
             const citationResult = await citationResponse.json()
             
-            if (citationResult.success) {
+            if (citationResult.success && citationResult.page_analysis) {
               processedCitations++
+              pageAnalyses.push(citationResult.page_analysis)
               console.log(`Successfully analyzed citation ${i + 1}`)
             } else {
               console.error(`Failed to analyze citation ${citation.url}:`, citationResult.error)
@@ -184,15 +202,26 @@ serve(async (req) => {
         }
       }
 
-      // Update query as completed
+      // FIXED: Store the associated pages in the query record
+      console.log(`Storing ${pageAnalyses.length} page analyses`)
+      
+      // Update query as completed with associated pages
       console.log('Updating query status to completed')
+      const updateData = {
+        associated_pages: pageAnalyses,
+        associated_pages_count: processedCitations,
+        status: 'completed',
+        completed_at: new Date().toISOString()
+      }
+      
+      console.log('Update data:', {
+        ...updateData,
+        associated_pages: `[${pageAnalyses.length} pages]`
+      })
+      
       await serviceClient
         .from('analysis_queries')
-        .update({
-          associated_pages_count: processedCitations,
-          status: 'completed',
-          completed_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', queryRecord.id)
 
       // Update analysis run progress
@@ -223,7 +252,8 @@ serve(async (req) => {
         JSON.stringify({
           success: true,
           query_id: queryRecord.id,
-          citations_processed: processedCitations
+          citations_processed: processedCitations,
+          page_analyses_count: pageAnalyses.length
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

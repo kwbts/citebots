@@ -1,28 +1,51 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="flex justify-between items-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">Provision New Client</h1>
+  <div class="max-w-4xl mx-auto">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Add New Client</h1>
+      <p class="page-subtitle mb-6">Provision a new client profile and enhance it with AI</p>
+    </div>
+
+    <!-- Top Actions -->
+    <div class="flex justify-between items-center mb-6">
       <button
         type="button"
-        @click="enhanceWithAI"
-        :disabled="!form.brandName || !form.domain || isEnhancing"
-        class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400 flex items-center gap-2"
+        @click="navigateTo('/dashboard/clients')"
+        class="btn-secondary"
       >
-        <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <span>{{ isEnhancing ? 'Enhancing...' : 'Enhance with AI' }}</span>
-        <span class="text-sm">✨</span>
+        Cancel
       </button>
+      <div class="flex gap-2">
+        <button
+          type="button"
+          @click="enhanceWithAI"
+          :disabled="!form.brandName || !form.domain || isEnhancing"
+          class="btn bg-purple-600 hover:bg-purple-700 text-white"
+        >
+          <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>{{ isEnhancing ? 'Enhancing...' : 'Enhance with AI' }}</span>
+          <span class="text-sm">✨</span>
+        </button>
+        <button
+          type="button"
+          @click="handleSubmit"
+          :disabled="isSubmitting"
+          class="btn-primary"
+        >
+          {{ isSubmitting ? 'Saving...' : 'Save Client' }}
+        </button>
+      </div>
     </div>
     
-    <form @submit.prevent="handleSubmit" class="space-y-6">
-      <!-- Brand Information -->
-      <div class="bg-white rounded-lg shadow-md p-6">
+    <form @submit.prevent="handleSubmit" @keydown.enter.prevent class="space-y-6">
+      <!-- Brand Information & Competitors Group -->
+      <div class="card">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Brand Information</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label for="brandName" class="block text-sm font-medium text-gray-700 mb-1">
               Brand Name <span class="text-red-500">*</span>
@@ -32,11 +55,11 @@
               v-model="form.brandName"
               type="text"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="input-field"
               placeholder="e.g., Knak"
             />
           </div>
-          
+
           <div>
             <label for="domain" class="block text-sm font-medium text-gray-700 mb-1">
               Domain <span class="text-red-500">*</span>
@@ -46,9 +69,63 @@
               v-model="form.domain"
               type="text"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="input-field"
               placeholder="e.g., knak.com"
             />
+          </div>
+        </div>
+
+        <!-- Competitors moved here -->
+        <div class="border-t pt-4">
+          <h3 class="font-medium text-gray-900 mb-3">Competitors</h3>
+          <div class="space-y-3">
+            <div v-for="(competitor, index) in form.competitors" :key="index" class="flex gap-3">
+              <div class="flex-1 relative">
+                <input
+                  v-model="competitor.name"
+                  type="text"
+                  :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Competitor name"
+                />
+                <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                  <span class="text-sm">✨</span>
+                </span>
+              </div>
+              <div class="flex-1 relative">
+                <input
+                  v-model="competitor.domain"
+                  type="text"
+                  :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
+                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Competitor domain"
+                />
+                <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                  <span class="text-sm">✨</span>
+                </span>
+              </div>
+              <button
+                type="button"
+                @click="removeCompetitor(index)"
+                class="p-2 text-red-600 hover:text-red-800"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              @click="addCompetitor"
+              class="mt-2 w-full py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center justify-center"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+              </svg>
+              Add Competitor
+            </button>
           </div>
         </div>
       </div>
@@ -99,33 +176,17 @@
           </div>
         </div>
         
-        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Sub-Industry
-              <span v-if="form.subIndustry && aiFields.includes('subIndustry')" class="ml-1 text-xs text-purple-600">✨ AI</span>
-            </label>
-            <input
-              v-model="form.subIndustry"
-              type="text"
-              :class="aiFields.includes('subIndustry') ? 'border-purple-300' : 'border-gray-300'"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Geographic Focus
-              <span v-if="form.geographicFocus && aiFields.includes('geographicFocus')" class="ml-1 text-xs text-purple-600">✨ AI</span>
-            </label>
-            <input
-              v-model="form.geographicFocus"
-              type="text"
-              :class="aiFields.includes('geographicFocus') ? 'border-purple-300' : 'border-gray-300'"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Global, Regional, Local"
-            />
-          </div>
+        <div class="mt-4">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Sub-Industry
+            <span v-if="form.subIndustry && aiFields.includes('subIndustry')" class="ml-1 text-xs text-purple-600">✨ AI</span>
+          </label>
+          <input
+            v-model="form.subIndustry"
+            type="text"
+            :class="aiFields.includes('subIndustry') ? 'border-purple-300' : 'border-gray-300'"
+            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
       </div>
 
@@ -168,63 +229,10 @@
         </div>
       </div>
 
-      <!-- Competitors -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Competitors</h2>
-        
-        <div class="space-y-4">
-          <div v-for="(competitor, index) in form.competitors" :key="index" class="flex gap-3">
-            <div class="flex-1 relative">
-              <input
-                v-model="competitor.name"
-                type="text"
-                :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
-                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Competitor name"
-              />
-              <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
-                <span class="text-sm">✨</span>
-              </span>
-            </div>
-            <div class="flex-1 relative">
-              <input
-                v-model="competitor.domain"
-                type="text"
-                :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
-                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Competitor domain"
-              />
-              <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
-                <span class="text-sm">✨</span>
-              </span>
-            </div>
-            <button
-              type="button"
-              @click="removeCompetitor(index)"
-              class="p-2 text-red-600 hover:text-red-800"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
-            </button>
-          </div>
-          
-          <button
-            type="button"
-            @click="addCompetitor"
-            class="mt-2 w-full py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center justify-center"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Add Competitor
-          </button>
-        </div>
-      </div>
+      <!-- Business Context (now includes geographic regions) -->
 
       <!-- Business Context -->
-      <div class="bg-white rounded-lg shadow-md p-6">
+      <div class="card">
         <h2 class="text-xl font-semibold text-gray-900 mb-4">Business Context</h2>
         
         <div class="space-y-4">
@@ -270,22 +278,37 @@
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="flex justify-between">
+      <!-- Bottom Actions -->
+      <div class="flex justify-between items-center">
         <button
           type="button"
           @click="navigateTo('/dashboard/clients')"
-          class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+          class="btn-secondary"
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          :disabled="isSubmitting"
-          class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400"
-        >
-          {{ isSubmitting ? 'Saving...' : 'Save Client' }}
-        </button>
+        <div class="flex gap-2">
+          <button
+            type="button"
+            @click="enhanceWithAI"
+            :disabled="!form.brandName || !form.domain || isEnhancing"
+            class="btn bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>{{ isEnhancing ? 'Enhancing...' : 'Enhance with AI' }}</span>
+            <span class="text-sm">✨</span>
+          </button>
+          <button
+            type="submit"
+            :disabled="isSubmitting"
+            class="btn-primary"
+          >
+            {{ isSubmitting ? 'Saving...' : 'Save Client' }}
+          </button>
+        </div>
       </div>
     </form>
   </div>

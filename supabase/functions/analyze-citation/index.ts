@@ -48,15 +48,15 @@ function findMentionsWithContext(content: string, searchTerm: string, contextLen
   return mentions;
 }
 
-// Function to crawl a page using ScrapingBee
-async function crawlPage(url: string) {
+// Enhanced crawlPage function with fallback options
+async function crawlPage(url: string, attempt: number = 1): Promise<string> {
   const apiKey = Deno.env.get('SCRAPINGBEE_API_KEY')
   if (!apiKey) {
     console.error('ScrapingBee API key not found in environment')
     throw new Error('ScrapingBee API key not configured')
   }
 
-  console.log(`Attempting to crawl URL: ${url}`)
+  console.log(`Attempting to crawl URL: ${url} (attempt ${attempt})`)
   
   // Validate URL
   try {
@@ -66,44 +66,160 @@ async function crawlPage(url: string) {
     throw new Error(`Invalid URL format: ${url}`)
   }
 
-  const params = new URLSearchParams({
-    api_key: apiKey,
-    url: url,
-    render_js: 'false',
-    premium_proxy: 'false',
-    country_code: 'us',
-    device: 'desktop',
-    return_page_source: 'true',
-    block_ads: 'true',
-    block_resources: 'false',
-    wait: '0',
-    timeout: '30000'
-  })
-
-  console.log('Making request to ScrapingBee API...')
+  // Configure parameters based on attempt number
+  let params: URLSearchParams
   
-  const response = await fetch(`https://app.scrapingbee.com/api/v1/?${params}`)
-  
-  console.log(`ScrapingBee response status: ${response.status}`)
-  
-  if (!response.ok) {
-    const errorText = await response.text()
-    console.error(`ScrapingBee error response: ${errorText}`)
-    
-    if (response.status === 401) {
-      throw new Error('ScrapingBee authentication failed - check API key')
-    } else if (response.status === 429) {
-      throw new Error('ScrapingBee rate limit exceeded')
-    } else if (response.status === 404) {
-      throw new Error(`URL not found: ${url}`)
-    } else {
-      throw new Error(`ScrapingBee error (${response.status}): ${response.statusText}`)
-    }
+  switch(attempt) {
+    case 1:
+      // First attempt: Basic crawl (1 credit)
+      params = new URLSearchParams({
+        api_key: apiKey,
+        url: url,
+        render_js: 'false',
+        premium_proxy: 'false',
+        country_code: 'us',
+        device: 'desktop',
+        return_page_source: 'true',
+        block_ads: 'true',
+        block_resources: 'false',
+        wait: '0',
+        timeout: '30000'
+      })
+      break
+      
+    case 2:
+      // Second attempt: JavaScript rendering (5 credits)
+      params = new URLSearchParams({
+        api_key: apiKey,
+        url: url,
+        render_js: 'true',
+        premium_proxy: 'false',
+        country_code: 'us',
+        device: 'desktop',
+        return_page_source: 'true',
+        block_ads: 'true',
+        wait: '2000',
+        timeout: '30000'
+      })
+      break
+      
+    case 3:
+      // Third attempt: Premium proxy (10-25 credits)
+      params = new URLSearchParams({
+        api_key: apiKey,
+        url: url,
+        render_js: 'true',
+        premium_proxy: 'true',
+        country_code: 'us',
+        device: 'desktop',
+        return_page_source: 'true',
+        block_ads: 'true',
+        wait: '2000',
+        timeout: '30000'
+      })
+      break
+      
+    default:
+      // Final attempt: Stealth proxy (75 credits)
+      params = new URLSearchParams({
+        api_key: apiKey,
+        url: url,
+        render_js: 'true',
+        stealth_proxy: 'true',
+        country_code: 'us',
+        device: 'desktop',
+        return_page_source: 'true',
+        block_ads: 'true',
+        wait: '2000',
+        timeout: '30000'
+      })
   }
 
-  const html = await response.text()
-  console.log(`Successfully crawled page: ${url} (received ${html.length} characters)`)
-  return html
+  console.log(`Making request to ScrapingBee API (attempt ${attempt})...`)
+  
+  try {
+    const response = await fetch(`https://app.scrapingbee.com/api/v1/?${params}`)
+    
+    console.log(`ScrapingBee response status: ${response.status}`)
+    
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`ScrapingBee error response: ${errorText}`)
+      
+      // Try to parse error JSON
+      let errorData
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { error: errorText }
+      }
+      
+      // Handle specific error cases
+      if (response.status === 403 || errorData.reason === 'Server responded with 403') {
+        if (attempt < 4) {
+          console.log(`403 error, trying with higher tier (attempt ${attempt + 1})`)
+          return crawlPage(url, attempt + 1)
+        }
+      } else if (response.status === 401) {
+        throw new Error('ScrapingBee authentication failed - check API key')
+      } else if (response.status === 429) {
+        throw new Error('ScrapingBee rate limit exceeded')
+      } else if (response.status === 500) {
+        if (attempt < 4) {
+          console.log(`Internal server error, trying with higher tier (attempt ${attempt + 1})`)
+          return crawlPage(url, attempt + 1)
+        }
+      }
+      
+      throw new Error(`ScrapingBee error (${response.status}): ${response.statusText}`)
+    }
+
+    const html = await response.text()
+    console.log(`Successfully crawled page: ${url} (received ${html.length} characters)`)
+    return html
+    
+  } catch (error) {
+    if (error.message.includes('rate limit')) {
+      throw error // Don't retry rate limits
+    }
+    
+    // For other errors, try next tier if not at max
+    if (attempt < 4) {
+      console.log(`Error on attempt ${attempt}, trying with higher tier: ${error.message}`)
+      return crawlPage(url, attempt + 1)
+    }
+    
+    throw error
+  }
+}
+
+// Fallback function to extract basic info without full crawl
+function createFallbackAnalysis(url: string, error: string) {
+  console.log('Creating fallback analysis due to crawl failure')
+  
+  const domain = new URL(url).hostname
+  
+  return {
+    pageTitle: `Page at ${domain}`,
+    metaDescription: '',
+    mainContent: `Unable to crawl page: ${error}`,
+    wordCount: 0,
+    imageCount: 0,
+    videoPresent: false,
+    headingCounts: { h1: 0, h2: 0, h3: 0, h4: 0, h5: 0, h6: 0 },
+    totalHeadings: 0,
+    hasTable: false,
+    tableCount: 0,
+    hasUnorderedList: false,
+    unorderedListCount: 0,
+    hasOrderedList: false,
+    orderedListCount: 0,
+    schemaMarkupPresent: false,
+    ariaLabelsPresent: false,
+    internalLinkCount: 0,
+    url,
+    crawlError: error
+  }
 }
 
 // Function to extract data from HTML
@@ -169,18 +285,33 @@ function extractFromHtml(html: string, url: string) {
 async function analyzeContentWithAI(pageData: any, queryText: string, brandName: string, competitors: any[]) {
   const apiKey = Deno.env.get('OPENAI_API_KEY')
   if (!apiKey) {
-    throw new Error('OpenAI API key not configured')
+    console.error('OpenAI API key not configured, using default analysis')
+    return getDefaultAnalysis()
+  }
+
+  // Skip AI analysis if we have a crawl error
+  if (pageData.crawlError) {
+    return getDefaultAnalysis()
   }
 
   // Find brand and competitor mentions safely
-  const brandMentions = findMentionsWithContext(pageData.mainContent, brandName);
+  const brandMentions = findMentionsWithContext(pageData.mainContent || '', brandName || '');
   const competitorAnalysis: any = {};
-  
-  for (const competitor of competitors || []) {
+
+  // Ensure competitors is an array before iterating
+  const competitorsList = Array.isArray(competitors) ? competitors : [];
+
+  for (const competitor of competitorsList) {
+    // Check competitor structure is valid
+    if (!competitor || typeof competitor !== 'object') {
+      console.error('Invalid competitor object:', competitor);
+      continue;
+    }
+
     const compName = competitor.name || '';
     if (compName) {
-      const mentions = findMentionsWithContext(pageData.mainContent, compName);
-      competitorAnalysis[compName] = mentions.length;
+      const mentions = findMentionsWithContext(pageData.mainContent || '', compName);
+      competitorAnalysis[compName] = mentions ? mentions.length : 0;
     }
   }
 
@@ -224,38 +355,72 @@ Please provide the following in JSON format:
   "analysis_notes": "Brief notes about the page"
 }`
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-4-turbo-preview',
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert content analyst. Provide analysis in valid JSON format.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_tokens: 1000,
-      response_format: { type: 'json_object' }
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4-turbo-preview',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert content analyst. Provide analysis in valid JSON format.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 1000,
+        response_format: { type: 'json_object' }
+      })
     })
-  })
 
-  if (!response.ok) {
-    throw new Error(`OpenAI API error: ${response.statusText}`)
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const analysis = JSON.parse(data.choices[0].message.content)
+    
+    return analysis
+  } catch (error) {
+    console.error('AI analysis error:', error)
+    return getDefaultAnalysis()
   }
+}
 
-  const data = await response.json()
-  const analysis = JSON.parse(data.choices[0].message.content)
-  
-  return analysis
+function getDefaultAnalysis() {
+  return {
+    content_type: "Unknown",
+    rock_paper_scissors: "Rock",
+    content_depth_score: 3,
+    sentiment_score: 0,
+    content_uniqueness: 3,
+    content_optimization_score: 3,
+    has_statistics: false,
+    has_quotes: false,
+    has_research: false,
+    analysis_score: 3,
+    citation_match_quality: 3,
+    topical_cluster: "General",
+    page_relevance_type: "partial",
+    page_intent_alignment: "moderate",
+    content_format: "unknown",
+    content_depth: "shallow",
+    brand_positioning: "absent",
+    competitor_presence: "none",
+    call_to_action_strength: "none",
+    content_recency: "undated",
+    eeat_signals: "weak",
+    user_experience_quality: "average",
+    content_structure: "linear",
+    analysis_notes: "Default analysis used due to crawl or AI error"
+  }
 }
 
 serve(async (req) => {
@@ -282,24 +447,39 @@ serve(async (req) => {
       throw new Error('citation_url is required')
     }
 
-    // Crawl the page
-    console.log(`Crawling ${citation_url}`)
-    const html = await crawlPage(citation_url)
+    let extractedData
     
-    // Extract basic data
-    const extractedData = extractFromHtml(html, citation_url)
+    try {
+      // Try to crawl the page with fallback options
+      console.log(`Crawling ${citation_url}`)
+      const html = await crawlPage(citation_url)
+      
+      // Extract basic data
+      extractedData = extractFromHtml(html, citation_url)
+    } catch (crawlError) {
+      console.error('Crawl failed, using fallback:', crawlError.message)
+      extractedData = createFallbackAnalysis(citation_url, crawlError.message)
+    }
     
-    // Analyze with AI
+    // Analyze with AI (will handle fallback if crawl failed)
     console.log('Analyzing content with AI')
     const aiAnalysis = await analyzeContentWithAI(extractedData, query_text, brand_name, competitors)
     
     // Determine if it's client or competitor domain
     const domain = new URL(citation_url).hostname
-    const isClientDomain = domain.includes(brand_domain)
+    const isClientDomain = brand_domain ? domain.includes(brand_domain) : false
     let isCompetitorDomain = false
-    
-    for (const competitor of competitors) {
-      if (domain.includes(competitor.domain || competitor.pattern)) {
+
+    // Ensure competitors is an array before processing
+    const competitorsList = Array.isArray(competitors) ? competitors : [];
+
+    for (const competitor of competitorsList) {
+      if (!competitor || typeof competitor !== 'object') {
+        continue;
+      }
+
+      const compDomain = competitor.domain || competitor.pattern || '';
+      if (compDomain && domain.includes(compDomain)) {
         isCompetitorDomain = true
         break
       }
@@ -327,12 +507,14 @@ serve(async (req) => {
       is_competitor_domain: isCompetitorDomain,
       mention_type: ['citation'],
       analysis_notes: aiAnalysis.analysis_notes,
+      crawl_status: extractedData.crawlError ? 'failed' : 'success',
+      crawl_error: extractedData.crawlError || null,
       
       technical_seo: {
         is_valid: true,
-        is_crawlable: true,
-        http_response_code: 200,
-        schema_markup_present: extractedData.schemaMarkupPresent,
+        is_crawlable: !extractedData.crawlError,
+        http_response_code: extractedData.crawlError ? 0 : 200,
+        schema_markup_present: extractedData.schemaMarkupPresent || false,
         schema_types: [],
         html_structure_score: 3,
         semantic_html_usage: extractedData.totalHeadings > 0,
@@ -342,7 +524,7 @@ serve(async (req) => {
         date_modified: null,
         cdn_usage: false,
         meta_description_present: !!extractedData.metaDescription,
-        aria_labels_present: extractedData.ariaLabelsPresent,
+        aria_labels_present: extractedData.ariaLabelsPresent || false,
         aria_labels_types: [],
         social_graphs_present: false
       },
@@ -367,23 +549,23 @@ serve(async (req) => {
       },
       
       on_page_seo: {
-        page_title: extractedData.pageTitle,
+        page_title: extractedData.pageTitle || '',
         content_type: aiAnalysis.content_type,
-        meta_description: extractedData.metaDescription,
-        word_count: extractedData.wordCount,
-        image_count: extractedData.imageCount,
-        video_present: extractedData.videoPresent,
-        has_table: extractedData.hasTable,
-        has_table_count: extractedData.tableCount,
-        has_unordered_list: extractedData.hasUnorderedList,
-        has_unordered_list_count: extractedData.unorderedListCount,
-        has_ordered_list: extractedData.hasOrderedList,
-        has_ordered_list_count: extractedData.orderedListCount,
-        internal_link_count: extractedData.internalLinkCount,
+        meta_description: extractedData.metaDescription || '',
+        word_count: extractedData.wordCount || 0,
+        image_count: extractedData.imageCount || 0,
+        video_present: extractedData.videoPresent || false,
+        has_table: extractedData.hasTable || false,
+        has_table_count: extractedData.tableCount || 0,
+        has_unordered_list: extractedData.hasUnorderedList || false,
+        has_unordered_list_count: extractedData.unorderedListCount || 0,
+        has_ordered_list: extractedData.hasOrderedList || false,
+        has_ordered_list_count: extractedData.orderedListCount || 0,
+        internal_link_count: extractedData.internalLinkCount || 0,
         folder_depth: citation_url.split('/').length - 3,
         authorship_clear: false,
-        heading_count: extractedData.totalHeadings,
-        heading_count_type: extractedData.headingCounts,
+        heading_count: extractedData.totalHeadings || 0,
+        heading_count_type: extractedData.headingCounts || {},
         keyword_match: [keyword]
       },
       

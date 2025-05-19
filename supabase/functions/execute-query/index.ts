@@ -401,17 +401,21 @@ async function analyzeCompetitorMentions(response: string, brandName: string, br
   // Implementation from existing code
   const competitorAnalysis = []
   const mentionedCompetitors = new Set<string>()
-  
+
+  // Ensure citations is an array before processing
+  const citationsList = Array.isArray(citations) ? citations : []
+
   // Check citations for competitor domains
-  for (const citation of citations) {
-    if (!citation.domain) continue
-    
+  for (const citation of citationsList) {
+    if (!citation || !citation.domain) continue
+
     const domain = citation.domain.toLowerCase()
-    
+
     // Check if it's a competitor domain
-    for (const comp of competitors || []) {
+    const competitorsList = Array.isArray(competitors) ? competitors : []
+    for (const comp of competitorsList) {
       if (!comp || !comp.domain) continue
-      
+
       const compDomain = comp.domain.toLowerCase()
       if (domain.includes(compDomain)) {
         mentionedCompetitors.add(comp.name)
@@ -421,9 +425,10 @@ async function analyzeCompetitorMentions(response: string, brandName: string, br
   
   // Check for competitor names in response text
   const responseLower = response.toLowerCase()
-  for (const comp of competitors || []) {
+  const competitorsList = Array.isArray(competitors) ? competitors : []
+  for (const comp of competitorsList) {
     if (!comp || !comp.name) continue
-    
+
     const namePattern = comp.name.toLowerCase()
     if (responseLower.includes(namePattern)) {
       mentionedCompetitors.add(comp.name)
@@ -436,9 +441,9 @@ async function analyzeCompetitorMentions(response: string, brandName: string, br
   
   // Check for brand domain in citations
   let brandInCitations = false
-  for (const citation of citations) {
-    if (!citation.domain) continue
-    
+  for (const citation of citationsList) {
+    if (!citation || !citation.domain) continue
+
     const domain = citation.domain.toLowerCase()
     if (brandDomain && domain.includes(brandDomain.toLowerCase())) {
       brandInCitations = true
