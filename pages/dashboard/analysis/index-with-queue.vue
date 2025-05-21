@@ -181,12 +181,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useSupabase } from '@/composables/useSupabase'
-import { useQueueAnalysis } from '@/composables/useQueueAnalysis'
-import QueueProgress from '@/components/analysis/QueueProgress.vue'
+import { useSupabaseClient, useSupabaseUser } from '#imports'
+import { useQueueAnalysis } from '~/composables/useQueueAnalysis'
+import QueueProgress from '~/components/analysis/QueueProgress.vue'
 
 const router = useRouter()
-const { supabase, user } = useSupabase()
+const supabase = useSupabaseClient()
+const user = useSupabaseUser()
 const { useQueue, toggleQueue, runAnalysisWithQueue } = useQueueAnalysis()
 
 // Data
