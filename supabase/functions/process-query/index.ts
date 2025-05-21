@@ -117,11 +117,10 @@ serve(async (req) => {
       console.log('Result data keys:', Object.keys(resultData))
       console.log('Has citations:', 'citations' in resultData)
       console.log('Citations type:', typeof resultData.citations)
+      console.log('Metadata received:', JSON.stringify(resultData.metadata, null, 2))
 
-      // Update query with response - FIXED: include more metadata
-      await serviceClient
-        .from('analysis_queries')
-        .update({
+      // Update query with response - using unique variable name
+      const metadataUpdate = {
           model_response: resultData.response_content || resultData.response,
           citation_count: Array.isArray(resultData.citations) ? resultData.citations.length : 0,
           brand_mentioned: resultData.brand_mention || false,
@@ -141,7 +140,13 @@ serve(async (req) => {
           brand_mention_type: resultData.metadata?.brand_mention_type || 'none',
           competitor_context: resultData.metadata?.competitor_names?.join(', ') || 'none',
           status: 'analyzing_citations'
-        })
+        }
+
+      console.log('Updating query with metadata:', metadataUpdate)
+
+      await serviceClient
+        .from('analysis_queries')
+        .update(metadataUpdate)
         .eq('id', queryRecord.id)
 
       // Process each citation
@@ -207,7 +212,7 @@ serve(async (req) => {
       
       // Update query as completed with associated pages
       console.log('Updating query status to completed')
-      const updateData = {
+      const completionUpdateData = {
         associated_pages: pageAnalyses,
         associated_pages_count: processedCitations,
         status: 'completed',
@@ -215,13 +220,13 @@ serve(async (req) => {
       }
       
       console.log('Update data:', {
-        ...updateData,
+        ...completionUpdateData,
         associated_pages: `[${pageAnalyses.length} pages]`
       })
-      
+
       await serviceClient
         .from('analysis_queries')
-        .update(updateData)
+        .update(completionUpdateData)
         .eq('id', queryRecord.id)
 
       // Update analysis run progress

@@ -29,6 +29,14 @@
           <p class="font-medium">{{ analysisRun.queries_completed }}/{{ analysisRun.queries_total }}</p>
         </div>
       </div>
+
+      <!-- Queue Progress Display -->
+      <div v-if="isQueueProcessing" class="mt-6">
+        <QueueProgress
+          :analysis-run-id="route.params.id"
+          @complete="refreshAnalysisData"
+        />
+      </div>
     </div>
     
     <!-- Loading State -->
@@ -41,7 +49,7 @@
     <div v-else-if="queries.length > 0" class="space-y-4">
       <h3 class="text-lg font-semibold mb-4">Query Results</h3>
       
-      <div v-for="query in queries" :key="query.id" 
+      <div v-for="query in queries" :key="query.id"
            class="bg-white p-6 rounded-lg shadow cursor-pointer hover:shadow-lg transition-shadow"
            @click="selectedQuery = query">
         <div class="flex justify-between items-start mb-2">
@@ -50,7 +58,7 @@
             {{ query.status }}
           </span>
         </div>
-        
+
         <div class="text-sm text-gray-600 mb-2">
           <span>Keyword: {{ query.query_keyword }}</span>
           <span class="mx-2">•</span>
@@ -58,18 +66,60 @@
           <span class="mx-2">•</span>
           <span>Platform: {{ query.data_source }}</span>
         </div>
-        
-        <div v-if="query.brand_mentioned || query.competitor_count > 0" class="mt-3 flex gap-3">
+
+        <!-- Brand and Competitor Metrics -->
+        <div class="mt-3 flex flex-wrap gap-2">
           <span v-if="query.brand_mentioned" class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
             Brand Mentioned
           </span>
           <span v-if="query.competitor_count > 0" class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
             {{ query.competitor_count }} Competitors
           </span>
+          <span v-if="query.brand_mention_count" class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+            {{ query.brand_mention_count }} Brand Mentions
+          </span>
+          <span v-if="query.sentiment_score" class="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded">
+            Sentiment: {{ formatSentiment(query.sentiment_score) }}
+          </span>
         </div>
-        
-        <div v-if="query.citation_count > 0" class="mt-3">
-          <p class="text-sm text-gray-600">{{ query.citation_count }} citations analyzed</p>
+
+        <!-- Analysis Metrics -->
+        <div class="mt-3 space-y-1">
+          <p v-if="query.citation_count > 0" class="text-sm text-gray-600">
+            {{ query.citation_count }} citations analyzed
+          </p>
+          <p v-if="query.query_category" class="text-sm text-gray-600">
+            Category: {{ query.query_category }} | Type: {{ query.query_type }}
+          </p>
+          <p v-if="query.funnel_stage" class="text-sm text-gray-600">
+            Funnel: {{ query.funnel_stage }} | Competition: {{ query.query_competition }}
+          </p>
+          <p v-if="query.brand_mention_type && query.brand_mention_type !== 'none'" class="text-sm font-medium text-green-700">
+            Brand Mention Type: {{ query.brand_mention_type }}
+          </p>
+        </div>
+
+        <!-- Page Analysis Summary -->
+        <div v-if="query.page_analyses && query.page_analyses.length > 0" class="mt-4 border-t pt-3">
+          <p class="text-sm font-medium text-gray-700 mb-2">Top Citations ({{ query.page_analyses.length }}):</p>
+          <div class="text-xs text-gray-600 space-y-1 max-h-20 overflow-y-auto">
+            <div v-for="page in query.page_analyses.slice(0, 3)" :key="page.id" class="flex items-start">
+              <span v-if="page.brand_mentioned" class="text-green-600 mr-1">✓</span>
+              <span v-else class="text-gray-400 mr-1">○</span>
+              <span class="truncate" :title="page.page_title || page.citation_url">
+                {{ truncateText(page.page_title || page.citation_url, 60) }}
+              </span>
+            </div>
+            <div v-if="query.page_analyses.length > 3" class="text-blue-600">
+              + {{ query.page_analyses.length - 3 }} more citations
+            </div>
+          </div>
+        </div>
+
+        <!-- Analysis Metadata -->
+        <div class="mt-3 border-t pt-2 text-xs text-gray-500 flex justify-between">
+          <div>ID: {{ truncateText(query.id, 8) }}</div>
+          <div>Created: {{ formatDate(query.created_at) }}</div>
         </div>
       </div>
     </div>
@@ -98,19 +148,109 @@
             <div>
               <h4 class="font-medium mb-2">Query</h4>
               <p class="text-gray-700">{{ selectedQuery.query_text }}</p>
+
+              <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Keyword</p>
+                  <p class="font-medium">{{ selectedQuery.query_keyword || 'N/A' }}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Intent</p>
+                  <p class="font-medium">{{ selectedQuery.query_intent || 'N/A' }}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Platform</p>
+                  <p class="font-medium">{{ selectedQuery.data_source || 'N/A' }}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Status</p>
+                  <p class="font-medium capitalize">{{ selectedQuery.status || 'N/A' }}</p>
+                </div>
+              </div>
             </div>
-            
+
+            <!-- Query Analysis Metrics -->
+            <div>
+              <h4 class="font-medium mb-2">Analysis Metrics</h4>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Citations</p>
+                  <p class="font-medium">{{ selectedQuery.citation_count || 0 }}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Brand Mentions</p>
+                  <p class="font-medium">{{ selectedQuery.brand_mention_count || 0 }}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Competitors</p>
+                  <p class="font-medium">{{ selectedQuery.competitor_count || 0 }}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Sentiment</p>
+                  <p class="font-medium">{{ formatSentiment(selectedQuery.sentiment_score) }}</p>
+                </div>
+
+                <div v-if="selectedQuery.query_category" class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Category</p>
+                  <p class="font-medium">{{ selectedQuery.query_category }}</p>
+                </div>
+                <div v-if="selectedQuery.query_type" class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Type</p>
+                  <p class="font-medium">{{ selectedQuery.query_type }}</p>
+                </div>
+                <div v-if="selectedQuery.funnel_stage" class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Funnel</p>
+                  <p class="font-medium">{{ selectedQuery.funnel_stage }}</p>
+                </div>
+                <div v-if="selectedQuery.query_competition" class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Competition</p>
+                  <p class="font-medium">{{ selectedQuery.query_competition }}</p>
+                </div>
+              </div>
+            </div>
+
             <div>
               <h4 class="font-medium mb-2">Response</h4>
-              <div class="bg-gray-50 p-4 rounded max-h-64 overflow-y-auto">
-                <p class="whitespace-pre-wrap">{{ selectedQuery.model_response }}</p>
+              <div class="bg-gray-50 p-4 rounded max-h-96 overflow-y-auto">
+                <p class="whitespace-pre-wrap text-sm">{{ selectedQuery.model_response }}</p>
+              </div>
+            </div>
+
+            <!-- Processing Data -->
+            <div>
+              <h4 class="font-medium mb-2">Processing Details</h4>
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Created</p>
+                  <p class="font-medium">{{ formatDate(selectedQuery.created_at) }}</p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Processing Time</p>
+                  <p class="font-medium">
+                    {{ selectedQuery.processing_time ? (selectedQuery.processing_time + 'ms') : 'N/A' }}
+                  </p>
+                </div>
+                <div class="bg-gray-50 p-3 rounded">
+                  <p class="text-gray-500 text-xs">Query ID</p>
+                  <p class="font-medium text-xs truncate" :title="selectedQuery.id">{{ selectedQuery.id }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 class="font-medium mb-2">Raw Query Data</h4>
+              <div class="bg-gray-50 p-4 rounded overflow-x-auto">
+                <pre class="text-xs">{{ JSON.stringify(selectedQuery, null, 2) }}</pre>
               </div>
             </div>
             
-            <div v-if="selectedQuery.page_analyses && selectedQuery.page_analyses.length > 0">
+            <div v-if="(selectedQuery.page_analyses && selectedQuery.page_analyses.length > 0) || selectedQuery.associated_pages">
               <h4 class="font-medium mb-2">Analyzed Pages</h4>
-              <div class="space-y-2">
-                <div v-for="page in selectedQuery.page_analyses" 
+
+              <!-- From page_analyses table -->
+              <div v-if="selectedQuery.page_analyses && selectedQuery.page_analyses.length > 0" class="space-y-2 mb-4">
+                <p class="text-sm text-gray-600">From page_analyses table:</p>
+                <div v-for="page in selectedQuery.page_analyses"
                      :key="page.id"
                      class="bg-gray-50 p-3 rounded">
                   <a :href="page.citation_url" target="_blank" class="text-blue-600 hover:text-blue-800">
@@ -120,6 +260,30 @@
                     <span v-if="page.brand_mentioned" class="mr-3">✓ Brand mentioned</span>
                     <span v-if="page.relevance_score">Relevance: {{ (page.relevance_score * 100).toFixed(0) }}%</span>
                   </div>
+                  <details class="mt-2">
+                    <summary class="cursor-pointer text-sm text-gray-500">View raw data</summary>
+                    <pre class="text-xs mt-2 bg-white p-2 rounded">{{ JSON.stringify(page, null, 2) }}</pre>
+                  </details>
+                </div>
+              </div>
+
+              <!-- From associated_pages column -->
+              <div v-if="selectedQuery.associated_pages" class="space-y-2">
+                <p class="text-sm text-gray-600">From associated_pages column:</p>
+                <div v-for="(page, index) in selectedQuery.associated_pages"
+                     :key="`ap-${index}`"
+                     class="bg-blue-50 p-3 rounded">
+                  <a :href="page.citation_url || page.url" target="_blank" class="text-blue-600 hover:text-blue-800">
+                    {{ page.page_title || page.title || page.citation_url || page.url }}
+                  </a>
+                  <div class="text-sm text-gray-600 mt-1">
+                    <span v-if="page.brand_mentioned" class="mr-3">✓ Brand mentioned</span>
+                    <span v-if="page.relevance_score">Relevance: {{ (page.relevance_score * 100).toFixed(0) }}%</span>
+                  </div>
+                  <details class="mt-2">
+                    <summary class="cursor-pointer text-sm text-gray-500">View raw data</summary>
+                    <pre class="text-xs mt-2 bg-white p-2 rounded">{{ JSON.stringify(page, null, 2) }}</pre>
+                  </details>
                 </div>
               </div>
             </div>
@@ -133,6 +297,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import QueueProgress from '~/components/analysis/QueueProgress.vue'
 
 // Ensure dashboard layout is used
 definePageMeta({
@@ -153,6 +318,14 @@ const client = ref(null)
 // Computed
 const clientName = computed(() => {
   return client.value?.name || 'Loading...'
+})
+
+const isQueueProcessing = computed(() => {
+  // Check if analysis is using queue and is still processing
+  return (
+    analysisRun.value?.processing_method === 'queue' &&
+    (analysisRun.value?.status === 'running' || analysisRun.value?.status === 'pending')
+  )
 })
 
 // Methods
@@ -182,7 +355,8 @@ const fetchAnalysisData = async () => {
       .from('analysis_queries')
       .select(`
         *,
-        page_analyses(*)
+        page_analyses(*),
+        associated_pages
       `)
       .eq('analysis_run_id', route.params.id)
       .order('created_at')
@@ -205,6 +379,39 @@ const getStatusClass = (status) => {
     'pending': 'bg-gray-100 text-gray-800'
   }
   return classes[status] || classes.pending
+}
+
+// Format sentiment score
+const formatSentiment = (score) => {
+  if (score === undefined || score === null) return 'N/A'
+
+  const numScore = parseFloat(score)
+  if (isNaN(numScore)) return 'N/A'
+
+  // Format to two decimal places with + sign for positive values
+  return numScore > 0 ? `+${numScore.toFixed(2)}` : numScore.toFixed(2)
+}
+
+// Truncate text with ellipsis
+const truncateText = (text, maxLength) => {
+  if (!text) return ''
+  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
+}
+
+// Format date
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// Refresh analysis data after queue completion
+const refreshAnalysisData = () => {
+  console.log('Refreshing analysis data after queue completion')
+  // Allow a small delay before fetching to ensure all database writes have completed
+  setTimeout(() => {
+    fetchAnalysisData()
+  }, 1000)
 }
 
 onMounted(() => {

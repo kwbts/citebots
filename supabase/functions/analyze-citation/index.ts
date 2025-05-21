@@ -1,10 +1,17 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// CORS headers for browser access
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
+
+// Standard response headers for all responses (includes CORS)
+const responseHeaders = { 
+  ...corsHeaders, 
+  'Content-Type': 'application/json' 
+};
 
 interface AnalyzeCitationRequest {
   query_id: string
@@ -48,27 +55,86 @@ function findMentionsWithContext(content: string, searchTerm: string, contextLen
   return mentions;
 }
 
-// Enhanced crawlPage function with fallback options
-async function crawlPage(url: string, attempt: number = 1): Promise<string> {
+// Domain knowledge store to remember which domains need premium options
+const knownDifficultDomains = new Map<string, number>();
+
+// Function to determine if a domain likely needs premium options based on past experience
+function needsPremiumOptions(url: string): number {
+  try {
+    const domain = new URL(url).hostname;
+    return knownDifficultDomains.get(domain) || 1; // Default to basic tier (1)
+  } catch {
+    return 1; // Default to basic tier
+  }
+}
+
+// Function to remember if a domain needed premium options
+function rememberDomainDifficulty(url: string, requiredTier: number) {
+  try {
+    const domain = new URL(url).hostname;
+
+    // Only update if the new tier is higher than what we knew before
+    const currentTier = knownDifficultDomains.get(domain) || 0;
+    if (requiredTier > currentTier) {
+      console.log(`Remembering that domain ${domain} requires tier ${requiredTier}`);
+      knownDifficultDomains.set(domain, requiredTier);
+    }
+  } catch (e) {
+    console.error(`Error remembering domain difficulty: ${e.message}`);
+  }
+}
+
+// List of known domains that typically require premium handling
+const KNOWN_PROBLEM_DOMAINS = [
+  'g2.com',
+  'capterra.com',
+  'softwareadvice.com',
+  'trustradius.com',
+  'techradar.com',
+  'pcmag.com',
+  'gartner.com',
+  'getapp.com',
+  'sourceforge.net',
+  'cnet.com',
+  'trustpilot.com'
+];
+
+// Initialize known difficult domains with software review sites
+KNOWN_PROBLEM_DOMAINS.forEach(domain => {
+  knownDifficultDomains.set(domain, 3); // Assume premium proxy needed (tier 3)
+});
+
+// Enhanced crawlPage function with fallback options and domain knowledge
+async function crawlPage(url: string, attempt: number = 0): Promise<string> {
   const apiKey = Deno.env.get('SCRAPINGBEE_API_KEY')
   if (!apiKey) {
     console.error('ScrapingBee API key not found in environment')
     throw new Error('ScrapingBee API key not configured')
   }
 
-  console.log(`Attempting to crawl URL: ${url} (attempt ${attempt})`)
-  
+  // If this is the first attempt, check if we already know this domain needs premium options
+  if (attempt === 0) {
+    attempt = needsPremiumOptions(url);
+    console.log(`Starting with tier ${attempt} for URL: ${url} (based on domain knowledge)`);
+  }
+
+  // Cap at attempt 4 (stealth proxy is the highest tier)
+  attempt = Math.min(attempt, 4);
+
+  console.log(`Attempting to crawl URL: ${url} (tier ${attempt})`);
+
   // Validate URL
   try {
-    new URL(url)
+    new URL(url);
   } catch (e) {
-    console.error(`Invalid URL provided: ${url}`)
-    throw new Error(`Invalid URL format: ${url}`)
+    console.error(`Invalid URL provided: ${url}`);
+    throw new Error(`Invalid URL format: ${url}`);
   }
 
   // Configure parameters based on attempt number
-  let params: URLSearchParams
-  
+  let params: URLSearchParams;
+  let creditCost = 1; // Track credit cost for analytics
+
   switch(attempt) {
     case 1:
       // First attempt: Basic crawl (1 credit)
@@ -84,9 +150,10 @@ async function crawlPage(url: string, attempt: number = 1): Promise<string> {
         block_resources: 'false',
         wait: '0',
         timeout: '30000'
-      })
-      break
-      
+      });
+      creditCost = 1;
+      break;
+
     case 2:
       // Second attempt: JavaScript rendering (5 credits)
       params = new URLSearchParams({
@@ -100,9 +167,10 @@ async function crawlPage(url: string, attempt: number = 1): Promise<string> {
         block_ads: 'true',
         wait: '2000',
         timeout: '30000'
-      })
-      break
-      
+      });
+      creditCost = 5;
+      break;
+
     case 3:
       // Third attempt: Premium proxy (10-25 credits)
       params = new URLSearchParams({
@@ -116,9 +184,10 @@ async function crawlPage(url: string, attempt: number = 1): Promise<string> {
         block_ads: 'true',
         wait: '2000',
         timeout: '30000'
-      })
-      break
-      
+      });
+      creditCost = 25; // Assume worst case
+      break;
+
     default:
       // Final attempt: Stealth proxy (75 credits)
       params = new URLSearchParams({
@@ -132,64 +201,97 @@ async function crawlPage(url: string, attempt: number = 1): Promise<string> {
         block_ads: 'true',
         wait: '2000',
         timeout: '30000'
-      })
+      });
+      creditCost = 75;
   }
 
-  console.log(`Making request to ScrapingBee API (attempt ${attempt})...`)
-  
+  console.log(`Making request to ScrapingBee API (tier ${attempt}, ~${creditCost} credits)...`);
+
   try {
-    const response = await fetch(`https://app.scrapingbee.com/api/v1/?${params}`)
-    
-    console.log(`ScrapingBee response status: ${response.status}`)
-    
+    const response = await fetch(`https://app.scrapingbee.com/api/v1/?${params}`);
+
+    console.log(`ScrapingBee response status: ${response.status}`);
+
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error(`ScrapingBee error response: ${errorText}`)
-      
+      const errorText = await response.text();
+      console.error(`ScrapingBee error response: ${errorText}`);
+
       // Try to parse error JSON
-      let errorData
+      let errorData;
       try {
-        errorData = JSON.parse(errorText)
+        errorData = JSON.parse(errorText);
       } catch {
-        errorData = { error: errorText }
+        errorData = { error: errorText };
       }
-      
+
       // Handle specific error cases
-      if (response.status === 403 || errorData.reason === 'Server responded with 403') {
+      if (response.status === 403 ||
+          (errorData.reason && errorData.reason.includes('403')) ||
+          (errorData.error && errorData.error.includes('Server responded with 403'))) {
+        // Remember that this domain had issues
+        rememberDomainDifficulty(url, attempt + 1);
+
         if (attempt < 4) {
-          console.log(`403 error, trying with higher tier (attempt ${attempt + 1})`)
-          return crawlPage(url, attempt + 1)
+          console.log(`403 error, trying with higher tier (tier ${attempt + 1})`);
+          return crawlPage(url, attempt + 1);
         }
       } else if (response.status === 401) {
-        throw new Error('ScrapingBee authentication failed - check API key')
+        throw new Error('ScrapingBee authentication failed - check API key');
       } else if (response.status === 429) {
-        throw new Error('ScrapingBee rate limit exceeded')
-      } else if (response.status === 500) {
+        throw new Error('ScrapingBee rate limit exceeded');
+      } else if (response.status === 500 ||
+                (errorData.error && errorData.error.includes('try again'))) {
+        // For 500 errors, also try with higher tier
+        rememberDomainDifficulty(url, attempt + 1);
+
         if (attempt < 4) {
-          console.log(`Internal server error, trying with higher tier (attempt ${attempt + 1})`)
-          return crawlPage(url, attempt + 1)
+          console.log(`Server error, trying with higher tier (tier ${attempt + 1})`);
+          return crawlPage(url, attempt + 1);
+        }
+      } else if (errorData.error &&
+                (errorData.error.includes('premium_proxy') ||
+                 errorData.error.includes('render_js'))) {
+        // The error message suggests using premium or js rendering
+        rememberDomainDifficulty(url, attempt + 1);
+
+        if (attempt < 4) {
+          console.log(`API suggests higher tier needed, trying tier ${attempt + 1}`);
+          return crawlPage(url, attempt + 1);
         }
       }
-      
-      throw new Error(`ScrapingBee error (${response.status}): ${response.statusText}`)
+
+      throw new Error(`ScrapingBee error (${response.status}): ${errorData.error || response.statusText}`);
     }
 
-    const html = await response.text()
-    console.log(`Successfully crawled page: ${url} (received ${html.length} characters)`)
-    return html
-    
-  } catch (error) {
-    if (error.message.includes('rate limit')) {
-      throw error // Don't retry rate limits
+    const html = await response.text();
+    const htmlLength = html ? html.length : 0;
+
+    if (htmlLength < 1000 && attempt < 4) {
+      // If we got a very small response, it might be a soft block or error page
+      console.log(`Warning: Very small HTML response (${htmlLength} chars), might be blocked. Trying higher tier.`);
+      rememberDomainDifficulty(url, attempt + 1);
+      return crawlPage(url, attempt + 1);
     }
-    
+
+    console.log(`Successfully crawled page: ${url} (received ${htmlLength} characters) using tier ${attempt}`);
+
+    // Remember that this tier worked successfully
+    rememberDomainDifficulty(url, attempt);
+
+    return html;
+
+  } catch (error) {
+    if (error.message && error.message.includes('rate limit')) {
+      throw error; // Don't retry rate limits
+    }
+
     // For other errors, try next tier if not at max
     if (attempt < 4) {
-      console.log(`Error on attempt ${attempt}, trying with higher tier: ${error.message}`)
-      return crawlPage(url, attempt + 1)
+      console.log(`Error on tier ${attempt}, trying higher tier: ${error.message}`);
+      return crawlPage(url, attempt + 1);
     }
-    
-    throw error
+
+    throw error;
   }
 }
 
@@ -423,55 +525,83 @@ function getDefaultAnalysis() {
   }
 }
 
+// Helper function to check if a column exists in a table
+async function columnExists(serviceClient: any, tableName: string, columnName: string): Promise<boolean> {
+  try {
+    const { data, error } = await serviceClient
+      .from('information_schema.columns')
+      .select('column_name')
+      .eq('table_schema', 'public')
+      .eq('table_name', tableName)
+      .eq('column_name', columnName)
+      .single();
+
+    return !(error || !data);
+  } catch (error) {
+    console.warn(`Error checking for ${columnName} column:`, error);
+    return false;
+  }
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests - respond immediately
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders
+    });
   }
 
   try {
-    const body = await req.json() as AnalyzeCitationRequest
-    console.log('Received analyze-citation request:', JSON.stringify(body, null, 2))
+    // Parse and validate request body
+    const body = await req.json().catch(err => {
+      console.error('Error parsing request JSON:', err);
+      throw new Error('Invalid JSON in request body');
+    });
     
-    const { 
-      query_id, 
-      citation_url, 
-      citation_position,
-      query_text,
-      keyword,
-      brand_name,
-      brand_domain,
-      competitors
-    } = body
-
-    if (!citation_url) {
-      throw new Error('citation_url is required')
+    // Type assertion with validation
+    const request = body as AnalyzeCitationRequest;
+    console.log('Received analyze-citation request:', JSON.stringify(body, null, 2));
+    
+    // Validate required fields
+    if (!request.citation_url) {
+      throw new Error('citation_url is required');
+    }
+    
+    if (!request.query_id) {
+      throw new Error('query_id is required');
     }
 
-    let extractedData
+    let extractedData;
     
     try {
       // Try to crawl the page with fallback options
-      console.log(`Crawling ${citation_url}`)
-      const html = await crawlPage(citation_url)
+      console.log(`Crawling ${request.citation_url}`);
+      const html = await crawlPage(request.citation_url);
       
       // Extract basic data
-      extractedData = extractFromHtml(html, citation_url)
+      extractedData = extractFromHtml(html, request.citation_url);
     } catch (crawlError) {
-      console.error('Crawl failed, using fallback:', crawlError.message)
-      extractedData = createFallbackAnalysis(citation_url, crawlError.message)
+      console.error('Crawl failed, using fallback:', crawlError.message);
+      extractedData = createFallbackAnalysis(request.citation_url, crawlError.message);
     }
     
     // Analyze with AI (will handle fallback if crawl failed)
-    console.log('Analyzing content with AI')
-    const aiAnalysis = await analyzeContentWithAI(extractedData, query_text, brand_name, competitors)
+    console.log('Analyzing content with AI');
+    const aiAnalysis = await analyzeContentWithAI(
+      extractedData, 
+      request.query_text || '', 
+      request.brand_name || '', 
+      request.competitors || []
+    );
     
     // Determine if it's client or competitor domain
-    const domain = new URL(citation_url).hostname
-    const isClientDomain = brand_domain ? domain.includes(brand_domain) : false
-    let isCompetitorDomain = false
+    const domain = new URL(request.citation_url).hostname;
+    const isClientDomain = request.brand_domain ? domain.includes(request.brand_domain) : false;
+    let isCompetitorDomain = false;
 
     // Ensure competitors is an array before processing
-    const competitorsList = Array.isArray(competitors) ? competitors : [];
+    const competitorsList = Array.isArray(request.competitors) ? request.competitors : [];
 
     for (const competitor of competitorsList) {
       if (!competitor || typeof competitor !== 'object') {
@@ -480,8 +610,8 @@ serve(async (req) => {
 
       const compDomain = competitor.domain || competitor.pattern || '';
       if (compDomain && domain.includes(compDomain)) {
-        isCompetitorDomain = true
-        break
+        isCompetitorDomain = true;
+        break;
       }
     }
 
@@ -494,21 +624,23 @@ serve(async (req) => {
           persistSession: false
         }
       }
-    )
+    );
 
-    // Create page analysis record
-    const pageAnalysis = {
-      query_id,
+    // Check for required columns in table
+    const hasCrawlErrorColumn = await columnExists(serviceClient, 'page_analyses', 'crawl_error');
+    const hasCrawlStatusColumn = await columnExists(serviceClient, 'page_analyses', 'crawl_status');
+
+    // Create base page analysis record
+    const basePageAnalysis = {
+      query_id: request.query_id,
       page_analysis_id: `${domain.replace(/\./g, '_')}_${Date.now()}`,
-      citation_url,
-      citation_position,
+      citation_url: request.citation_url,
+      citation_position: request.citation_position || 0,
       domain_name: domain,
       is_client_domain: isClientDomain,
       is_competitor_domain: isCompetitorDomain,
       mention_type: ['citation'],
       analysis_notes: aiAnalysis.analysis_notes,
-      crawl_status: extractedData.crawlError ? 'failed' : 'success',
-      crawl_error: extractedData.crawlError || null,
       
       technical_seo: {
         is_valid: true,
@@ -562,11 +694,11 @@ serve(async (req) => {
         has_ordered_list: extractedData.hasOrderedList || false,
         has_ordered_list_count: extractedData.orderedListCount || 0,
         internal_link_count: extractedData.internalLinkCount || 0,
-        folder_depth: citation_url.split('/').length - 3,
+        folder_depth: request.citation_url.split('/').length - 3,
         authorship_clear: false,
         heading_count: extractedData.totalHeadings || 0,
         heading_count_type: extractedData.headingCounts || {},
-        keyword_match: [keyword]
+        keyword_match: [request.keyword].filter(Boolean)
       },
       
       content_quality: {
@@ -600,42 +732,51 @@ serve(async (req) => {
         user_experience_quality: aiAnalysis.user_experience_quality,
         content_structure: aiAnalysis.content_structure
       }
-    }
+    };
+
+    // Add optional fields based on column existence
+    const pageAnalysis = {
+      ...basePageAnalysis,
+      ...(hasCrawlErrorColumn && extractedData.crawlError ? { crawl_error: extractedData.crawlError } : {}),
+      ...(hasCrawlStatusColumn ? { crawl_status: extractedData.crawlError ? 'failed' : 'success' } : {})
+    };
 
     // Insert into database
     const { data, error } = await serviceClient
       .from('page_analyses')
       .insert(pageAnalysis)
       .select()
-      .single()
+      .single();
 
     if (error) {
-      throw new Error(`Database error: ${error.message}`)
+      throw new Error(`Database error: ${error.message}`);
     }
 
+    // Return success
     return new Response(
       JSON.stringify({
         success: true,
         page_analysis: data
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: responseHeaders,
         status: 200
       }
-    )
+    );
 
   } catch (error) {
-    console.error('Citation analysis error:', error)
+    console.error('Citation analysis error:', error);
     
+    // Always use the same response headers for errors to ensure CORS headers are sent
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message
+        error: error.message || String(error)
       }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: responseHeaders,
         status: 400
       }
-    )
+    );
   }
-})
+});

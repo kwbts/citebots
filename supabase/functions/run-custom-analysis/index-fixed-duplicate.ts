@@ -199,16 +199,19 @@ serve(async (req) => {
       // Queue-based processing - add all queries to the queue
       console.log(`Adding ${selectedQueries.length} queries to queue for processing`);
       
+      // Use a single analysis run ID for all queries to prevent duplicates
+      const analysisRunId = analysisRun.id;
+      
       for (const query of selectedQueries) {
         try {
           // Handle queue differently for 'both' platform
           if (platform === 'both') {
-            // Queue one per platform
-            await queueQuery(analysisRun.id, query, 'chatgpt', client, formattedCompetitors, serviceClient);
-            await queueQuery(analysisRun.id, query, 'perplexity', client, formattedCompetitors, serviceClient);
+            // Queue one per platform but using the same analysis run ID
+            await queueQuery(analysisRunId, query, 'chatgpt', client, formattedCompetitors, serviceClient);
+            await queueQuery(analysisRunId, query, 'perplexity', client, formattedCompetitors, serviceClient);
           } else {
             // Queue for the specified platform
-            await queueQuery(analysisRun.id, query, platform, client, formattedCompetitors, serviceClient);
+            await queueQuery(analysisRunId, query, platform, client, formattedCompetitors, serviceClient);
           }
         } catch (error) {
           console.error(`Error queueing query "${query.query_text}":`, error);
@@ -223,18 +226,53 @@ serve(async (req) => {
         .eq('id', analysisRun.id);
       
       // Trigger queue worker to start processing
+      // Trigger multiple workers in parallel to process more items faster
       try {
-        await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/process-queue-worker`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
-          },
-          body: JSON.stringify({ batch_size: 5 })
-        });
-        console.log('Queue worker triggered');
+        // Trigger 3 workers in parallel with larger batch sizes
+        const workerPromises = [];
+        for (let i = 0; i < 3; i++) {
+          workerPromises.push(
+            fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/process-queue-worker`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+              },
+              body: JSON.stringify({
+                batch_size: 10,  // Increased batch size for faster processing
+                max_runtime: 25000 // Maximum allowed runtime in milliseconds
+              })
+            })
+          );
+        }
+
+        // Wait for all workers to be triggered
+        await Promise.all(workerPromises);
+        console.log('Multiple queue workers triggered in parallel');
+
+        // Schedule a follow-up trigger after a delay to ensure all items are processed
+        // This is a fire-and-forget operation that ensures queued items don't get stuck
+        setTimeout(async () => {
+          try {
+            await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/process-queue-worker`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+              },
+              body: JSON.stringify({
+                batch_size: 20,  // Use a larger batch size for the follow-up
+                max_runtime: 25000
+              })
+            });
+            console.log('Scheduled follow-up worker executed');
+          } catch (error) {
+            console.error('Follow-up worker scheduling failed:', error);
+            // Non-critical error, don't block
+          }
+        }, 20000); // Wait 20 seconds before firing follow-up
       } catch (workerError) {
-        console.error('Failed to trigger queue worker:', workerError);
+        console.error('Failed to trigger queue workers:', workerError);
         // Non-critical error, don't throw
       }
       
@@ -391,26 +429,29 @@ async function processQuery(
   console.log(`Processing query: "${queryText}" for ${platform}`);
   
   // Call the process-query function
-  const processResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/process-query`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
-    },
-    body: JSON.stringify({
-      analysis_run_id: analysisRunId,
-      query_text: queryText,
-      keyword: keyword,
-      query_intent: intent,
-      platform,
-      client: {
-        id: client.id,
-        name: client.name,
-        domain: client.domain,
-        competitors: competitors
-      }
-    })
-  });
+  const processResponse = await fetch(
+    `${Deno.env.get('SUPABASE_URL')}/functions/v1/process-query`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+      },
+      body: JSON.stringify({
+        analysis_run_id: analysisRunId,
+        query_text: queryText,
+        keyword: keyword,
+        query_intent: intent,
+        platform,
+        client: {
+          id: client.id,
+          name: client.name,
+          domain: client.domain,
+          competitors: competitors
+        }
+      })
+    }
+  );
   
   try {
     if (!processResponse.ok) {

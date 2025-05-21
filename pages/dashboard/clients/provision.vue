@@ -474,12 +474,16 @@ const handleSubmit = async () => {
   
   isSubmitting.value = true
   try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser()
+
     // Create the client
     const { data: client, error: clientError } = await supabase
       .from('clients')
       .insert({
         name: form.value.brandName,
         domain: form.value.domain,
+        created_by: user?.id, // Explicitly set the created_by field
         industry_primary: form.value.industryPrimary,
         industry_secondary: form.value.industrySecondary,
         sub_industry: form.value.subIndustry,

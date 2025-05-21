@@ -1,6 +1,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// Generate queries with only two intent types:
+// 1. recommendation_request - Seeking advice or recommendations
+// 2. comparison_question - Comparing options or alternatives
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -10,7 +14,7 @@ const corsHeaders = {
 interface GenerateQueriesRequest {
   client_id: string
   keywords: string[]
-  count?: number
+  count?: number // Number of queries per intent type (default: 5)
 }
 
 interface ClientInfo {
@@ -62,7 +66,6 @@ Guidelines:
 6. Consider the search intent: ${intent}
 
 Query Intent Types:
-- direct_experience: Questions about using or experiencing the product/service
 - recommendation_request: Seeking advice or recommendations
 - comparison_question: Comparing options or alternatives
 
@@ -176,7 +179,7 @@ serve(async (req) => {
 
     // Generate queries for each keyword and intent combination
     const allQueries = []
-    const intents = ['direct_experience', 'recommendation_request', 'comparison_question']
+    const intents = ['recommendation_request', 'comparison_question']
 
     console.log('Starting query generation for keywords:', keywords)
 

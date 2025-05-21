@@ -83,7 +83,7 @@
           >
             Back
           </button>
-          
+
           <div class="space-x-4">
             <button
               @click="regenerateQueries"
@@ -91,6 +91,20 @@
             >
               Regenerate Queries
             </button>
+
+            <!-- Queue Toggle -->
+            <div class="inline-flex items-center mr-4">
+              <input
+                type="checkbox"
+                id="use-queue"
+                v-model="useQueueProcessing"
+                class="h-4 w-4 text-citebots-orange rounded focus:ring-citebots-orange"
+              />
+              <label for="use-queue" class="ml-2 text-sm text-gray-700">
+                Use Queue Processing
+              </label>
+            </div>
+
             <button
               @click="runAnalysis"
               :disabled="selectedCount === 0"
@@ -113,12 +127,22 @@
         </button>
       </div>
     </div>
+
+    <!-- Queue Progress UI -->
+    <QueueProgress
+      v-if="showProgressUI && analysisRunId"
+      :analysis-run-id="analysisRunId"
+      @complete="handleQueueComplete"
+      class="mt-8"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useQueueAnalysis } from '~/composables/useQueueAnalysis'
+import QueueProgress from '~/components/analysis/QueueProgress.vue'
 
 // Ensure this page uses the dashboard layout
 definePageMeta({
@@ -128,8 +152,17 @@ definePageMeta({
 
 const router = useRouter()
 const route = useRoute()
-const client = useSupabaseClient()
+const supabase = useSupabaseClient()
 const user = useSupabaseUser()
+
+// Get queue analysis composable
+const {
+  useQueue,
+  queueEnabled,
+  toggleQueue,
+  runAnalysisWithQueue,
+  initializeQueueFeature
+} = useQueueAnalysis()
 
 // Query parameters
 const clientId = ref('')
@@ -141,6 +174,9 @@ const loading = ref(false)
 const loadingMessage = ref('Generating natural language queries...')
 const error = ref('')
 const queries = ref([])
+const useQueueProcessing = ref(false)
+const analysisRunId = ref('')
+const showProgressUI = ref(false)
 
 // Computed
 const selectedCount = computed(() => {
@@ -177,34 +213,36 @@ const generateQueries = async () => {
   loading.value = true
   loadingMessage.value = 'Generating natural language queries...'
   error.value = ''
-  
+
   try {
     console.log('Generating queries for:', { clientId: clientId.value, keywords: keywords.value })
-    
-    const { data, error: generateError } = await client.functions.invoke('generate-queries', {
+
+    const { data, error: generateError } = await supabase.functions.invoke('generate-queries', {
       body: {
         client_id: clientId.value,
         keywords: keywords.value,
         count: 5 // Generate 5 queries per keyword/intent combination
       }
     })
-    
+
     if (generateError) throw generateError
-    
+
     console.log('Generate queries response:', data)
-    
+
     if (data?.success && data.queries) {
       queries.value = data.queries.map(q => ({
         ...q,
         selected: true // Select all by default
       }))
+
+      // Don't automatically run analysis - let the user select and review queries
+      loading.value = false;
     } else {
       throw new Error(data?.error || 'Failed to generate queries')
     }
   } catch (err) {
     console.error('Error generating queries:', err)
     error.value = err.message || 'Failed to generate queries'
-  } finally {
     loading.value = false
   }
 }
@@ -215,46 +253,59 @@ const regenerateQueries = async () => {
 
 const runAnalysis = async () => {
   const selectedQueries = queries.value.filter(q => q.selected)
-  
+
   if (selectedQueries.length === 0) {
     error.value = 'Please select at least one query'
     return
   }
-  
+
   loading.value = true
   loadingMessage.value = 'Starting analysis...'
   error.value = ''
-  
+
   try {
     console.log('Running analysis with:', {
       client_id: clientId.value,
       platform: selectedPlatform.value,
-      queries: selectedQueries.length
+      queries: selectedQueries.length,
+      useQueue: useQueueProcessing.value
     })
-    
-    // Call run-custom-analysis with selected queries
-    const { data, error: analysisError } = await client.functions.invoke('run-custom-analysis', {
-      body: {
-        client_id: clientId.value,
-        platform: selectedPlatform.value,
-        queries: selectedQueries
+
+    // Save queue preference
+    toggleQueue(useQueueProcessing.value)
+
+    // Use the queue-enabled analysis function
+    const result = await runAnalysisWithQueue({
+      client_id: clientId.value,
+      platform: selectedPlatform.value,
+      queries: selectedQueries
+    })
+
+    console.log('Run analysis response:', result)
+
+    if (result.success) {
+      // Check if we have an analysis_run or analysis_run_id
+      const runId = result.analysis_run?.id || result.analysis_run_id
+      analysisRunId.value = runId
+
+      // Determine if queued based on processing_method or explicit queued flag
+      const isQueued =
+        result.processing_method === 'queue' ||
+        result.queued ||
+        false
+
+      if (isQueued) {
+        console.log('Analysis queued for processing')
+        // Show queue progress UI
+        showProgressUI.value = true
+        loading.value = false
+      } else {
+        // Redirect to analysis results page for direct processing
+        console.log('Redirecting to:', `/dashboard/analysis/${runId}`)
+        await router.push(`/dashboard/analysis/${runId}`)
       }
-    })
-    
-    console.log('Run analysis response:', data)
-    
-    if (analysisError) {
-      console.error('Analysis error:', analysisError)
-      throw analysisError
-    }
-    
-    if (data?.success && data.analysis_run_id) {
-      // Redirect to analysis results page
-      console.log('Redirecting to:', `/dashboard/analysis/${data.analysis_run_id}`)
-      await router.push(`/dashboard/analysis/${data.analysis_run_id}`)
     } else {
-      console.error('Invalid response data:', data)
-      throw new Error(data?.error || 'Failed to start analysis - no analysis ID returned')
+      throw new Error(result.error || 'Failed to start analysis')
     }
   } catch (err) {
     console.error('Error running analysis:', err)
@@ -263,29 +314,45 @@ const runAnalysis = async () => {
   }
 }
 
+// Handle queue completion
+const handleQueueComplete = (runData) => {
+  console.log('Queue processing completed:', runData)
+  showProgressUI.value = false
+  loading.value = false
+
+  // Navigate to results page
+  router.push(`/dashboard/analysis/${runData.id}`)
+}
+
 // Initialize on mount
 onMounted(async () => {
   // Get query parameters
   clientId.value = route.query.client_id || ''
   selectedPlatform.value = route.query.platform || 'both'
-  
+
   // Parse keywords
   if (route.query.keywords) {
     keywords.value = route.query.keywords.split(',').filter(k => k.trim())
   }
-  
+
+  // Initialize queue feature
+  initializeQueueFeature()
+  useQueueProcessing.value = useQueue.value
+
   console.log('Page initialized with:', {
     clientId: clientId.value,
     platform: selectedPlatform.value,
-    keywords: keywords.value
+    keywords: keywords.value,
+    queueEnabled: queueEnabled.value,
+    useQueue: useQueue.value
   })
-  
+
   // Validate parameters
   if (!clientId.value || keywords.value.length === 0) {
     error.value = 'Missing required parameters'
     return
   }
-  
+
   // Generate queries automatically
   await generateQueries()
 })

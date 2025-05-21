@@ -116,9 +116,9 @@ const loadClients = async () => {
       .from('clients')
       .select('*')
       .order('updated_at', { ascending: false })
-    
+
     if (fetchError) throw fetchError
-    
+
     clients.value = data || []
   } catch (err) {
     error.value = err.message

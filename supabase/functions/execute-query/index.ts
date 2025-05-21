@@ -331,21 +331,27 @@ serve(async (req) => {
     console.log('Citations:', JSON.stringify(citations, null, 2))
 
     // Analyze competitor mentions
+    console.log('Starting competitor analysis...')
     const competitorAnalysis = await analyzeCompetitorMentions(
-      response, 
-      brand_name, 
-      brand_domain, 
+      response,
+      brand_name,
+      brand_domain,
       competitors,
       citations
     )
-    
-    // Extract metadata
-    const metadata = await extractQueryMetadata(query_text, response, query_intent)
-    
-    // Analyze brand sentiment
-    const brandSentiment = await analyzeBrandSentiment(response, brand_name)
+    console.log('Competitor analysis result:', competitorAnalysis)
 
-    // Create comprehensive result object
+    // Extract metadata
+    console.log('Starting metadata extraction...')
+    const metadata = await extractQueryMetadata(query_text, response, query_intent)
+    console.log('Metadata extraction result:', metadata)
+
+    // Analyze brand sentiment
+    console.log('Starting brand sentiment analysis...')
+    const brandSentiment = await analyzeBrandSentiment(response, brand_name)
+    console.log('Brand sentiment:', brandSentiment)
+
+    // Create comprehensive result object with all fields at the top level
     const result = {
       query_text,
       keyword,
@@ -354,14 +360,43 @@ serve(async (req) => {
       response_content: response,
       citations,
       citation_count: citations.length,
+
+      // Brand data
       brand_mention: competitorAnalysis.brand_mention_type !== 'none',
-      brand_mention_count: competitorAnalysis.brand_mention_count,
-      competitor_mentions: competitorAnalysis.competitors_mentioned,
+      brand_mentioned: competitorAnalysis.brand_mention_type !== 'none',
+      brand_mention_count: competitorAnalysis.brand_mention_count || 0,
+      brand_sentiment: brandSentiment || 0,
+      brand_mention_type: competitorAnalysis.brand_mention_type || 'none',
+      brand_positioning: competitorAnalysis.market_positioning || 'none',
+
+      // Competitor data
+      competitor_mentions: competitorAnalysis.competitors_mentioned || [],
+      competitor_mentioned_names: competitorAnalysis.competitor_names || [],
+      competitor_count: (competitorAnalysis.competitor_names || []).length,
+      total_competitor_mentions: competitorAnalysis.total_competitor_mentions || 0,
+      competitor_context: competitorAnalysis.competitor_context || 'none',
+      competitor_analysis: competitorAnalysis,
+
+      // Query metadata - bringing these to top level for direct access
+      query_category: metadata.query_category || 'general',
+      query_topic: metadata.query_topic || 'general',
+      query_type: metadata.query_type || 'informational',
+      funnel_stage: metadata.funnel_stage || 'awareness',
+      query_complexity: metadata.query_complexity || 'simple',
+
+      // Response metadata
+      response_match: metadata.response_match || 'direct',
+      response_outcome: metadata.response_outcome || 'answer',
+      action_orientation: metadata.action_orientation || 'medium',
+      query_competition: metadata.query_competition || 'opportunity',
+
+      // Keep metadata object for backward compatibility
       metadata: {
         ...metadata,
         ...competitorAnalysis,
         brand_sentiment: brandSentiment
       },
+
       timestamp: new Date().toISOString()
     }
 
@@ -396,23 +431,35 @@ serve(async (req) => {
   }
 })
 
-// Helper functions (existing ones would go here)
+// Helper functions
 async function analyzeCompetitorMentions(response: string, brandName: string, brandDomain: string, competitors: Competitor[], citations: any[]) {
-  // Implementation from existing code
+  console.log('Analyzing competitor mentions for brand:', brandName)
+
+  // Helper function to escape special regex characters
+  function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+  }
+
   const competitorAnalysis = []
   const mentionedCompetitors = new Set<string>()
-
+  
   // Ensure citations is an array before processing
   const citationsList = Array.isArray(citations) ? citations : []
+  const competitorsList = Array.isArray(competitors) ? competitors : []
 
-  // Check citations for competitor domains
+  // Check citations for brand and competitor domains
+  let brandInCitations = false
   for (const citation of citationsList) {
     if (!citation || !citation.domain) continue
 
     const domain = citation.domain.toLowerCase()
 
+    // Check if it's the brand domain
+    if (brandDomain && domain.includes(brandDomain.toLowerCase())) {
+      brandInCitations = true
+    }
+
     // Check if it's a competitor domain
-    const competitorsList = Array.isArray(competitors) ? competitors : []
     for (const comp of competitorsList) {
       if (!comp || !comp.domain) continue
 
@@ -422,10 +469,38 @@ async function analyzeCompetitorMentions(response: string, brandName: string, br
       }
     }
   }
-  
-  // Check for competitor names in response text
+
+  // Check for brand and competitor names in response text
   const responseLower = response.toLowerCase()
-  const competitorsList = Array.isArray(competitors) ? competitors : []
+  const brandLower = brandName.toLowerCase()
+
+  // Count brand mentions in the response text
+  // Escape special regex characters in brand name
+  const escapedBrandName = escapeRegExp(brandLower)
+  const brandRegex = new RegExp(`\\b${escapedBrandName}\\b`, 'gi')
+  const brandMatches = response.match(brandRegex) || []
+  const brandMentionCount = brandMatches.length
+
+  // Determine brand mention type
+  let brandMentionType = 'none'
+  if (brandMentionCount > 0 || brandInCitations) {
+    // Check for specific mention types
+    if (responseLower.includes(`recommend ${brandLower}`) ||
+        responseLower.includes(`${brandLower} is the best`) ||
+        responseLower.includes(`best ${brandLower}`)) {
+      brandMentionType = 'recommendation'
+    } else if (responseLower.includes(`${brandLower} is`) ||
+               responseLower.includes(`${brandLower} offers`) ||
+               responseLower.includes(`${brandLower} provides`)) {
+      brandMentionType = 'featured'
+    } else if (brandInCitations) {
+      brandMentionType = 'citation'
+    } else {
+      brandMentionType = 'mentioned'
+    }
+  }
+
+  // Analyze each competitor
   for (const comp of competitorsList) {
     if (!comp || !comp.name) continue
 
@@ -435,46 +510,12 @@ async function analyzeCompetitorMentions(response: string, brandName: string, br
     }
   }
   
-  // Analyze brand mention
-  let brandMentionType = 'none'
-  let brandMentionCount = 0
-  
-  // Check for brand domain in citations
-  let brandInCitations = false
-  for (const citation of citationsList) {
-    if (!citation || !citation.domain) continue
-
-    const domain = citation.domain.toLowerCase()
-    if (brandDomain && domain.includes(brandDomain.toLowerCase())) {
-      brandInCitations = true
-      break
-    }
-  }
-  
-  // Check for brand name in response
-  const brandLower = brandName.toLowerCase()
-  if (responseLower.includes(brandLower) || brandInCitations) {
-    const brandRegex = new RegExp(brandLower, 'gi')
-    const matches = response.match(brandRegex)
-    brandMentionCount = matches ? matches.length : (brandInCitations ? 1 : 0)
-    
-    if (responseLower.includes(`recommend ${brandLower}`) || 
-        responseLower.includes(`${brandLower} is the best`) ||
-        responseLower.includes(`best ${brandLower}`)) {
-      brandMentionType = 'recommendation'
-    } else if (responseLower.includes(`${brandLower} is`) || 
-               responseLower.includes(`${brandLower} offers`) ||
-               responseLower.includes(`${brandLower} provides`)) {
-      brandMentionType = 'featured'
-    } else {
-      brandMentionType = 'mentioned'
-    }
-  }
-  
   // Build competitor analysis
   for (const compName of mentionedCompetitors) {
     const compLower = compName.toLowerCase()
-    const compRegex = new RegExp(compLower, 'gi')
+    // Escape special regex characters in competitor name
+    const escapedCompName = escapeRegExp(compLower)
+    const compRegex = new RegExp(escapedCompName, 'gi')
     const compMatches = response.match(compRegex)
     const mentionCount = compMatches ? compMatches.length : 1
     
@@ -498,36 +539,46 @@ async function analyzeCompetitorMentions(response: string, brandName: string, br
     brand_mention_type: brandMentionType,
     brand_mention_count: brandMentionCount,
     competitors_mentioned: competitorAnalysis,
-    competitor_names: Array.from(mentionedCompetitors)
+    competitor_names: Array.from(mentionedCompetitors),
+    total_competitor_mentions: competitorAnalysis.reduce((sum, comp) => sum + comp.mentions, 0),
+    competitive_landscape: competitorAnalysis.length > 0 ? 'competitive' : 'uncontested'
   }
 }
 
 async function extractQueryMetadata(query: string, response: string, intent: string) {
   const apiKey = Deno.env.get('OPENAI_API_KEY')
   if (!apiKey) {
+    console.log('No OpenAI API key, using defaults')
     return getDefaultMetadata(query, intent)
   }
 
+  // Truncate response if too long to avoid token limits
+  const truncatedResponse = response.length > 2000 ? response.substring(0, 2000) + '...' : response
+
   const prompt = `
-Analyze this query and response to extract metadata:
+Analyze this query and AI response. Return a JSON object with these exact fields and choose ONLY from the specified values.
 
 Query: "${query}"
-Response: "${response}"
+Response excerpt: "${truncatedResponse}"
 
-Extract the following in JSON format:
+Required JSON structure:
 {
-  "query_category": "general/product/service/comparison/troubleshooting/educational",
-  "query_topic": "main topic area",
-  "query_type": "informational/navigational/transactional/commercial",
-  "funnel_stage": "awareness/consideration/decision/retention",
-  "query_complexity": "simple/moderate/complex",
-  "response_match": "direct/partial/tangential",
-  "response_outcome": "answer/recommendation/comparison/explanation",
-  "action_orientation": "high/medium/low/none",
-  "query_competition": "high/moderate/low/opportunity"
-}`
+  "query_category": Choose ONE: "general", "product", "service", "comparison", "troubleshooting", "educational", "pricing", "features"
+  "query_topic": Main topic in 2-4 words (e.g., "workforce management", "construction software", "email tools")
+  "query_type": Choose ONE: "informational", "navigational", "transactional", "commercial"
+  "funnel_stage": Choose ONE: "awareness", "consideration", "decision", "retention"
+  "query_complexity": Choose ONE: "simple", "moderate", "complex"
+  "response_match": Choose ONE: "direct", "partial", "tangential"
+  "response_outcome": Choose ONE: "answer", "recommendation", "comparison", "explanation"
+  "action_orientation": Choose ONE: "high", "medium", "low", "none"
+  "query_competition": Choose ONE: "high", "moderate", "low", "opportunity"
+}
+
+IMPORTANT: Return ONLY valid JSON with these exact fields.`
 
   try {
+    console.log('Extracting metadata for query:', query.substring(0, 100))
+
     const metadataResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -539,7 +590,7 @@ Extract the following in JSON format:
         messages: [
           {
             role: 'system',
-            content: 'You are a query analysis expert. Extract metadata from queries and responses.'
+            content: 'You are a metadata extraction assistant. Return only valid JSON with the exact fields requested. Choose values ONLY from the options provided.'
           },
           {
             role: 'user',
@@ -554,28 +605,86 @@ Extract the following in JSON format:
 
     if (metadataResponse.ok) {
       const data = await metadataResponse.json()
-      return JSON.parse(data.choices[0].message.content)
+      const metadata = JSON.parse(data.choices[0].message.content)
+
+      console.log('Extracted metadata:', JSON.stringify(metadata, null, 2))
+
+      // Validate required fields
+      const requiredFields = [
+        'query_category', 'query_topic', 'query_type', 'funnel_stage',
+        'query_complexity', 'response_match', 'response_outcome',
+        'action_orientation', 'query_competition'
+      ]
+
+      for (const field of requiredFields) {
+        if (!metadata[field]) {
+          console.warn(`Missing field ${field}, using default`)
+          metadata[field] = getDefaultMetadata(query, intent)[field]
+        }
+      }
+
+      return metadata
+    } else {
+      const errorText = await metadataResponse.text()
+      console.error('Metadata extraction failed:', errorText)
     }
   } catch (error) {
     console.error('Error extracting metadata:', error)
   }
 
+  console.log('Falling back to default metadata')
   return getDefaultMetadata(query, intent)
 }
 
 function getDefaultMetadata(query: string, intent: string) {
-  const isQuestion = query.includes('?')
-  const isComparison = query.toLowerCase().includes('compare') || query.toLowerCase().includes('vs')
+  const queryLower = query.toLowerCase()
+  const wordCount = query.split(' ').length
+  
+  // Detect query category
+  let category = 'general'
+  if (queryLower.includes('compare') || queryLower.includes('vs') || queryLower.includes('difference')) {
+    category = 'comparison'
+  } else if (queryLower.includes('how') || queryLower.includes('why') || queryLower.includes('what')) {
+    category = 'educational'
+  } else if (queryLower.includes('price') || queryLower.includes('cost') || queryLower.includes('pricing')) {
+    category = 'pricing'
+  } else if (queryLower.includes('best') || queryLower.includes('top')) {
+    category = 'product'
+  }
+  
+  // Detect topic from keywords
+  let topic = 'general'
+  if (queryLower.includes('construction')) topic = 'construction software'
+  else if (queryLower.includes('workforce')) topic = 'workforce management'
+  else if (queryLower.includes('email')) topic = 'email tools'
+  else if (queryLower.includes('marketing')) topic = 'marketing tools'
+  else if (queryLower.includes('project')) topic = 'project management'
+  
+  // Detect query type
+  let queryType = 'informational'
+  if (queryLower.includes('buy') || queryLower.includes('purchase') || queryLower.includes('pricing')) {
+    queryType = 'transactional'
+  } else if (queryLower.includes('review') || queryLower.includes('compare')) {
+    queryType = 'commercial'
+  }
+  
+  // Detect funnel stage
+  let funnelStage = 'awareness'
+  if (queryLower.includes('compare') || queryLower.includes('vs') || queryLower.includes('alternative')) {
+    funnelStage = 'consideration'
+  } else if (queryLower.includes('buy') || queryLower.includes('price') || queryLower.includes('demo')) {
+    funnelStage = 'decision'
+  }
   
   return {
-    query_category: isComparison ? 'comparison' : 'general',
-    query_topic: 'general',
-    query_type: isQuestion ? 'informational' : 'navigational',
-    funnel_stage: 'awareness',
-    query_complexity: query.split(' ').length > 10 ? 'complex' : 'simple',
+    query_category: category,
+    query_topic: topic,
+    query_type: queryType,
+    funnel_stage: funnelStage,
+    query_complexity: wordCount > 15 ? 'complex' : wordCount > 8 ? 'moderate' : 'simple',
     response_match: 'direct',
     response_outcome: 'answer',
-    action_orientation: 'medium',
+    action_orientation: queryType === 'transactional' ? 'high' : 'medium',
     query_competition: 'opportunity'
   }
 }
@@ -598,26 +707,26 @@ async function analyzeBrandSentiment(response: string, brandName: string) {
         messages: [
           {
             role: 'system',
-            content: 'You are a sentiment analysis expert. Analyze the sentiment of brand mentions.'
+            content: 'You are a sentiment analysis assistant. Analyze the sentiment of brand mentions and return a sentiment score.'
           },
           {
             role: 'user',
-            content: `Analyze the sentiment of mentions of "${brandName}" in this text. Return a number between -1 (negative) and 1 (positive):\n\n${response}`
+            content: `Analyze the sentiment towards "${brandName}" in this text. Return ONLY a JSON object with a "sentiment" field containing a number between -1 (very negative) and 1 (very positive):\n\n${response.substring(0, 1000)}`
           }
         ],
         temperature: 0.3,
-        max_tokens: 50
+        max_tokens: 50,
+        response_format: { type: 'json_object' }
       })
     })
 
     if (sentimentResponse.ok) {
       const data = await sentimentResponse.json()
-      const sentimentText = data.choices[0].message.content
-      const sentiment = parseFloat(sentimentText) || 0
-      return Math.max(-1, Math.min(1, sentiment))
+      const result = JSON.parse(data.choices[0].message.content)
+      return result.sentiment || 0
     }
   } catch (error) {
-    console.error('Error analyzing sentiment:', error)
+    console.error('Error analyzing brand sentiment:', error)
   }
 
   return 0

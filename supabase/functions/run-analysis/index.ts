@@ -124,8 +124,9 @@ serve(async (req) => {
     // In test mode, only use one intent for quick validation
     const intents = test_mode ? ['direct_experience'] : ['direct_experience', 'recommendation_request', 'comparison_question']
     
-    // Calculate total queries (keywords × intents)
-    const queries_total = keywords.length * intents.length
+    // Calculate total queries (keywords × intents × platforms)
+    const platformCount = platform === 'both' ? 2 : 1
+    const queries_total = keywords.length * intents.length * platformCount
 
     const { data: analysisRun, error: runError } = await serviceClient
       .from('analysis_runs')
