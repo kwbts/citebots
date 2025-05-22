@@ -43,16 +43,6 @@
             </div>
           </div>
           
-          <!-- Date Range -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Time Period</label>
-            <select v-model="selectedDateRange" class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-citebots-orange focus:border-transparent">
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 90 Days</option>
-              <option value="180">Last 6 Months</option>
-              <option value="all">All Time</option>
-            </select>
-          </div>
           
           <!-- View Type -->
           <div>
@@ -146,31 +136,31 @@
               :value="totalQueries"
               icon="chart-bar"
               color="blue"
-              :trend="12"
+              suffix=" analyzed"
             />
             <MetricCard
-              title="Brand Mentions"
+              title="Brand Mention Rate"
               :value="brandMentionRate"
               suffix="%"
               icon="trending-up"
               color="green"
-              :trend="8"
+              :subtitle="`${totalBrandMentions} mentions`"
             />
             <MetricCard
-              title="Avg Citations"
-              :value="avgCitations"
-              :decimals="1"
+              title="Citation Rate"
+              :value="citationMentionRate"
+              suffix="%"
               icon="link"
               color="purple"
-              :trend="-2"
+              :subtitle="`${totalPagesAnalyzed} pages`"
             />
             <MetricCard
-              title="Quality Score"
-              :value="qualityScore"
-              :decimals="1"
+              title="Competitive Win Rate"
+              :value="competitiveWinRate"
+              suffix="%"
               icon="star"
               color="orange"
-              :trend="3"
+              subtitle="vs competitors"
             />
           </div>
 
@@ -304,6 +294,13 @@
           :data="filteredData"
           :client="client"
         />
+
+        <RawDataView
+          v-else-if="activeTab === 'raw-data'"
+          :data="filteredData"
+          :analysis-run="filteredData?.analysis_run"
+          :client="client"
+        />
       </div>
     </div>
   </div>
@@ -318,6 +315,7 @@ import QueryAnalysisDashboard from './QueryAnalysisDashboard.vue'
 import OnPageSEODashboard from './OnPageSEODashboard.vue'
 import PageAnalyticsDashboard from './PageAnalyticsDashboard.vue'
 import CompetitorComparisonDashboard from './CompetitorComparisonDashboard.vue'
+import RawDataView from './RawDataView.vue'
 
 const props = defineProps({
   data: { type: Object, required: true },
@@ -329,7 +327,6 @@ defineEmits(['close'])
 // Dashboard State
 const activeTab = ref('overview')
 const activePlatforms = ref(['chatgpt', 'perplexity'])
-const selectedDateRange = ref('30')
 const viewType = ref('all')
 const activeTrendMetric = ref('mentions')
 
@@ -382,11 +379,19 @@ const dashboardTabs = ref([
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
     ])
   },
-  { 
-    id: 'competitor-comparison', 
+  {
+    id: 'competitor-comparison',
     name: 'Competitors',
     icon: () => h('svg', { class: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z' })
+    ])
+  },
+  {
+    id: 'raw-data',
+    name: 'Raw Data',
+    icon: () => h('svg', { class: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }),
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M11 13h6' })
     ])
   }
 ])
@@ -430,22 +435,76 @@ const avgCitations = computed(() => {
   return Math.round((totalCitations / queries.length) * 10) / 10
 })
 
-const qualityScore = computed(() => {
-  // Calculate from page analyses if available
+const contentQualityScore = computed(() => {
   const pages = filteredData.value?.page_analyses || []
   if (pages.length === 0) return 0
-  
+
   let totalScore = 0
   let scoreCount = 0
-  
+
   pages.forEach(page => {
     if (page.content_quality?.overall_score) {
       totalScore += page.content_quality.overall_score
       scoreCount++
     }
   })
-  
-  return scoreCount > 0 ? Math.round((totalScore / scoreCount) * 10) / 10 : 8.4
+
+  return scoreCount > 0 ? Math.round((totalScore / scoreCount) * 10) / 10 : 0
+})
+
+const citationMentionRate = computed(() => {
+  const pages = filteredData.value?.page_analyses || []
+  if (pages.length === 0) return 0
+
+  const clientPages = pages.filter(page => page.is_client_domain === true).length
+  return Math.round((clientPages / pages.length) * 100)
+})
+
+const totalBrandMentions = computed(() =>
+  filteredData.value?.analysis_queries?.filter(q => q.brand_mentioned === true).length || 0
+)
+
+const avgBrandSentiment = computed(() => {
+  const queries = filteredData.value?.analysis_queries || []
+  const brandQueries = queries.filter(q => q.brand_mentioned === true && q.brand_sentiment !== null)
+
+  if (brandQueries.length === 0) return 0
+
+  const totalSentiment = brandQueries.reduce((sum, q) => sum + (q.brand_sentiment || 0), 0)
+  return Math.round((totalSentiment / brandQueries.length) * 100) / 100
+})
+
+const competitiveWinRate = computed(() => {
+  const queries = filteredData.value?.analysis_queries || []
+
+  const brandOnlyQueries = queries.filter(q =>
+    q.brand_mentioned === true && (q.competitor_count || 0) === 0
+  ).length
+
+  const competitorOnlyQueries = queries.filter(q =>
+    q.brand_mentioned !== true && (q.competitor_count || 0) > 0
+  ).length
+
+  const totalCompetitive = brandOnlyQueries + competitorOnlyQueries
+
+  return totalCompetitive > 0 ? Math.round((brandOnlyQueries / totalCompetitive) * 100) : 0
+})
+
+const totalPagesAnalyzed = computed(() =>
+  filteredData.value?.page_analyses?.length || 0
+)
+
+const queryCompetitionDistribution = computed(() => {
+  const queries = filteredData.value?.analysis_queries || []
+  const distribution = {}
+
+  queries.forEach(query => {
+    const competition = query.query_competition || 'unknown'
+    if (!distribution[competition]) distribution[competition] = 0
+    distribution[competition]++
+  })
+
+  return distribution
 })
 
 const chatgptScore = computed(() => {
@@ -462,20 +521,93 @@ const perplexityScore = computed(() => {
   return Math.round((brandMentions / perplexityQueries.length) * 100)
 })
 
-const topCompetitors = computed(() => [
-  { name: 'Competitor A', percentage: 45 },
-  { name: 'Competitor B', percentage: 32 },
-  { name: 'Competitor C', percentage: 28 },
-  { name: 'Competitor D', percentage: 19 }
-])
+const topCompetitors = computed(() => {
+  const queries = filteredData.value?.analysis_queries || []
+  const competitorMentions = {}
 
-const recentActivity = computed(() => [
-  { id: 1, title: 'New #1 ranking for "enterprise software"', time: '2 hours ago', type: 'positive', label: 'New' },
-  { id: 2, title: 'Quality score improved to 8.4/10', time: '4 hours ago', type: 'positive', label: '+0.3' },
-  { id: 3, title: 'Brand mention rate increased 8%', time: '6 hours ago', type: 'positive', label: '+8%' },
-  { id: 4, title: 'Lost position for "marketing automation"', time: '1 day ago', type: 'negative', label: '-2' },
-  { id: 5, title: 'Analysis completed for 47 new queries', time: '1 day ago', type: 'neutral', label: 'Done' }
-])
+  // Count mentions for each competitor
+  queries.forEach(query => {
+    if (query.competitor_mentioned_names && Array.isArray(query.competitor_mentioned_names)) {
+      query.competitor_mentioned_names.forEach(competitor => {
+        if (!competitorMentions[competitor]) competitorMentions[competitor] = 0
+        competitorMentions[competitor]++
+      })
+    }
+  })
+
+  // Convert to array and sort by mentions
+  const competitors = Object.entries(competitorMentions)
+    .map(([name, count]) => ({
+      name,
+      count,
+      percentage: queries.length > 0 ? Math.round((count / queries.length) * 100) : 0
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4) // Top 4 competitors
+
+  return competitors
+})
+
+const recentActivity = computed(() => {
+  const analysisRun = filteredData.value?.analysis_run
+  const queries = filteredData.value?.analysis_queries || []
+  const pages = filteredData.value?.page_analyses || []
+
+  const activities = []
+
+  if (analysisRun) {
+    activities.push({
+      id: 1,
+      title: `Analysis completed for ${queries.length} queries`,
+      time: new Date(analysisRun.created_at).toLocaleDateString(),
+      type: 'neutral',
+      label: 'Done'
+    })
+  }
+
+  if (brandMentionRate.value > 0) {
+    activities.push({
+      id: 2,
+      title: `Brand mentioned in ${brandMentionRate.value}% of queries`,
+      time: new Date(analysisRun?.created_at || Date.now()).toLocaleDateString(),
+      type: brandMentionRate.value > 50 ? 'positive' : 'neutral',
+      label: `${brandMentionRate.value}%`
+    })
+  }
+
+  if (pages.length > 0) {
+    activities.push({
+      id: 3,
+      title: `${pages.length} pages analyzed for SEO performance`,
+      time: new Date(analysisRun?.created_at || Date.now()).toLocaleDateString(),
+      type: 'neutral',
+      label: `${pages.length}`
+    })
+  }
+
+  if (competitiveWinRate.value > 0) {
+    activities.push({
+      id: 4,
+      title: `${competitiveWinRate.value}% competitive win rate achieved`,
+      time: new Date(analysisRun?.created_at || Date.now()).toLocaleDateString(),
+      type: competitiveWinRate.value > 70 ? 'positive' : competitiveWinRate.value > 30 ? 'neutral' : 'negative',
+      label: `${competitiveWinRate.value}%`
+    })
+  }
+
+  if (topCompetitors.value.length > 0) {
+    const topCompetitor = topCompetitors.value[0]
+    activities.push({
+      id: 5,
+      title: `${topCompetitor.name} mentioned in ${topCompetitor.percentage}% of queries`,
+      time: new Date(analysisRun?.created_at || Date.now()).toLocaleDateString(),
+      type: 'neutral',
+      label: `${topCompetitor.percentage}%`
+    })
+  }
+
+  return activities.slice(0, 5)
+})
 
 // Helper functions
 const togglePlatform = (platform) => {
@@ -503,7 +635,7 @@ const getCurrentTabName = () => {
 
 const getFilterSummary = () => {
   const platformText = activePlatforms.value.includes('all') ? 'All Platforms' : activePlatforms.value.join(', ')
-  return `${platformText} • Last ${selectedDateRange.value} days • ${totalQueries.value} queries`
+  return `${platformText} • ${totalQueries.value} queries analyzed`
 }
 
 const getActivityClass = (type) => {
@@ -535,7 +667,10 @@ const MetricCard = (props) => {
           props.trend && h('span', {
             class: `text-sm font-medium ${props.trend > 0 ? 'text-green-600' : 'text-red-600'}`
           }, `${props.trend > 0 ? '+' : ''}${props.trend}%`)
-        ])
+        ]),
+        props.subtitle && h('p', {
+          class: 'text-xs text-gray-400 dark:text-gray-500 mt-1'
+        }, props.subtitle)
       ]),
       h('div', {
         class: `p-3 bg-${props.color}-100 dark:bg-${props.color}-900 rounded-lg`
