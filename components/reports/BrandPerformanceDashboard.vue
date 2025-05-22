@@ -341,10 +341,10 @@ const getPlatformButtonClass = (platform) => {
 const brandMetrics = computed(() => {
   // Debug: Log the data structure
   console.log('Debug - props.data:', props.data)
-  console.log('Debug - props.data.queries:', props.data?.queries)
+  console.log('Debug - props.data.analysis_queries:', props.data?.analysis_queries)
 
-  if (!props.data?.queries || !Array.isArray(props.data.queries)) {
-    console.log('Debug - No queries found or not an array')
+  if (!props.data?.analysis_queries || !Array.isArray(props.data.analysis_queries)) {
+    console.log('Debug - No analysis_queries found or not an array')
     return {
       mentionRate: 0,
       mentionedQueries: 0,
@@ -354,7 +354,7 @@ const brandMetrics = computed(() => {
     }
   }
 
-  let filteredQueries = props.data.queries
+  let filteredQueries = props.data.analysis_queries
   console.log('Debug - All queries count:', filteredQueries.length)
   console.log('Debug - Sample query:', filteredQueries[0])
 
@@ -423,9 +423,9 @@ const brandMetrics = computed(() => {
 
 // Calculate mention types distribution
 const mentionTypes = computed(() => {
-  if (!props.data?.queries) return []
-  
-  let filteredQueries = props.data.queries
+  if (!props.data?.analysis_queries) return []
+
+  let filteredQueries = props.data.analysis_queries
   if (activePlatform.value !== 'all') {
     filteredQueries = filteredQueries.filter(q => 
       q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
@@ -455,9 +455,9 @@ const mentionTypes = computed(() => {
 
 // Calculate intent performance
 const intentPerformance = computed(() => {
-  if (!props.data?.queries) return []
-  
-  let filteredQueries = props.data.queries
+  if (!props.data?.analysis_queries) return []
+
+  let filteredQueries = props.data.analysis_queries
   if (activePlatform.value !== 'all') {
     filteredQueries = filteredQueries.filter(q => 
       q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
@@ -490,14 +490,14 @@ const intentPerformance = computed(() => {
 
 // Calculate citation metrics
 const citationMetrics = computed(() => {
-  if (!props.data?.queries) return {
+  if (!props.data?.analysis_queries) return {
     mentionRate: 0,
     totalCitations: 0,
     citedQueries: 0,
     vsCompetitors: 0
   }
-  
-  let filteredQueries = props.data.queries
+
+  let filteredQueries = props.data.analysis_queries
   if (activePlatform.value !== 'all') {
     filteredQueries = filteredQueries.filter(q => 
       q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
@@ -540,9 +540,9 @@ const citationMetrics = computed(() => {
 
 // Get competitor comparison data
 const getCompetitorComparison = () => {
-  if (!props.data?.queries || !props.competitors.length) return []
-  
-  let filteredQueries = props.data.queries
+  if (!props.data?.analysis_queries || !props.competitors.length) return []
+
+  let filteredQueries = props.data.analysis_queries
   if (activePlatform.value !== 'all') {
     filteredQueries = filteredQueries.filter(q => 
       q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
