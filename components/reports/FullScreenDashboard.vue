@@ -136,7 +136,6 @@
               :value="totalQueries"
               icon="chart-bar"
               color="blue"
-              suffix=" analyzed"
             />
             <MetricCard
               title="Brand Mention Rate"
@@ -144,23 +143,20 @@
               suffix="%"
               icon="trending-up"
               color="green"
-              :subtitle="`${totalBrandMentions} mentions`"
             />
             <MetricCard
-              title="Citation Rate"
-              :value="citationMentionRate"
-              suffix="%"
+              title="Avg Citations"
+              :value="avgCitations"
+              :decimals="1"
               icon="link"
               color="purple"
-              :subtitle="`${totalPagesAnalyzed} pages`"
             />
             <MetricCard
-              title="Competitive Win Rate"
-              :value="competitiveWinRate"
-              suffix="%"
+              title="Quality Score"
+              :value="qualityScore"
+              :decimals="1"
               icon="star"
               color="orange"
-              subtitle="vs competitors"
             />
           </div>
 
@@ -435,7 +431,7 @@ const avgCitations = computed(() => {
   return Math.round((totalCitations / queries.length) * 10) / 10
 })
 
-const contentQualityScore = computed(() => {
+const qualityScore = computed(() => {
   const pages = filteredData.value?.page_analyses || []
   if (pages.length === 0) return 0
 
@@ -443,8 +439,8 @@ const contentQualityScore = computed(() => {
   let scoreCount = 0
 
   pages.forEach(page => {
-    if (page.content_quality?.overall_score) {
-      totalScore += page.content_quality.overall_score
+    if (page.content_quality_score) {
+      totalScore += parseFloat(page.content_quality_score)
       scoreCount++
     }
   })
@@ -452,60 +448,6 @@ const contentQualityScore = computed(() => {
   return scoreCount > 0 ? Math.round((totalScore / scoreCount) * 10) / 10 : 0
 })
 
-const citationMentionRate = computed(() => {
-  const pages = filteredData.value?.page_analyses || []
-  if (pages.length === 0) return 0
-
-  const clientPages = pages.filter(page => page.is_client_domain === true).length
-  return Math.round((clientPages / pages.length) * 100)
-})
-
-const totalBrandMentions = computed(() =>
-  filteredData.value?.analysis_queries?.filter(q => q.brand_mentioned === true).length || 0
-)
-
-const avgBrandSentiment = computed(() => {
-  const queries = filteredData.value?.analysis_queries || []
-  const brandQueries = queries.filter(q => q.brand_mentioned === true && q.brand_sentiment !== null)
-
-  if (brandQueries.length === 0) return 0
-
-  const totalSentiment = brandQueries.reduce((sum, q) => sum + (q.brand_sentiment || 0), 0)
-  return Math.round((totalSentiment / brandQueries.length) * 100) / 100
-})
-
-const competitiveWinRate = computed(() => {
-  const queries = filteredData.value?.analysis_queries || []
-
-  const brandOnlyQueries = queries.filter(q =>
-    q.brand_mentioned === true && (q.competitor_count || 0) === 0
-  ).length
-
-  const competitorOnlyQueries = queries.filter(q =>
-    q.brand_mentioned !== true && (q.competitor_count || 0) > 0
-  ).length
-
-  const totalCompetitive = brandOnlyQueries + competitorOnlyQueries
-
-  return totalCompetitive > 0 ? Math.round((brandOnlyQueries / totalCompetitive) * 100) : 0
-})
-
-const totalPagesAnalyzed = computed(() =>
-  filteredData.value?.page_analyses?.length || 0
-)
-
-const queryCompetitionDistribution = computed(() => {
-  const queries = filteredData.value?.analysis_queries || []
-  const distribution = {}
-
-  queries.forEach(query => {
-    const competition = query.query_competition || 'unknown'
-    if (!distribution[competition]) distribution[competition] = 0
-    distribution[competition]++
-  })
-
-  return distribution
-})
 
 const chatgptScore = computed(() => {
   const chatgptQueries = filteredData.value?.analysis_queries?.filter(q => q.data_source === 'chatgpt') || []
@@ -585,28 +527,7 @@ const recentActivity = computed(() => {
     })
   }
 
-  if (competitiveWinRate.value > 0) {
-    activities.push({
-      id: 4,
-      title: `${competitiveWinRate.value}% competitive win rate achieved`,
-      time: new Date(analysisRun?.created_at || Date.now()).toLocaleDateString(),
-      type: competitiveWinRate.value > 70 ? 'positive' : competitiveWinRate.value > 30 ? 'neutral' : 'negative',
-      label: `${competitiveWinRate.value}%`
-    })
-  }
-
-  if (topCompetitors.value.length > 0) {
-    const topCompetitor = topCompetitors.value[0]
-    activities.push({
-      id: 5,
-      title: `${topCompetitor.name} mentioned in ${topCompetitor.percentage}% of queries`,
-      time: new Date(analysisRun?.created_at || Date.now()).toLocaleDateString(),
-      type: 'neutral',
-      label: `${topCompetitor.percentage}%`
-    })
-  }
-
-  return activities.slice(0, 5)
+  return activities.slice(0, 3)
 })
 
 // Helper functions
