@@ -1,0 +1,1016 @@
+<template>
+  <div class="space-y-6">
+    <!-- Platform Filter -->
+    <div v-if="availablePlatforms.length > 1" class="bg-white rounded-lg border border-gray-200 p-4">
+      <label class="block text-sm font-medium text-gray-700 mb-3">Filter by Platform</label>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="platform in availablePlatforms"
+          :key="platform.value"
+          @click="togglePlatform(platform.value)"
+          :class="[
+            'px-3 py-1 rounded-full text-sm font-medium transition-colors',
+            selectedPlatforms.includes(platform.value)
+              ? 'bg-citebots-orange text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          ]"
+        >
+          {{ platform.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+          <div class="ml-4 flex-1">
+            <h3 class="text-sm font-medium text-gray-500">Technical SEO Score (Brand Pages)</h3>
+            <div class="flex items-center gap-3">
+              <p class="text-2xl font-semibold text-gray-900">{{ techSeoScore }}%</p>
+              <div class="flex items-center gap-1 text-xs" :class="getComparisonIndicator(techSeoScore, benchmarkAverages.avgTechSeoScore).color">
+                <span>{{ getComparisonIndicator(techSeoScore, benchmarkAverages.avgTechSeoScore).icon }}</span>
+                <span>other pages: {{ benchmarkAverages.avgTechSeoScore }}%</span>
+              </div>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">{{ totalBrandPages }}/{{ totalPages }} pages mention your brand</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+          <div class="ml-4 flex-1">
+            <h3 class="text-sm font-medium text-gray-500">Content Quality Score (Brand Pages)</h3>
+            <div class="flex items-center gap-3">
+              <p class="text-2xl font-semibold text-gray-900">{{ contentQualityScore }}%</p>
+              <div class="flex items-center gap-1 text-xs" :class="getComparisonIndicator(contentQualityScore, benchmarkAverages.avgContentQualityScore).color">
+                <span>{{ getComparisonIndicator(contentQualityScore, benchmarkAverages.avgContentQualityScore).icon }}</span>
+                <span>other pages: {{ benchmarkAverages.avgContentQualityScore }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </div>
+          <div class="ml-4 flex-1">
+            <h3 class="text-sm font-medium text-gray-500">Page Performance Score (Brand Pages)</h3>
+            <div class="flex items-center gap-3">
+              <p class="text-2xl font-semibold text-gray-900">{{ pagePerformanceScore }}%</p>
+              <div class="flex items-center gap-1 text-xs" :class="getComparisonIndicator(pagePerformanceScore, benchmarkAverages.avgPagePerformanceScore).color">
+                <span>{{ getComparisonIndicator(pagePerformanceScore, benchmarkAverages.avgPagePerformanceScore).icon }}</span>
+                <span>other pages: {{ benchmarkAverages.avgPagePerformanceScore }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-500">Brand Pages Found</h3>
+            <p class="text-2xl font-semibold text-gray-900">{{ totalBrandPages }}</p>
+            <div class="text-xs text-gray-500 mt-1">out of {{ totalPages }} total pages</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Technical SEO Analysis -->
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Technical SEO Implementation</h3>
+        <p class="text-sm text-gray-500 mt-1">Analysis of technical SEO elements across your pages</p>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div v-for="metric in technicalSeoMetrics" :key="metric.label" class="text-center">
+            <div class="relative inline-flex items-center justify-center w-20 h-20 mb-3">
+              <svg class="w-20 h-20 transform -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" fill="none" class="text-gray-200"/>
+                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" fill="none" 
+                        :class="metric.percentage >= 80 ? 'text-green-500' : metric.percentage >= 60 ? 'text-yellow-500' : 'text-red-500'"
+                        :stroke-dasharray="`${metric.percentage * 2.51327} 251.327`"
+                        stroke-linecap="round"/>
+              </svg>
+              <span class="absolute text-sm font-semibold text-gray-900">{{ metric.percentage }}%</span>
+            </div>
+            <div class="text-sm font-medium text-gray-900">{{ metric.label }}</div>
+            <div class="text-xs text-gray-500">{{ metric.count }}/{{ metric.totalBrandPages }} brand pages</div>
+            <div class="text-xs mt-1" :class="getComparisonIndicator(metric.percentage, metric.avgPercentage).color">
+              {{ getComparisonIndicator(metric.percentage, metric.avgPercentage).icon }} other pages: {{ metric.avgPercentage }}%
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Quality Analysis -->
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Content Quality Distribution</h3>
+        <p class="text-sm text-gray-500 mt-1">Word count, readability, and content structure analysis</p>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Word Count Distribution -->
+          <div>
+            <h4 class="text-sm font-medium text-gray-900 mb-4">Word Count Distribution</h4>
+            <div class="space-y-3">
+              <div v-for="range in wordCountDistribution" :key="range.range" class="flex items-center">
+                <div class="w-20 text-sm text-gray-600">{{ range.range }}</div>
+                <div class="flex-1 mx-3">
+                  <div class="bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-500 h-2 rounded-full" :style="{ width: `${range.percentage}%` }"></div>
+                  </div>
+                </div>
+                <div class="w-12 text-sm text-gray-900 text-right">{{ range.count }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Structure -->
+          <div>
+            <h4 class="text-sm font-medium text-gray-900 mb-4">Content Structure Elements</h4>
+            <div class="space-y-3">
+              <div v-for="element in contentStructure" :key="element.element" class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="text-sm text-gray-600">{{ element.element }}</div>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <div class="flex flex-col items-end">
+                    <div class="text-sm text-gray-900">{{ element.percentage }}%</div>
+                    <div class="text-xs" :class="getComparisonIndicator(element.percentage, element.avgPercentage).color">
+                      {{ getComparisonIndicator(element.percentage, element.avgPercentage).icon }} {{ element.avgPercentage }}%
+                    </div>
+                  </div>
+                  <div class="w-16 bg-gray-200 rounded-full h-2">
+                    <div class="h-2 rounded-full"
+                         :class="element.percentage >= element.avgPercentage ? 'bg-green-500' : 'bg-red-500'"
+                         :style="{ width: `${element.percentage}%` }"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page Performance vs Citation Success -->
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Performance vs Citation Success</h3>
+        <p class="text-sm text-gray-500 mt-1">Correlation between technical metrics and citation frequency</p>
+      </div>
+      <div class="p-6">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric Range</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pages</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Citations</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Citation Rate</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Quality Score</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="range in performanceRanges" :key="range.range" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ range.range }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ range.pages }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ range.citations }}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                        :class="range.citationRate >= 20 ? 'bg-green-100 text-green-800' : 
+                               range.citationRate >= 10 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'">
+                    {{ range.citationRate }}%
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ range.avgQualityScore }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Issues and Recommendations -->
+    <div class="bg-white rounded-lg border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Brand Page Issues & Recommendations</h3>
+        <p class="text-sm text-gray-500 mt-1">Priority fixes for improving your brand page SEO performance</p>
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <div v-for="issue in topIssues" :key="issue.issue"
+               class="rounded-lg border"
+               :class="issue.priority === 'High' ? 'bg-red-50 border-red-200' : issue.priority === 'Medium' ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200'">
+            <div class="flex items-start p-4">
+              <div class="flex-shrink-0">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center"
+                     :class="issue.priority === 'High' ? 'bg-red-200' : issue.priority === 'Medium' ? 'bg-yellow-200' : 'bg-blue-200'">
+                  <svg class="w-4 h-4" :class="issue.priority === 'High' ? 'text-red-600' : issue.priority === 'Medium' ? 'text-yellow-600' : 'text-blue-600'"
+                       fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <div class="ml-4 flex-1">
+                <div class="flex items-center justify-between">
+                  <h4 class="text-sm font-medium text-gray-900">{{ issue.issue }}</h4>
+                  <button
+                    @click="selectedIssue = selectedIssue === issue.issue ? null : issue.issue"
+                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                    {{ selectedIssue === issue.issue ? 'Hide Details' : 'View Pages' }}
+                  </button>
+                </div>
+                <p class="text-sm text-gray-600 mt-1">{{ issue.description }}</p>
+                <p class="text-xs text-gray-500 mt-2">Affects {{ issue.affectedPages }} brand pages • Priority: {{ issue.priority }}</p>
+              </div>
+            </div>
+
+            <!-- Dropdown with affected pages -->
+            <div v-if="selectedIssue === issue.issue && issue.pages" class="border-t border-gray-200 bg-white">
+              <div class="p-4">
+                <h5 class="text-sm font-medium text-gray-900 mb-3">Affected Brand Pages:</h5>
+                <div class="space-y-2">
+                  <div v-for="page in issue.pages" :key="page.id"
+                       class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium text-gray-900 truncate">
+                        {{ page.page_title || 'Untitled Page' }}
+                      </div>
+                      <div class="text-xs text-gray-500 truncate">
+                        {{ page.citation_url }}
+                      </div>
+                      <div class="text-xs text-blue-600 mt-1">
+                        Query: "{{ page.query_text }}"
+                      </div>
+                    </div>
+                    <a :href="page.citation_url" target="_blank"
+                       class="ml-3 text-blue-600 hover:text-blue-800 text-xs font-medium">
+                      View Page →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Data State -->
+    <div v-if="!hasData" class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">No brand pages found</h3>
+      <p class="mt-1 text-sm text-gray-500">
+        {{ filteredData.length === 0 ? 'No queries match the current filters.' : 'No pages mentioning your brand were found in the analysis results.' }}
+      </p>
+      <p class="mt-1 text-xs text-gray-400">
+        Total queries: {{ props.data?.queries?.length || 0 }} |
+        Filtered queries: {{ filteredData.length }} |
+        Total pages: {{ pageAnalyses.length }} |
+        Brand pages: {{ brandPages.length }}
+      </p>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+
+const props = defineProps({
+  data: {
+    type: Object,
+    required: true
+  },
+  client: {
+    type: Object,
+    required: true
+  }
+})
+
+// Available platforms for filtering
+const availablePlatforms = computed(() => {
+  const platforms = new Set()
+  if (props.data?.queries) {
+    props.data.queries.forEach(query => {
+      // Check both platform and data_source fields from schema
+      const platform = query.platform || query.data_source
+      if (platform) platforms.add(platform.toLowerCase())
+    })
+  }
+  return Array.from(platforms).map(platform => ({
+    value: platform,
+    label: platform.charAt(0).toUpperCase() + platform.slice(1)
+  }))
+})
+
+// Selected platforms for filtering
+const selectedPlatforms = ref([])
+
+// Platform toggle function
+const togglePlatform = (platform) => {
+  const index = selectedPlatforms.value.indexOf(platform)
+  if (index > -1) {
+    selectedPlatforms.value.splice(index, 1)
+  } else {
+    selectedPlatforms.value.push(platform)
+  }
+}
+
+// Filter data based on selected platforms
+const filteredData = computed(() => {
+  if (!props.data?.queries) return []
+  if (selectedPlatforms.value.length === 0) return props.data.queries
+  return props.data.queries.filter(item => {
+    const platform = (item.platform || item.data_source || '').toLowerCase()
+    return platform && selectedPlatforms.value.includes(platform)
+  })
+})
+
+const hasData = computed(() => {
+  return filteredData.value.length > 0 && brandPages.value.length > 0
+})
+
+// Extract page analyses data
+const pageAnalyses = computed(() => {
+  const analyses = []
+  filteredData.value.forEach(query => {
+    if (query.page_analyses && Array.isArray(query.page_analyses)) {
+      // Add URL field from citation_url if missing and query context
+      const processedAnalyses = query.page_analyses.map(analysis => ({
+        ...analysis,
+        url: analysis.url || analysis.citation_url,
+        query_text: query.query_text,
+        query_keyword: query.query_keyword
+      }))
+      analyses.push(...processedAnalyses)
+    }
+  })
+
+  return analyses
+})
+
+// Filter brand pages only (pages that mention the client's brand)
+const brandPages = computed(() => {
+  return pageAnalyses.value.filter(page =>
+    page.brand_mentioned === true ||
+    page.is_client_domain === true ||
+    (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain))
+  )
+})
+
+// Filter non-brand pages for benchmarking
+const nonBrandPages = computed(() => {
+  return pageAnalyses.value.filter(page =>
+    !(page.brand_mentioned === true ||
+      page.is_client_domain === true ||
+      (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain)))
+  )
+})
+
+const totalPages = computed(() => pageAnalyses.value.length)
+const totalBrandPages = computed(() => brandPages.value.length)
+const totalNonBrandPages = computed(() => nonBrandPages.value.length)
+
+// Calculate benchmark averages across all pages
+const benchmarkAverages = computed(() => {
+  if (!nonBrandPages.value.length) return {}
+
+  const pages = nonBrandPages.value
+  const total = pages.length
+
+  return {
+    // Technical SEO benchmarks
+    httpsPercentage: Math.round((pages.filter(page =>
+      page.citation_url?.startsWith('https://') || page.technical_seo?.http_response_code === 200
+    ).length / total) * 100),
+
+    schemaPercentage: Math.round((pages.filter(page =>
+      page.technical_seo?.schema_markup_present === true
+    ).length / total) * 100),
+
+    semanticHtmlPercentage: Math.round((pages.filter(page =>
+      page.technical_seo?.semantic_html_usage === true
+    ).length / total) * 100),
+
+    mobilePercentage: Math.round((pages.filter(page =>
+      page.technical_seo?.mobile_friendly === true
+    ).length / total) * 100),
+
+    ariaPercentage: Math.round((pages.filter(page =>
+      page.technical_seo?.aria_labels_present === true
+    ).length / total) * 100),
+
+    metaDescPercentage: Math.round((pages.filter(page =>
+      page.technical_seo?.meta_description_present === true
+    ).length / total) * 100),
+
+    // Content structure benchmarks
+    tablesPercentage: Math.round((pages.filter(page =>
+      page.on_page_seo?.has_table === true
+    ).length / total) * 100),
+
+    orderedListsPercentage: Math.round((pages.filter(page =>
+      page.on_page_seo?.has_ordered_list === true
+    ).length / total) * 100),
+
+    unorderedListsPercentage: Math.round((pages.filter(page =>
+      page.on_page_seo?.has_unordered_list === true
+    ).length / total) * 100),
+
+    headingsPercentage: Math.round((pages.filter(page =>
+      (page.on_page_seo?.heading_count || 0) > 0
+    ).length / total) * 100),
+
+    imagesPercentage: Math.round((pages.filter(page =>
+      (page.on_page_seo?.image_count || 0) > 0
+    ).length / total) * 100),
+
+    videosPercentage: Math.round((pages.filter(page =>
+      page.on_page_seo?.video_present === true
+    ).length / total) * 100),
+
+    // Performance benchmarks
+    avgTechSeoScore: Math.round(pages.reduce((sum, page) => {
+      const tech = page.technical_seo || {}
+      let score = 0
+      if (page.citation_url?.startsWith('https://') || tech.http_response_code === 200) score += 20
+      if (tech.schema_markup_present === true) score += 20
+      if (tech.semantic_html_usage === true) score += 20
+      if (tech.aria_labels_present === true) score += 20
+      if (tech.mobile_friendly === true) score += 10
+      if (tech.meta_description_present === true) score += 5
+      if (tech.html_structure_score >= 3) score += 5
+      return sum + score
+    }, 0) / total),
+
+    avgContentQualityScore: Math.round(pages.reduce((sum, page) => {
+      if (page.content_quality_score && page.content_quality_score > 0) {
+        return sum + (Number(page.content_quality_score) * 20)
+      }
+      const content = page.content_quality || {}
+      const onPage = page.on_page_seo || {}
+      let score = 0
+      score += (content.content_depth_score || 0) * 5
+      score += (content.analysis_score || 0) * 5
+      score += (content.content_optimization_score || 0) * 5
+      score += (content.eeat_score || 0) * 3
+      score += (content.readability_score || 0) * 3
+      if (content.has_quotes) score += 3
+      if (content.has_research) score += 4
+      if (content.has_citations) score += 4
+      if (content.has_statistics) score += 4
+      const wordCount = onPage.word_count || 0
+      if (wordCount > 2000) score += 10
+      else if (wordCount > 1000) score += 7
+      else if (wordCount > 500) score += 5
+      else if (wordCount > 300) score += 3
+      return sum + Math.min(score, 100)
+    }, 0) / total),
+
+    avgPagePerformanceScore: Math.round(pages.reduce((sum, page) => {
+      const perf = page.page_performance || {}
+      if (perf.page_speed_score) return sum + Number(perf.page_speed_score)
+
+      let score = 0
+      const speedScore = perf.page_speed_score || 50
+      score += speedScore * 0.4
+      const accessibilityScore = (perf.accessibility_score || 0) * 25
+      score += accessibilityScore * 0.25
+      const fcp = perf.firstContentfulPaint || 0
+      let fcpScore = 100
+      if (fcp > 2500) fcpScore = 0
+      else if (fcp > 1800) fcpScore = 50
+      else if (fcp > 1000) fcpScore = 75
+      score += fcpScore * 0.15
+      const lcp = perf.largestContentfulPaint || 0
+      let lcpScore = 100
+      if (lcp > 4000) lcpScore = 0
+      else if (lcp > 2500) lcpScore = 50
+      else if (lcp > 1500) lcpScore = 75
+      score += lcpScore * 0.15
+      const cls = perf.cumulativeLayoutShift || 0
+      let clsScore = 100
+      if (cls > 0.25) clsScore = 0
+      else if (cls > 0.1) clsScore = 50
+      else if (cls > 0.05) clsScore = 75
+      score += clsScore * 0.05
+      return sum + Math.round(Math.max(score, 0))
+    }, 0) / total)
+  }
+})
+
+// Helper function to get comparison indicator
+const getComparisonIndicator = (current, average) => {
+  if (current > average) {
+    return {
+      trend: 'up',
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      icon: '↗️'
+    }
+  } else if (current < average) {
+    return {
+      trend: 'down',
+      color: 'text-red-600',
+      bgColor: 'bg-red-50',
+      icon: '↘️'
+    }
+  } else {
+    return {
+      trend: 'equal',
+      color: 'text-gray-600',
+      bgColor: 'bg-gray-50',
+      icon: '→'
+    }
+  }
+}
+
+// Calculate Technical SEO Score (BRAND PAGES ONLY)
+const techSeoScore = computed(() => {
+  if (!brandPages.value.length) return 0
+
+  // Calculate based on actual technical_seo object fields
+  const scores = brandPages.value.map(page => {
+    let score = 0
+    const tech = page.technical_seo || {}
+
+    // HTTPS/SSL (20 points)
+    if (page.citation_url?.startsWith('https://') || tech.http_response_code === 200) {
+      score += 20
+    }
+
+    // Schema markup (20 points)
+    if (tech.schema_markup_present === true) {
+      score += 20
+    }
+
+    // Semantic HTML (20 points)
+    if (tech.semantic_html_usage === true) {
+      score += 20
+    }
+
+    // ARIA/Accessibility (20 points)
+    if (tech.aria_labels_present === true) {
+      score += 20
+    }
+
+    // Mobile friendly (10 points)
+    if (tech.mobile_friendly === true) {
+      score += 10
+    }
+
+    // Meta description (5 points)
+    if (tech.meta_description_present === true) {
+      score += 5
+    }
+
+    // HTML structure quality (5 points)
+    if (tech.html_structure_score >= 3) {
+      score += 5
+    }
+
+    return score
+  })
+
+  const validScores = scores.filter(score => score >= 0)
+  if (!validScores.length) return 0
+
+  return Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
+})
+
+// Calculate Content Quality Score (BRAND PAGES ONLY)
+const contentQualityScore = computed(() => {
+  if (!brandPages.value.length) return 0
+
+  // Use actual content_quality object with detailed scoring
+  const scores = brandPages.value.map(page => {
+    // First try direct score field from schema (scale from 0-5 to 0-100)
+    if (page.content_quality_score && page.content_quality_score > 0) {
+      return Number(page.content_quality_score) * 20
+    }
+
+    // Calculate based on content_quality object metrics
+    const content = page.content_quality || {}
+    const onPage = page.on_page_seo || {}
+    let score = 0
+
+    // Content depth and analysis (25 points)
+    score += (content.content_depth_score || 0) * 5
+    score += (content.analysis_score || 0) * 5
+
+    // Content optimization (20 points)
+    score += (content.content_optimization_score || 0) * 5
+
+    // EEAT signals (15 points)
+    score += (content.eeat_score || 0) * 3
+
+    // Readability (15 points)
+    score += (content.readability_score || 0) * 3
+
+    // Content features (15 points)
+    if (content.has_quotes) score += 3
+    if (content.has_research) score += 4
+    if (content.has_citations) score += 4
+    if (content.has_statistics) score += 4
+
+    // Word count from on_page_seo (10 points)
+    const wordCount = onPage.word_count || 0
+    if (wordCount > 2000) score += 10
+    else if (wordCount > 1000) score += 7
+    else if (wordCount > 500) score += 5
+    else if (wordCount > 300) score += 3
+
+    return Math.min(score, 100) // Cap at 100
+  })
+
+  const validScores = scores.filter(score => score >= 0)
+  if (!validScores.length) return 0
+
+  return Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
+})
+
+// Calculate Page Performance Score (BRAND PAGES ONLY)
+const pagePerformanceScore = computed(() => {
+  if (!brandPages.value.length) return 0
+
+  // Calculate performance score based on available metrics in page_performance JSONB field
+  const scores = brandPages.value.map(page => {
+    const perf = page.page_performance || {}
+
+    // Use direct page_speed_score if available
+    if (perf.page_speed_score) {
+      return Number(perf.page_speed_score)
+    }
+
+    // Calculate based on Core Web Vitals and accessibility
+    let score = 0
+
+    // Page speed contributes 40%
+    const speedScore = perf.page_speed_score || 50 // Default to 50 if not available
+    score += speedScore * 0.4
+
+    // Accessibility contributes 25%
+    const accessibilityScore = (perf.accessibility_score || 0) * 25 // Scale from 0-4 to 0-100
+    score += accessibilityScore * 0.25
+
+    // First Contentful Paint (15%)
+    const fcp = perf.firstContentfulPaint || 0
+    let fcpScore = 100
+    if (fcp > 2500) fcpScore = 0
+    else if (fcp > 1800) fcpScore = 50
+    else if (fcp > 1000) fcpScore = 75
+    score += fcpScore * 0.15
+
+    // Largest Contentful Paint (15%)
+    const lcp = perf.largestContentfulPaint || 0
+    let lcpScore = 100
+    if (lcp > 4000) lcpScore = 0
+    else if (lcp > 2500) lcpScore = 50
+    else if (lcp > 1500) lcpScore = 75
+    score += lcpScore * 0.15
+
+    // Cumulative Layout Shift (5%)
+    const cls = perf.cumulativeLayoutShift || 0
+    let clsScore = 100
+    if (cls > 0.25) clsScore = 0
+    else if (cls > 0.1) clsScore = 50
+    else if (cls > 0.05) clsScore = 75
+    score += clsScore * 0.05
+
+    return Math.round(Math.max(score, 0)) // Don't go below 0
+  })
+
+  const validScores = scores.filter(score => score >= 0)
+  if (!validScores.length) return 0
+
+  return Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
+})
+
+// Technical SEO Metrics (BRAND PAGES ONLY)
+const technicalSeoMetrics = computed(() => {
+  if (!brandPages.value.length) return []
+
+  const metrics = [
+    {
+      label: 'HTTPS/SSL',
+      check: (page) => {
+        return page.citation_url?.startsWith('https://') ||
+               page.technical_seo?.http_response_code === 200
+      },
+      avgKey: 'httpsPercentage'
+    },
+    {
+      label: 'Schema Markup',
+      check: (page) => page.technical_seo?.schema_markup_present === true,
+      avgKey: 'schemaPercentage'
+    },
+    {
+      label: 'Semantic HTML',
+      check: (page) => page.technical_seo?.semantic_html_usage === true,
+      avgKey: 'semanticHtmlPercentage'
+    },
+    {
+      label: 'Mobile Friendly',
+      check: (page) => page.technical_seo?.mobile_friendly === true,
+      avgKey: 'mobilePercentage'
+    },
+    {
+      label: 'ARIA Labels',
+      check: (page) => page.technical_seo?.aria_labels_present === true,
+      avgKey: 'ariaPercentage'
+    },
+    {
+      label: 'Meta Description',
+      check: (page) => page.technical_seo?.meta_description_present === true,
+      avgKey: 'metaDescPercentage'
+    }
+  ]
+
+  return metrics.map(metric => {
+    const count = brandPages.value.filter(page => metric.check(page)).length
+    const percentage = totalBrandPages.value > 0 ? Math.round((count / totalBrandPages.value) * 100) : 0
+
+    return {
+      label: metric.label,
+      count,
+      percentage,
+      avgPercentage: benchmarkAverages.value[metric.avgKey] || 0,
+      totalBrandPages: totalBrandPages.value
+    }
+  })
+})
+
+// Word Count Distribution (BRAND PAGES ONLY)
+const wordCountDistribution = computed(() => {
+  if (!brandPages.value.length) return []
+
+  const ranges = [
+    { range: '0-500', min: 0, max: 500 },
+    { range: '501-1000', min: 501, max: 1000 },
+    { range: '1001-2000', min: 1001, max: 2000 },
+    { range: '2000+', min: 2001, max: Infinity }
+  ]
+
+  return ranges.map(range => {
+    const count = brandPages.value.filter(page => {
+      // Use word_count from on_page_seo object
+      const wordCount = page.on_page_seo?.word_count || 0
+      return wordCount >= range.min && wordCount <= range.max
+    }).length
+
+    return {
+      range: range.range,
+      count,
+      percentage: totalBrandPages.value > 0 ? Math.round((count / totalBrandPages.value) * 100) : 0
+    }
+  })
+})
+
+// Content Structure Elements (BRAND PAGES ONLY)
+const contentStructure = computed(() => {
+  if (!brandPages.value.length) return []
+
+  const elements = [
+    {
+      element: 'Tables',
+      check: (page) => page.on_page_seo?.has_table === true,
+      avgKey: 'tablesPercentage'
+    },
+    {
+      element: 'Ordered Lists',
+      check: (page) => page.on_page_seo?.has_ordered_list === true,
+      avgKey: 'orderedListsPercentage'
+    },
+    {
+      element: 'Unordered Lists',
+      check: (page) => page.on_page_seo?.has_unordered_list === true,
+      avgKey: 'unorderedListsPercentage'
+    },
+    {
+      element: 'Headings',
+      check: (page) => (page.on_page_seo?.heading_count || 0) > 0,
+      avgKey: 'headingsPercentage'
+    },
+    {
+      element: 'Images',
+      check: (page) => (page.on_page_seo?.image_count || 0) > 0,
+      avgKey: 'imagesPercentage'
+    },
+    {
+      element: 'Videos',
+      check: (page) => page.on_page_seo?.video_present === true,
+      avgKey: 'videosPercentage'
+    }
+  ]
+
+  return elements.map(element => {
+    const count = brandPages.value.filter(page => element.check(page)).length
+    const percentage = totalBrandPages.value > 0 ? Math.round((count / totalBrandPages.value) * 100) : 0
+
+    return {
+      element: element.element,
+      percentage,
+      avgPercentage: benchmarkAverages.value[element.avgKey] || 0
+    }
+  })
+})
+
+// Performance vs Citation Analysis
+const performanceRanges = computed(() => {
+  if (!pageAnalyses.value.length) return []
+
+  const ranges = [
+    { range: '90-100%', min: 90, max: 100 },
+    { range: '80-89%', min: 80, max: 89 },
+    { range: '70-79%', min: 70, max: 79 },
+    { range: '60-69%', min: 60, max: 69 },
+    { range: 'Below 60%', min: 0, max: 59 }
+  ]
+
+  return ranges.map(range => {
+    const pagesInRange = pageAnalyses.value.filter(page => {
+      // Use content_quality_score or relevance_score from schema
+      const score = Number(page.content_quality_score || page.relevance_score || 0)
+      return score >= range.min && score <= range.max
+    })
+
+    // Check for citations using schema fields
+    const citations = pagesInRange.filter(page =>
+      page.is_client_domain ||
+      page.brand_mentioned ||
+      (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain))
+    ).length
+
+    const citationRate = pagesInRange.length > 0 ? Math.round((citations / pagesInRange.length) * 100) : 0
+
+    const avgQualityScore = pagesInRange.length > 0
+      ? Math.round(pagesInRange.reduce((sum, page) => {
+          return sum + Number(page.content_quality_score || page.relevance_score || 0)
+        }, 0) / pagesInRange.length)
+      : 0
+
+    return {
+      range: range.range,
+      pages: pagesInRange.length,
+      citations,
+      citationRate,
+      avgQualityScore
+    }
+  }).filter(range => range.pages > 0)
+})
+
+// Selected issue for detailed view
+const selectedIssue = ref(null)
+
+// Top Issues and Recommendations (BRAND PAGES ONLY)
+const topIssues = computed(() => {
+  if (!brandPages.value.length) return []
+
+  const issues = []
+
+  // Check for SSL issues
+  const noSSLPages = brandPages.value.filter(page => {
+    const tech = page.technical_seo || {}
+    return !(tech.ssl_enabled || tech.https || tech.secure ||
+             page.url?.startsWith('https://') || page.citation_url?.startsWith('https://'))
+  })
+  const noSSL = noSSLPages.length
+
+  if (noSSL > 0) {
+    issues.push({
+      issue: 'Missing SSL Certificates',
+      description: 'Some brand pages are not served over HTTPS, which affects search rankings and user trust.',
+      affectedPages: noSSL,
+      priority: 'High',
+      pages: noSSLPages
+    })
+  }
+
+  // Check for poor content quality
+  const poorContentPages = brandPages.value.filter(page => {
+    const score = Number(page.content_quality_score || page.relevance_score || 0)
+    return score < 60
+  })
+  const poorContent = poorContentPages.length
+
+  if (poorContent > 0) {
+    issues.push({
+      issue: 'Low Content Quality Scores',
+      description: 'Brand pages with poor content quality scores need optimization for better engagement.',
+      affectedPages: poorContent,
+      priority: 'Medium',
+      pages: poorContentPages
+    })
+  }
+
+  // Check for missing structure
+  const noStructurePages = brandPages.value.filter(page => {
+    const onPage = page.on_page_seo || {}
+    return !((onPage.heading_count || 0) > 0 ||
+            onPage.has_ordered_list === true ||
+            onPage.has_unordered_list === true)
+  })
+  const noStructure = noStructurePages.length
+
+  if (noStructure > 0) {
+    issues.push({
+      issue: 'Missing Content Structure',
+      description: 'Brand pages lack proper heading hierarchy and structured content elements.',
+      affectedPages: noStructure,
+      priority: 'Medium',
+      pages: noStructurePages
+    })
+  }
+
+  // Check for thin content
+  const lowWordCountPages = brandPages.value.filter(page => {
+    const wordCount = page.on_page_seo?.word_count || 0
+    return wordCount < 300
+  })
+  const lowWordCount = lowWordCountPages.length
+
+  if (lowWordCount > 0) {
+    issues.push({
+      issue: 'Thin Content',
+      description: 'Brand pages with very low word counts may not provide sufficient value to users.',
+      affectedPages: lowWordCount,
+      priority: 'Low',
+      pages: lowWordCountPages
+    })
+  }
+
+  // Check for missing semantic markup
+  const noSemanticPages = brandPages.value.filter(page => {
+    const tech = page.technical_seo || {}
+    return !(tech.semantic_html_usage === true || tech.schema_markup_present === true)
+  })
+  const noSemantic = noSemanticPages.length
+
+  if (noSemantic > 0) {
+    issues.push({
+      issue: 'Missing Semantic Markup',
+      description: 'Brand pages lack structured data and semantic HTML elements for better search visibility.',
+      affectedPages: noSemantic,
+      priority: 'Medium',
+      pages: noSemanticPages
+    })
+  }
+
+  // Check for accessibility issues
+  const noAriaPages = brandPages.value.filter(page => {
+    const tech = page.technical_seo || {}
+    return !(tech.aria_labels_present === true)
+  })
+  const noAria = noAriaPages.length
+
+  if (noAria > 0) {
+    issues.push({
+      issue: 'Poor Accessibility',
+      description: 'Brand pages lack ARIA labels and accessibility features, limiting user experience.',
+      affectedPages: noAria,
+      priority: 'Low',
+      pages: noAriaPages
+    })
+  }
+
+  return issues.slice(0, 5) // Show top 5 issues
+})
+</script>

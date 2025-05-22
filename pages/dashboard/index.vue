@@ -43,15 +43,17 @@
       </NuxtLink>
 
       <!-- Reports Card -->
-      <NuxtLink to="/dashboard/reports" class="card group opacity-75">
+      <NuxtLink to="/dashboard/reports" class="card group">
         <div class="flex items-center justify-between mb-4">
-          <div class="bg-gray-100 p-3 rounded-lg">
-            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="bg-citebots-orange/10 p-3 rounded-lg group-hover:bg-citebots-orange/20 transition-colors">
+            <svg class="w-6 h-6 text-citebots-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
-          <span class="text-sm text-gray-400">Coming Soon</span>
+          <svg class="w-5 h-5 text-citebots-gray-400 group-hover:text-citebots-orange transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
         </div>
         <h3 class="text-lg font-semibold mb-2">Reports</h3>
         <p class="text-citebots-gray-600">View and share analysis reports</p>
