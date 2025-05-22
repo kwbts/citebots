@@ -1,237 +1,197 @@
 <template>
-  <div class="p-6 max-w-6xl mx-auto">
-    <div class="mb-6">
-      <NuxtLink to="/dashboard/reports" class="text-blue-600 hover:text-blue-800">
-        ← Back to Reports
-      </NuxtLink>
-    </div>
-    
-    <h1 class="text-2xl font-bold mb-6">Analysis Report</h1>
-    
-    <!-- Loading State -->
-    <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p class="mt-4 text-gray-600">Loading report...</p>
-    </div>
-    
-    <!-- Report Content -->
-    <div v-else-if="analysisRun && reportData" class="space-y-6">
-      <!-- Report Header -->
-      <div class="bg-white p-6 rounded-lg shadow">
-        <div class="flex justify-between items-start mb-4">
-          <div>
-            <h2 class="text-xl font-semibold">{{ clientName }} - Analysis Report</h2>
-            <p class="text-gray-600">{{ formatAnalysisRunTitle(analysisRun) }}</p>
-          </div>
-          <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-            {{ reportData.queries.length }} Queries
-          </span>
+  <div class="h-screen flex flex-col">
+    <!-- Header with Title and Filters -->
+    <div class="bg-white border-b border-gray-200 p-6">
+      <!-- Breadcrumb -->
+      <div class="mb-4">
+        <NuxtLink to="/dashboard/reports" class="text-blue-600 hover:text-blue-800">
+          ← Back to Reports
+        </NuxtLink>
+      </div>
+      
+      <!-- Title -->
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">{{ clientName }} - Analysis Dashboard</h1>
+          <p class="text-gray-600 mt-1">{{ formatAnalysisRunTitle(analysisRun) }}</p>
         </div>
-        
-        <!-- Summary Metrics -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <p class="text-sm text-gray-600">Platform</p>
-            <p class="font-semibold">{{ analysisRun.platform }}</p>
-          </div>
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <p class="text-sm text-gray-600">Status</p>
-            <p class="font-semibold capitalize">{{ analysisRun.status }}</p>
-          </div>
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <p class="text-sm text-gray-600">Progress</p>
-            <p class="font-semibold">{{ analysisRun.queries_completed || 0 }}/{{ analysisRun.queries_total || 0 }}</p>
-          </div>
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <p class="text-sm text-gray-600">Created</p>
-            <p class="font-semibold">{{ formatDate(analysisRun.created_at) }}</p>
-          </div>
+        <div class="flex items-center gap-4">
+          <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+            {{ reportData?.queries?.length || 0 }} Queries
+          </span>
+          <span :class="getStatusClass(analysisRun?.status)" class="px-3 py-1 text-sm rounded-full">
+            {{ analysisRun?.status || 'Loading' }}
+          </span>
         </div>
       </div>
       
-      <!-- Query Results List -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="p-6 border-b">
-          <h3 class="text-lg font-semibold">Query Analysis Results</h3>
+      <!-- Top Filters -->
+      <div class="flex flex-wrap gap-4 items-center">
+        <!-- View Type Filter -->
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700">View:</label>
+          <select v-model="filters.viewType" class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+            <option value="all">All</option>
+            <option value="brand">Brand Only</option>
+            <option value="competitor">Competitor Only</option>
+          </select>
         </div>
         
-        <div class="divide-y divide-gray-200">
-          <div v-for="query in reportData.queries" :key="query.id"
-               class="p-6 hover:bg-gray-50 cursor-pointer"
-               @click="selectedQuery = query">
-            
-            <!-- Query Header -->
-            <div class="flex justify-between items-start mb-3">
-              <h4 class="font-medium text-lg text-gray-900">{{ query.query_text }}</h4>
-              <span :class="getStatusClass(query.status)" class="px-2 py-1 text-xs rounded-full">
-                {{ query.status }}
-              </span>
-            </div>
-            
-            <!-- Query Metadata -->
-            <div class="text-sm text-gray-600 mb-3">
-              <span>Keyword: {{ query.query_keyword || 'N/A' }}</span>
-              <span class="mx-2">•</span>
-              <span>Intent: {{ query.query_intent || 'N/A' }}</span>
-              <span class="mx-2">•</span>
-              <span>Platform: {{ query.data_source || 'N/A' }}</span>
-            </div>
-            
-            <!-- Metrics Tags -->
-            <div class="flex flex-wrap gap-2 mb-3">
-              <span v-if="query.brand_mentioned" class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">
-                Brand Mentioned
-              </span>
-              <span v-if="query.competitor_count > 0" class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                {{ query.competitor_count }} Competitors
-              </span>
-              <span v-if="query.brand_mention_count" class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {{ query.brand_mention_count }} Brand Mentions
-              </span>
-              <span v-if="query.brand_sentiment" class="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                Sentiment: {{ formatSentiment(query.brand_sentiment) }}
-              </span>
-            </div>
-            
-            <!-- Analysis Summary -->
-            <div class="text-sm text-gray-600 space-y-1">
-              <p v-if="query.citation_count > 0">
-                {{ query.citation_count }} citations analyzed
-              </p>
-              <p v-if="query.query_category">
-                Category: {{ query.query_category }} | Type: {{ query.query_type }}
-              </p>
-              <p v-if="query.funnel_stage">
-                Funnel: {{ query.funnel_stage }} | Competition: {{ query.query_competition }}
-              </p>
-            </div>
-            
-            <!-- Page Analysis Preview -->
-            <div v-if="query.page_analyses && query.page_analyses.length > 0" class="mt-4 pt-3 border-t border-gray-100">
-              <p class="text-sm font-medium text-gray-700 mb-2">Citations ({{ query.page_analyses.length }}):</p>
-              <div class="text-xs text-gray-600 space-y-1 max-h-20 overflow-y-auto">
-                <div v-for="page in query.page_analyses.slice(0, 3)" :key="page.id" class="flex items-start">
-                  <span v-if="page.brand_mentioned" class="text-green-600 mr-1">✓</span>
-                  <span v-else class="text-gray-400 mr-1">○</span>
-                  <span class="truncate" :title="page.page_title || page.citation_url">
-                    {{ truncateText(page.page_title || page.citation_url, 80) }}
-                  </span>
-                </div>
-                <div v-if="query.page_analyses.length > 3" class="text-blue-600">
-                  + {{ query.page_analyses.length - 3 }} more citations
-                </div>
-              </div>
-            </div>
-            
-            <!-- Query ID and Date -->
-            <div class="mt-3 pt-2 border-t border-gray-100 text-xs text-gray-500 flex justify-between">
-              <div>ID: {{ truncateText(query.id, 8) }}</div>
-              <div>{{ formatDate(query.created_at) }}</div>
-            </div>
+        <!-- Platform Filter -->
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700">Platform:</label>
+          <div class="flex gap-2">
+            <label class="flex items-center">
+              <input type="checkbox" v-model="filters.platforms" value="chatgpt" class="mr-1">
+              <span class="text-sm">ChatGPT</span>
+            </label>
+            <label class="flex items-center">
+              <input type="checkbox" v-model="filters.platforms" value="perplexity" class="mr-1">
+              <span class="text-sm">Perplexity</span>
+            </label>
           </div>
         </div>
+        
+        <!-- Query Intent Filter -->
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700">Intent:</label>
+          <select v-model="filters.queryIntent" class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+            <option value="">All Intents</option>
+            <option v-for="intent in availableIntents" :key="intent" :value="intent">
+              {{ intent }}
+            </option>
+          </select>
+        </div>
+        
+        <!-- Funnel Stage Filter -->
+        <div class="flex items-center gap-2">
+          <label class="text-sm font-medium text-gray-700">Funnel:</label>
+          <select v-model="filters.funnelStage" class="border border-gray-300 rounded-md px-3 py-1 text-sm">
+            <option value="">All Stages</option>
+            <option v-for="stage in availableFunnelStages" :key="stage" :value="stage">
+              {{ stage }}
+            </option>
+          </select>
+        </div>
+        
+        <!-- Reset Filters -->
+        <button @click="resetFilters" class="text-sm text-blue-600 hover:text-blue-800">
+          Reset Filters
+        </button>
       </div>
     </div>
     
-    <!-- Error State -->
-    <div v-else-if="error" class="text-center py-12">
-      <p class="text-red-600">{{ error }}</p>
-    </div>
-    
-    <!-- Empty State -->
-    <div v-else class="text-center py-12">
-      <p class="text-gray-600">No report data found.</p>
-    </div>
-    
-    <!-- Query Detail Modal -->
-    <Teleport to="body">
-      <div v-if="selectedQuery" 
-           class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-           @click="selectedQuery = null">
-        <div class="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6"
-             @click.stop>
-          <div class="flex justify-between items-start mb-4">
-            <h3 class="text-xl font-semibold">Query Details</h3>
-            <button @click="selectedQuery = null" class="text-gray-500 hover:text-gray-700">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex">
+      <!-- Left Sidebar Navigation -->
+      <div class="w-64 bg-gray-50 border-r border-gray-200 p-4">
+        <nav class="space-y-1">
+          <button 
+            v-for="tab in dashboardTabs" 
+            :key="tab.id"
+            @click="activeTab = tab.id"
+            :class="[
+              'w-full text-left px-3 py-2 rounded-md text-sm font-medium transition-colors',
+              activeTab === tab.id 
+                ? 'bg-blue-100 text-blue-700' 
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            ]"
+          >
+            {{ tab.name }}
+          </button>
+        </nav>
+      </div>
+      
+      <!-- Main Dashboard Content -->
+      <div class="flex-1 overflow-auto">
+        <!-- Loading State -->
+        <div v-if="loading" class="flex items-center justify-center h-full">
+          <div class="text-center">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p class="mt-4 text-gray-600">Loading dashboard data...</p>
+          </div>
+        </div>
+        
+        <!-- Error State -->
+        <div v-else-if="error" class="flex items-center justify-center h-full">
+          <div class="text-center">
+            <p class="text-red-600 mb-4">{{ error }}</p>
+            <button @click="fetchReportData" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+              Retry
             </button>
           </div>
+        </div>
+        
+        <!-- Dashboard Content -->
+        <div v-else class="p-6">
+          <!-- Brand Performance Tab -->
+          <BrandPerformanceDashboard 
+            v-if="activeTab === 'brand-performance'"
+            :data="filteredReportData"
+            :client="client"
+            :competitors="competitors"
+          />
           
-          <!-- Modal content matches the existing analysis/[id] page structure -->
-          <div class="space-y-4">
-            <div>
-              <h4 class="font-medium mb-2">Query</h4>
-              <p class="text-gray-700">{{ selectedQuery.query_text }}</p>
-              
-              <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Keyword</p>
-                  <p class="font-medium">{{ selectedQuery.query_keyword || 'N/A' }}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Intent</p>
-                  <p class="font-medium">{{ selectedQuery.query_intent || 'N/A' }}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Platform</p>
-                  <p class="font-medium">{{ selectedQuery.data_source || 'N/A' }}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Status</p>
-                  <p class="font-medium capitalize">{{ selectedQuery.status || 'N/A' }}</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Analysis Metrics -->
-            <div>
-              <h4 class="font-medium mb-2">Analysis Metrics</h4>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Citations</p>
-                  <p class="font-medium">{{ selectedQuery.citation_count || 0 }}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Brand Mentions</p>
-                  <p class="font-medium">{{ selectedQuery.brand_mention_count || 0 }}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Competitors</p>
-                  <p class="font-medium">{{ selectedQuery.competitor_count || 0 }}</p>
-                </div>
-                <div class="bg-gray-50 p-3 rounded">
-                  <p class="text-gray-500 text-xs">Sentiment</p>
-                  <p class="font-medium">{{ formatSentiment(selectedQuery.brand_sentiment) }}</p>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Response -->
-            <div>
-              <h4 class="font-medium mb-2">Response</h4>
-              <div class="bg-gray-50 p-4 rounded max-h-96 overflow-y-auto">
-                <p class="whitespace-pre-wrap text-sm">{{ selectedQuery.model_response }}</p>
-              </div>
-            </div>
-            
-            <!-- Raw Data -->
-            <div>
-              <h4 class="font-medium mb-2">Raw Query Data</h4>
-              <div class="bg-gray-50 p-4 rounded overflow-x-auto">
-                <pre class="text-xs">{{ JSON.stringify(selectedQuery, null, 2) }}</pre>
-              </div>
-            </div>
-          </div>
+          <!-- Competitor Comparison Tab -->
+          <CompetitorComparisonDashboard 
+            v-else-if="activeTab === 'competitor-comparison'"
+            :data="filteredReportData"
+            :client="client"
+            :competitors="competitors"
+          />
+          
+          <!-- On-page SEO Tab -->
+          <OnPageSEODashboard 
+            v-else-if="activeTab === 'onpage-seo'"
+            :data="filteredReportData"
+            :client="client"
+          />
+          
+          <!-- Query Analysis Tab -->
+          <QueryAnalysisDashboard 
+            v-else-if="activeTab === 'query-analysis'"
+            :data="filteredReportData"
+            :client="client"
+          />
+          
+          <!-- Page Analytics Tab -->
+          <PageAnalyticsDashboard 
+            v-else-if="activeTab === 'page-analytics'"
+            :data="filteredReportData"
+            :client="client"
+          />
+          
+          <!-- Content Gaps Tab -->
+          <ContentGapsDashboard 
+            v-else-if="activeTab === 'content-gaps'"
+            :data="filteredReportData"
+            :client="client"
+            :competitors="competitors"
+          />
+          
+          <!-- Recommendations Tab -->
+          <RecommendationsDashboard 
+            v-else-if="activeTab === 'recommendations'"
+            :data="filteredReportData"
+            :client="client"
+            :competitors="competitors"
+          />
+          
+          <!-- Raw Data Tab (Original View) -->
+          <RawDataView 
+            v-else-if="activeTab === 'raw-data'"
+            :data="filteredReportData"
+            :analysis-run="analysisRun"
+            :client="client"
+          />
         </div>
       </div>
-    </Teleport>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 definePageMeta({
@@ -246,19 +206,100 @@ const user = useSupabaseUser()
 // Data
 const analysisRun = ref(null)
 const reportData = ref(null)
-const selectedQuery = ref(null)
 const client = ref(null)
+const competitors = ref([])
 const loading = ref(true)
 const error = ref(null)
+
+// Dashboard State
+const activeTab = ref('brand-performance')
+const filters = ref({
+  viewType: 'all',
+  platforms: ['chatgpt', 'perplexity'],
+  queryIntent: '',
+  funnelStage: ''
+})
+
+// Dashboard Tabs Configuration
+const dashboardTabs = [
+  { id: 'brand-performance', name: 'Brand Performance' },
+  { id: 'competitor-comparison', name: 'Competitor Comparison' },
+  { id: 'onpage-seo', name: 'On-page SEO' },
+  { id: 'query-analysis', name: 'Query Analysis' },
+  { id: 'page-analytics', name: 'Page Analytics' },
+  { id: 'content-gaps', name: 'Content Gaps' },
+  { id: 'recommendations', name: 'Recommendations' },
+  { id: 'raw-data', name: 'Raw Data' }
+]
 
 // Computed
 const clientName = computed(() => {
   return client.value?.name || 'Loading...'
 })
 
+const availableIntents = computed(() => {
+  if (!reportData.value?.queries) return []
+  const intents = new Set()
+  reportData.value.queries.forEach(query => {
+    if (query.query_intent) intents.add(query.query_intent)
+  })
+  return Array.from(intents).sort()
+})
+
+const availableFunnelStages = computed(() => {
+  if (!reportData.value?.queries) return []
+  const stages = new Set()
+  reportData.value.queries.forEach(query => {
+    if (query.funnel_stage) stages.add(query.funnel_stage)
+  })
+  return Array.from(stages).sort()
+})
+
+const filteredReportData = computed(() => {
+  if (!reportData.value?.queries) return { queries: [] }
+  
+  let filteredQueries = reportData.value.queries
+  
+  // Apply View Type Filter
+  if (filters.value.viewType === 'brand') {
+    filteredQueries = filteredQueries.filter(q => q.brand_mentioned)
+  } else if (filters.value.viewType === 'competitor') {
+    filteredQueries = filteredQueries.filter(q => q.competitor_count > 0)
+  }
+  
+  // Apply Platform Filter
+  if (filters.value.platforms.length > 0) {
+    filteredQueries = filteredQueries.filter(q => 
+      filters.value.platforms.includes(q.data_source?.toLowerCase())
+    )
+  }
+  
+  // Apply Query Intent Filter
+  if (filters.value.queryIntent) {
+    filteredQueries = filteredQueries.filter(q => 
+      q.query_intent === filters.value.queryIntent
+    )
+  }
+  
+  // Apply Funnel Stage Filter
+  if (filters.value.funnelStage) {
+    filteredQueries = filteredQueries.filter(q => 
+      q.funnel_stage === filters.value.funnelStage
+    )
+  }
+  
+  return {
+    ...reportData.value,
+    queries: filteredQueries
+  }
+})
+
 // Methods
 const fetchReportData = async () => {
   try {
+    loading.value = true
+    error.value = null
+    
     const analysisRunId = route.params.id
     
     // Fetch analysis run
@@ -277,12 +318,20 @@ const fetchReportData = async () => {
     // Fetch client info
     const { data: clientData } = await supabase
       .from('clients')
-      .select('name')
+      .select('*')
       .eq('id', runData.client_id)
       .eq('created_by', user.value.id)
       .single()
     
     client.value = clientData
+    
+    // Fetch competitors
+    const { data: competitorData } = await supabase
+      .from('competitors')
+      .select('*')
+      .eq('client_id', runData.client_id)
+    
+    competitors.value = competitorData || []
     
     // Fetch queries with page analyses
     const { data: queryData, error: queryError } = await supabase
@@ -310,6 +359,7 @@ const fetchReportData = async () => {
 }
 
 const formatAnalysisRunTitle = (run) => {
+  if (!run) return 'Loading...'
   const date = new Date(run.created_at).toLocaleDateString()
   return `${run.platform?.toUpperCase() || 'Analysis'} - ${date}`
 }
@@ -324,27 +374,42 @@ const getStatusClass = (status) => {
   return classes[status] || classes.pending
 }
 
-const formatSentiment = (score) => {
-  if (score === undefined || score === null) return 'N/A'
-  
-  const numScore = parseFloat(score)
-  if (isNaN(numScore)) return 'N/A'
-  
-  return numScore > 0 ? `+${numScore.toFixed(2)}` : numScore.toFixed(2)
+const resetFilters = () => {
+  filters.value = {
+    viewType: 'all',
+    platforms: ['chatgpt', 'perplexity'],
+    queryIntent: '',
+    funnelStage: ''
+  }
 }
 
-const truncateText = (text, maxLength) => {
-  if (!text) return ''
-  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
-}
-
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-}
+// Watch for filter changes and update URL params
+watch(filters, (newFilters) => {
+  // Optional: Update URL params to persist filter state
+  // This allows bookmarking of filtered views
+}, { deep: true })
 
 onMounted(() => {
   fetchReportData()
 })
 </script>
+
+<style scoped>
+/* Custom scrollbar for the main content area */
+.overflow-auto::-webkit-scrollbar {
+  width: 6px;
+}
+
+.overflow-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.overflow-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+</style>

@@ -1,0 +1,1448 @@
+[
+  {
+    "table_name": "access_requests",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "first_name",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "last_name",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "company",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "requested_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "approved_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "approved_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "access_requests",
+    "column_name": "generated_password",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "analysis_run_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_id",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_text",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_keyword",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_category",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_topic",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_type",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_intent",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "funnel_stage",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_complexity",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "data_source",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "model_response",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "citation_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "brand_mentioned",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "brand_sentiment",
+    "data_type": "double precision",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "competitor_mentioned_names",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "competitor_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "associated_pages_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "response_match",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "response_outcome",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "brand_mention_type",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "competitor_context",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "action_orientation",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "query_competition",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "error_message",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "brand_mention_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "competitor_analysis",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "brand_positioning",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "total_competitor_mentions",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queries",
+    "column_name": "associated_pages",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "analysis_run_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "query_data",
+    "data_type": "jsonb",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "attempts",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "max_attempts",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "error_message",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "error_details",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "started_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "processor_id",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "priority",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "error",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "result",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "query_text",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "platform",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "client_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "client_name",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "client_domain",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_queue",
+    "column_name": "competitors",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "client_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "batch_id",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "platform",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "intents",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "keywords",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "queries_total",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "queries_completed",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "completed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "error_message",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "competitors",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "test_mode",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "processing_method",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "queries_queued",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "queries_processing",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "analysis_runs",
+    "column_name": "queries_failed",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "analysis_date",
+    "data_type": "date",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "industry_sector",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "query_keyword",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "query_category",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "query_topic",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "query_type",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "funnel_stage",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "data_source",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "citation_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "response_match",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "response_outcome",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "action_orientation",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "query_competition",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "avg_citation_position",
+    "data_type": "double precision",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "domain_authority_stats",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "content_quality_metrics",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "technical_seo_metrics",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "benchmark_data",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "domain",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "industry_primary",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "industry_secondary",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "sub_industry",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "business_model",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "target_audience",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "key_products",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "unique_selling_props",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "geographic_focus",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "brand_voice",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "customer_problems",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "use_cases",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "industry_terminology",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "regulatory_considerations",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "ai_enhanced_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "ai_enhancement_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "geographic_regions",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "clients",
+    "column_name": "keywords",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "analysis_run_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "client_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "client_name",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "total_queries",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "queries_with_brand",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "queries_with_competitors",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "avg_brand_mentions",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "avg_competitor_mentions",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "strong_positioning_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "neutral_positioning_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "weak_positioning_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "brand_dominant_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "equal_mention_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "competitor_dominant_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "only_competitors_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitor_analysis_summary",
+    "column_name": "all_mentioned_competitors",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "client_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "domain",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "source",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "ai_data",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "competitors",
+    "column_name": "added_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "query_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "page_analysis_id",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "citation_url",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "citation_position",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "domain_name",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "is_client_domain",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "is_competitor_domain",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "mention_type",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "analysis_notes",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "technical_seo",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "page_performance",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "domain_authority",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "on_page_seo",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "content_quality",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "page_analysis",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "brand_mentioned",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "page_title",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "brand_mention_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "brand_in_title",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "competitor_mentioned",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "competitor_analysis",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "competitor_names",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "brand_context",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "competitor_context",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "relevance_score",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "content_quality_score",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "query_keyword",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "query_text",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_analyses",
+    "column_name": "crawl_error",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "query_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "citation_url",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "page_title",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "brand_mentioned",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "brand_mention_count",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "brand_in_title",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "competitor_mentioned",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "competitor_names",
+    "data_type": "ARRAY",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "competitor_analysis",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "brand_context",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "competitor_context",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "relevance_score",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "content_quality_score",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "query_text",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "query_keyword",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "page_competitor_insights",
+    "column_name": "query_intent",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "first_name",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "last_name",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "company",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "role",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "is_active",
+    "data_type": "boolean",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "analysis_run_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "query_text",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "keyword",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "query_intent",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "platform",
+    "data_type": "text",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "client_id",
+    "data_type": "uuid",
+    "is_nullable": "NO"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "client_name",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "client_domain",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "competitors",
+    "data_type": "jsonb",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "priority",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "query_queue",
+    "column_name": "error",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "analysis_run_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "client_id",
+    "data_type": "uuid",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "platform",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "processing_method",
+    "data_type": "text",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "queries_total",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "queries_completed",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "queries_queued",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "queries_processing",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "queries_failed",
+    "data_type": "integer",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "progress_percentage",
+    "data_type": "numeric",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "pending_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "processing_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "completed_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "failed_count",
+    "data_type": "bigint",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "oldest_pending_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  },
+  {
+    "table_name": "queue_status",
+    "column_name": "latest_completed_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES"
+  }
+]

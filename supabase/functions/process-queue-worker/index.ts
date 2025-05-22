@@ -1,43 +1,21 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // CORS headers for browser access
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
-}
-
-// Standard response headers for all responses (includes CORS)
-const responseHeaders = { 
-  ...corsHeaders, 
-  'Content-Type': 'application/json' 
 };
 
-interface QueueItem {
-  id: string
-  analysis_run_id: string
-  query_data: {
-    query_text: string
-    keyword: string
-    intent: string
-    platform: 'chatgpt' | 'perplexity' | 'both'
-    client: {
-      id: string
-      name: string
-      domain: string
-      competitors: Array<{
-        name: string
-        domain: string
-        pattern: string
-      }>
-    }
-  }
-  attempts: number
-}
+// Standard response headers for all responses (includes CORS)
+const responseHeaders = {
+  ...corsHeaders,
+  'Content-Type': 'application/json'
+};
 
 serve(async (req) => {
-  console.log('Queue worker invoked')
+  console.log('Queue worker invoked');
   
   // Handle CORS preflight requests - respond immediately
   if (req.method === 'OPTIONS') {
@@ -49,9 +27,9 @@ serve(async (req) => {
 
   try {
     // Parse request to get optional parameters
-    const requestBody = await req.json().catch(err => {
+    const requestBody = await req.json().catch((err) => {
       console.error('Error parsing request JSON:', err);
-      return {};  // Default empty object if JSON parsing fails
+      return {}; // Default empty object if JSON parsing fails
     });
     
     const batch_size = requestBody.batch_size || 3;
@@ -61,51 +39,51 @@ serve(async (req) => {
     
     // Create service client for full access
     const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      Deno.env.get('SUPABASE_URL') ?? '', 
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '', 
       {
         auth: {
           persistSession: false
         }
       }
-    )
+    );
 
-    const startTime = Date.now()
-    let processedCount = 0
-    let errorCount = 0
+    const startTime = Date.now();
+    let processedCount = 0;
+    let errorCount = 0;
     
     // Process batches until timeout approaches
     while (Date.now() - startTime < max_runtime) {
-      console.log(`Claiming batch of ${batch_size} items...`)
+      console.log(`Claiming batch of ${batch_size} items...`);
       
       // Claim a batch of work atomically
       const { data: batch, error: claimError } = await supabase
-        .rpc('claim_queue_batch', { 
+        .rpc('claim_queue_batch', {
           p_batch_size: batch_size,
           p_processor_id: crypto.randomUUID()
-        })
+        });
       
       if (claimError) {
-        console.error('Error claiming batch:', claimError)
-        break
+        console.error('Error claiming batch:', claimError);
+        break;
       }
       
       if (!batch || !Array.isArray(batch) || batch.length === 0) {
-        console.log('No pending items found')
-        break
+        console.log('No pending items found');
+        break;
       }
       
-      console.log(`Processing ${batch.length} queue items`)
+      console.log(`Processing ${batch.length} queue items`);
       
       // Process items in parallel within the batch
       const results = await Promise.allSettled(
-        batch.map(async (item: QueueItem) => {
+        batch.map(async (item) => {
           try {
-            await processQueueItem(item, supabase)
-            processedCount++
+            await processQueueItem(item, supabase);
+            processedCount++;
           } catch (error) {
-            errorCount++
-            console.error(`Error processing item ${item.id}:`, error)
+            errorCount++;
+            console.error(`Error processing item ${item.id}:`, error);
             
             // Record the failure
             try {
@@ -117,19 +95,19 @@ serve(async (req) => {
                   timestamp: new Date().toISOString(),
                   attempts: item.attempts
                 }
-              })
+              });
             } catch (rpcError) {
-              console.error('Failed to record queue failure:', rpcError)
+              console.error('Failed to record queue failure:', rpcError);
             }
           }
         })
-      )
+      );
       
       // Check if we have time for another batch
-      const remainingTime = max_runtime - (Date.now() - startTime)
+      const remainingTime = max_runtime - (Date.now() - startTime);
       if (remainingTime < 5000) { // Less than 5 seconds remaining
-        console.log('Approaching timeout, stopping processing')
-        break
+        console.log('Approaching timeout, stopping processing');
+        break;
       }
     }
     
@@ -138,9 +116,9 @@ serve(async (req) => {
       processed: processedCount,
       errors: errorCount,
       runtime: Date.now() - startTime
-    }
+    };
     
-    console.log('Worker completed:', response)
+    console.log('Worker completed:', response);
     
     return new Response(
       JSON.stringify(response),
@@ -148,10 +126,10 @@ serve(async (req) => {
         headers: responseHeaders,
         status: 200
       }
-    )
+    );
     
   } catch (error) {
-    console.error('Worker error:', error)
+    console.error('Worker error:', error);
     return new Response(
       JSON.stringify({ 
         success: false, 
@@ -161,22 +139,22 @@ serve(async (req) => {
         headers: responseHeaders,
         status: 500
       }
-    )
+    );
   }
-})
+});
 
-async function processQueueItem(item: QueueItem, supabase: any) {
+async function processQueueItem(item, supabase) {
   if (!item || !item.id || !item.analysis_run_id || !item.query_data) {
-    throw new Error('Invalid queue item: missing required fields')
+    throw new Error('Invalid queue item: missing required fields');
   }
 
-  console.log(`Processing queue item ${item.id}`)
+  console.log(`Processing queue item ${item.id}`);
 
-  const { query_data } = item
+  const { query_data } = item;
 
   // Validate query data
   if (!query_data.query_text) {
-    throw new Error('Invalid queue item: missing query_text')
+    throw new Error('Invalid queue item: missing query_text');
   }
 
   // Create the query record
@@ -191,14 +169,14 @@ async function processQueueItem(item: QueueItem, supabase: any) {
       status: 'pending'
     })
     .select()
-    .single()
+    .single();
 
   if (queryError) {
-    throw new Error(`Failed to create query record: ${queryError.message}`)
+    throw new Error(`Failed to create query record: ${queryError.message}`);
   }
 
   // Add a delay to ensure database operation completes and commits
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise((resolve) => setTimeout(resolve, 500));
   
   // Execute the query using existing infrastructure
   try {
@@ -220,7 +198,7 @@ async function processQueueItem(item: QueueItem, supabase: any) {
           competitors: Array.isArray(query_data.client?.competitors) ? query_data.client.competitors : []
         })
       }
-    )
+    );
     
     if (!executeResponse.ok) {
       const errorText = await executeResponse.text().catch(() => 'Unknown error');
@@ -294,7 +272,7 @@ async function processQueueItem(item: QueueItem, supabase: any) {
       console.log(`Processing ${citations.length} citations`);
       
       // Process each citation
-      const citationPromises = citations.map(async (citation: any, index: number) => {
+      const citationPromises = citations.map(async (citation, index) => {
         if (!citation || !citation.url) {
           console.warn('Skipping invalid citation:', citation);
           return null;
@@ -385,11 +363,12 @@ async function processQueueItem(item: QueueItem, supabase: any) {
     })
     .eq('id', item.id);
   
-  // Update analysis run progress
+  // Update analysis run status (but not counts - let the trigger handle counts)
   try {
+    // Check if all queries are completed based on the run's total count
     const { data: runData, error: runError } = await supabase
       .from('analysis_runs')
-      .select('queries_completed, queries_total')
+      .select('queries_total')
       .eq('id', item.analysis_run_id)
       .single();
     
@@ -399,22 +378,40 @@ async function processQueueItem(item: QueueItem, supabase: any) {
     }
     
     if (runData) {
-      // Safely increment completed count
-      const currentCompleted = typeof runData.queries_completed === 'number' ? runData.queries_completed : 0;
-      const totalQueries = typeof runData.queries_total === 'number' ? runData.queries_total : 0;
-      const newCompleted = currentCompleted + 1;
+      // Count completed items to check if run is finished
+      const { count: completedCount, error: countError } = await supabase
+        .from('analysis_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('analysis_run_id', item.analysis_run_id)
+        .eq('status', 'completed');
       
-      const isCompleted = newCompleted >= totalQueries;
-      await supabase
-        .from('analysis_runs')
-        .update({
-          queries_completed: newCompleted,
-          status: isCompleted ? 'completed' : 'running',
-          updated_at: new Date().toISOString(),
-          // Set completed_at if the run is now complete
-          ...(isCompleted ? { completed_at: new Date().toISOString() } : {})
-        })
-        .eq('id', item.analysis_run_id);
+      if (countError) {
+        console.warn(`Failed to count completed items: ${countError.message}`);
+        return;
+      }
+      
+      const totalQueries = typeof runData.queries_total === 'number' ? runData.queries_total : 0;
+      const isCompleted = completedCount >= totalQueries;
+      
+      // Only update status and timestamps, not the count fields
+      if (isCompleted) {
+        await supabase
+          .from('analysis_runs')
+          .update({
+            status: 'completed',
+            updated_at: new Date().toISOString(),
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', item.analysis_run_id);
+      } else {
+        await supabase
+          .from('analysis_runs')
+          .update({
+            status: 'running',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', item.analysis_run_id);
+      }
 
       // Add delay after updating the run status to ensure frontend sees the updated status
       await new Promise(resolve => setTimeout(resolve, 1000));

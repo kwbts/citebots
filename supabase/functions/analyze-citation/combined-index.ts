@@ -24,7 +24,7 @@ interface AnalyzeCitationRequest {
   competitors: any[]
 }
 
-// ============== HELPER FUNCTIONS ==============
+// ============== HELPER FUNCTIONS (from helper.ts) ==============
 
 /**
  * Helper function to escape regex special characters
