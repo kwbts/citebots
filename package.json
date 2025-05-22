@@ -20,6 +20,7 @@
     "@nuxtjs/supabase": "^1.5.1",
     "@supabase/supabase-js": "^2.42.0",
     "@vueuse/nuxt": "^10.9.0",
+    "chart.js": "^4.4.9",
     "openai": "^4.100.0"
   }
 }
