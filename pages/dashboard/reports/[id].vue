@@ -140,20 +140,34 @@ const fetchReportData = async () => {
       competitors.value = competitorData || []
     }
     
-    // Get all analysis data for this run
-    const [queriesResult, pagesResult] = await Promise.all([
-      // Get analysis queries
-      supabase
-        .from('analysis_queries')
-        .select('*')
-        .eq('analysis_run_id', analysisRunId),
-      
-      // Get page analyses  
-      supabase
+    // Get analysis queries first
+    const { data: queriesData, error: queriesError } = await supabase
+      .from('analysis_queries')
+      .select('*')
+      .eq('analysis_run_id', analysisRunId)
+
+    if (queriesError) {
+      console.warn('Error fetching queries:', queriesError)
+    }
+
+    // Get page analyses using the query IDs (correct relationship)
+    let pagesData = []
+    if (queriesData && queriesData.length > 0) {
+      const queryIds = queriesData.map(q => q.id)
+      const { data: pageAnalyses, error: pagesError } = await supabase
         .from('page_analyses')
         .select('*')
-        .eq('analysis_run_id', analysisRunId)
-    ])
+        .in('query_id', queryIds)
+
+      if (pagesError) {
+        console.warn('Error fetching pages:', pagesError)
+      } else {
+        pagesData = pageAnalyses || []
+      }
+    }
+
+    const queriesResult = { data: queriesData, error: queriesError }
+    const pagesResult = { data: pagesData, error: null }
     
     if (queriesResult.error) {
       console.warn('Error fetching queries:', queriesResult.error)
