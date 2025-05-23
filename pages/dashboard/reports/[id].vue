@@ -38,6 +38,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FullScreenDashboard from '~/components/reports/FullScreenDashboard.vue'
 
+// Initialize dark mode support
+const { isDark } = useDarkMode()
+
 definePageMeta({
   middleware: 'auth',
   layout: false

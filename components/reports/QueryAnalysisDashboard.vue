@@ -367,15 +367,25 @@ const getPlatformButtonClass = (platform) => {
   const isActive = activePlatform.value === platform
   return isActive
     ? 'bg-citebots-orange text-white border-citebots-orange border'
-    : 'bg-white text-gray-700 border-gray-300 border hover:bg-gray-50'
+    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 border hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors'
 }
+
+// Dark mode support
+const { isDark } = useDarkMode()
 
 // Chart creation functions
 const createQueryTypeChart = () => {
   if (!queryTypeChart.value) return
-  
+
+  // Destroy existing chart
+  if (queryTypeChart.value.chart) {
+    queryTypeChart.value.chart.destroy()
+  }
+
   const ctx = queryTypeChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  const chart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: queryTypeData.value.map(d => d.type),
@@ -383,15 +393,15 @@ const createQueryTypeChart = () => {
         {
           label: 'Total Queries',
           data: queryTypeData.value.map(d => d.total),
-          backgroundColor: 'rgba(59, 130, 246, 0.5)',
-          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: isDarkMode ? 'rgba(96, 165, 250, 0.6)' : 'rgba(59, 130, 246, 0.6)',
+          borderColor: isDarkMode ? 'rgb(96, 165, 250)' : 'rgb(59, 130, 246)',
           borderWidth: 1
         },
         {
           label: 'Brand Mentioned',
           data: queryTypeData.value.map(d => d.brandMentioned),
-          backgroundColor: 'rgba(16, 185, 129, 0.5)',
-          borderColor: 'rgb(16, 185, 129)',
+          backgroundColor: isDarkMode ? 'rgba(52, 211, 153, 0.6)' : 'rgba(16, 185, 129, 0.6)',
+          borderColor: isDarkMode ? 'rgb(52, 211, 153)' : 'rgb(16, 185, 129)',
           borderWidth: 1
         }
       ]
@@ -399,75 +409,189 @@ const createQueryTypeChart = () => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151'
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1
+        }
+      },
       scales: {
+        x: {
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
+        },
         y: {
-          beginAtZero: true
+          beginAtZero: true,
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
         }
       }
     }
   })
+
+  queryTypeChart.value.chart = chart
 }
 
 const createQueryIntentChart = () => {
   if (!queryIntentChart.value) return
-  
+
+  // Destroy existing chart
+  if (queryIntentChart.value.chart) {
+    queryIntentChart.value.chart.destroy()
+  }
+
   const ctx = queryIntentChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  const chart = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: queryIntentData.value.map(d => `${d.intent} (${d.mentionRate}%)`),
       datasets: [{
         data: queryIntentData.value.map(d => d.total),
-        backgroundColor: [
-          'rgba(239, 68, 68, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(34, 197, 94, 0.8)',
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(147, 51, 234, 0.8)',
-          'rgba(236, 72, 153, 0.8)'
-        ]
+        backgroundColor: isDarkMode ? [
+          'rgba(248, 113, 113, 0.8)', // red-400
+          'rgba(251, 191, 36, 0.8)',  // amber-400
+          'rgba(52, 211, 153, 0.8)',  // emerald-400
+          'rgba(96, 165, 250, 0.8)',  // blue-400
+          'rgba(168, 85, 247, 0.8)',  // violet-400
+          'rgba(244, 114, 182, 0.8)'  // pink-400
+        ] : [
+          'rgba(239, 68, 68, 0.8)',   // red-500
+          'rgba(245, 158, 11, 0.8)',  // amber-500
+          'rgba(34, 197, 94, 0.8)',   // emerald-500
+          'rgba(59, 130, 246, 0.8)',  // blue-500
+          'rgba(147, 51, 234, 0.8)',  // violet-500
+          'rgba(236, 72, 153, 0.8)'   // pink-500
+        ],
+        borderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+        borderWidth: 2
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      cutout: '50%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151',
+            usePointStyle: true,
+            padding: 15
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1
+        }
+      }
     }
   })
+
+  queryIntentChart.value.chart = chart
 }
 
 const createCitationDistributionChart = () => {
   if (!citationDistributionChart.value) return
-  
+
+  // Destroy existing chart
+  if (citationDistributionChart.value.chart) {
+    citationDistributionChart.value.chart.destroy()
+  }
+
   const ctx = citationDistributionChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  const chart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: citationDistributionData.value.map(d => d.bucket),
       datasets: [{
         label: 'Number of Queries',
         data: citationDistributionData.value.map(d => d.count),
-        backgroundColor: 'rgba(147, 51, 234, 0.5)',
-        borderColor: 'rgb(147, 51, 234)',
+        backgroundColor: isDarkMode ? 'rgba(168, 85, 247, 0.6)' : 'rgba(147, 51, 234, 0.6)',
+        borderColor: isDarkMode ? 'rgb(168, 85, 247)' : 'rgb(147, 51, 234)',
         borderWidth: 1
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151'
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1
+        }
+      },
       scales: {
+        x: {
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
+        },
         y: {
-          beginAtZero: true
+          beginAtZero: true,
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
         }
       }
     }
   })
+
+  citationDistributionChart.value.chart = chart
 }
 
 const createFunnelStageChart = () => {
   if (!funnelStageChart.value) return
-  
+
+  // Destroy existing chart
+  if (funnelStageChart.value.chart) {
+    funnelStageChart.value.chart.destroy()
+  }
+
   const ctx = funnelStageChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  const chart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: funnelStageData.value.map(d => d.stage),
@@ -475,90 +599,208 @@ const createFunnelStageChart = () => {
         {
           label: 'Total Queries',
           data: funnelStageData.value.map(d => d.total),
-          borderColor: 'rgb(59, 130, 246)',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          tension: 0.4
+          borderColor: isDarkMode ? 'rgb(96, 165, 250)' : 'rgb(59, 130, 246)',
+          backgroundColor: isDarkMode ? 'rgba(96, 165, 250, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+          tension: 0.4,
+          pointBackgroundColor: isDarkMode ? 'rgb(96, 165, 250)' : 'rgb(59, 130, 246)',
+          pointBorderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          pointBorderWidth: 2
         },
         {
           label: 'Brand Mention Rate (%)',
           data: funnelStageData.value.map(d => d.mentionRate),
-          borderColor: 'rgb(16, 185, 129)',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderColor: isDarkMode ? 'rgb(52, 211, 153)' : 'rgb(16, 185, 129)',
+          backgroundColor: isDarkMode ? 'rgba(52, 211, 153, 0.1)' : 'rgba(16, 185, 129, 0.1)',
           tension: 0.4,
-          yAxisID: 'y1'
+          yAxisID: 'y1',
+          pointBackgroundColor: isDarkMode ? 'rgb(52, 211, 153)' : 'rgb(16, 185, 129)',
+          pointBorderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          pointBorderWidth: 2
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151'
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1
+        }
+      },
       scales: {
+        x: {
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
+        },
         y: {
           type: 'linear',
           display: true,
           position: 'left',
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
         },
         y1: {
           type: 'linear',
           display: true,
           position: 'right',
+          max: 100,
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
           grid: {
             drawOnChartArea: false,
-          },
-          max: 100
+            color: isDarkMode ? '#374151' : '#E5E7EB'
+          }
         }
       }
     }
   })
+
+  funnelStageChart.value.chart = chart
 }
 
 const createCompetitionChart = () => {
   if (!competitionChart.value) return
-  
+
+  // Destroy existing chart
+  if (competitionChart.value.chart) {
+    competitionChart.value.chart.destroy()
+  }
+
   const ctx = competitionChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  const chart = new Chart(ctx, {
     type: 'pie',
     data: {
       labels: competitionData.value.map(d => d.competition),
       datasets: [{
         data: competitionData.value.map(d => d.count),
-        backgroundColor: [
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(239, 68, 68, 0.8)',
-          'rgba(107, 114, 128, 0.8)'
-        ]
+        backgroundColor: isDarkMode ? [
+          'rgba(52, 211, 153, 0.8)',  // emerald-400
+          'rgba(251, 191, 36, 0.8)',   // amber-400
+          'rgba(248, 113, 113, 0.8)',  // red-400
+          'rgba(156, 163, 175, 0.8)'   // gray-400
+        ] : [
+          'rgba(16, 185, 129, 0.8)',   // emerald-500
+          'rgba(245, 158, 11, 0.8)',   // amber-500
+          'rgba(239, 68, 68, 0.8)',    // red-500
+          'rgba(107, 114, 128, 0.8)'   // gray-500
+        ],
+        borderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+        borderWidth: 2
       }]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151',
+            usePointStyle: true,
+            padding: 15
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1
+        }
+      }
     }
   })
+
+  competitionChart.value.chart = chart
 }
 
 const createCompetitorContextChart = () => {
   if (!competitorContextChart.value) return
-  
+
+  // Destroy existing chart
+  if (competitorContextChart.value.chart) {
+    competitorContextChart.value.chart.destroy()
+  }
+
   const ctx = competitorContextChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  const chart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: competitorContextData.value.map(d => d.context),
       datasets: [{
         label: 'Queries',
         data: competitorContextData.value.map(d => d.count),
-        backgroundColor: 'rgba(245, 158, 11, 0.5)',
-        borderColor: 'rgb(245, 158, 11)',
+        backgroundColor: isDarkMode ? 'rgba(251, 191, 36, 0.6)' : 'rgba(245, 158, 11, 0.6)',
+        borderColor: isDarkMode ? 'rgb(251, 191, 36)' : 'rgb(245, 158, 11)',
         borderWidth: 1
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      indexAxis: 'y'
+      indexAxis: 'y',
+      plugins: {
+        legend: {
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151'
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
+        },
+        y: {
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
+        }
+      }
     }
   })
+
+  competitorContextChart.value.chart = chart
 }
 
 // Initialize charts on mount
@@ -574,6 +816,17 @@ onMounted(async () => {
 
 // Watch for platform changes and recreate charts
 watch(activePlatform, async () => {
+  await nextTick()
+  createQueryTypeChart()
+  createQueryIntentChart()
+  createCitationDistributionChart()
+  createFunnelStageChart()
+  createCompetitionChart()
+  createCompetitorContextChart()
+})
+
+// Watch for dark mode changes and recreate charts
+watch(isDark, async () => {
   await nextTick()
   createQueryTypeChart()
   createQueryIntentChart()

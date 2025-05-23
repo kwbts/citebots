@@ -9,18 +9,6 @@
         Higher mention rates indicate stronger brand visibility in AI-generated content.
       </TextBox>
       
-      <!-- Platform Selector -->
-      <div class="flex mb-6">
-        <button 
-          v-for="platform in platforms" 
-          :key="platform.value"
-          @click="activePlatform = platform.value" 
-          class="px-4 py-2 text-sm font-medium transition-colors"
-          :class="getPlatformButtonClass(platform.value)"
-        >
-          {{ platform.label }}
-        </button>
-      </div>
       
       <!-- Key Performance Metrics Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -238,18 +226,18 @@
                 stroke-linecap="round"
                 class="dark:stroke-gray-700"
               />
-              <circle 
-                cx="50" 
-                cy="50" 
-                r="45" 
-                fill="none" 
-                stroke="#D36641" 
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="currentColor"
                 stroke-width="10"
                 stroke-linecap="round"
                 stroke-dasharray="282.7"
                 :stroke-dashoffset="calculateStrokeDashOffset(citationMetrics.mentionRate, 100)"
                 transform="rotate(-90 50 50)"
-                class="transition-all duration-700 ease-in-out"
+                class="transition-all duration-700 ease-in-out text-citebots-orange"
               />
             </svg>
             <div class="absolute inset-0 flex items-center justify-center flex-col">
@@ -309,33 +297,8 @@ const props = defineProps({
   }
 })
 
-// Platform selection options
-const platforms = [
-  { value: 'all', label: 'All Platforms' },
-  { value: 'chatgpt', label: 'ChatGPT' },
-  { value: 'perplexity', label: 'Perplexity' }
-]
-
 // Reactive state
-const activePlatform = ref('all')
 const selectedCompetitor = ref('all')
-
-// Helper method to get platform-specific styling classes for buttons
-const getPlatformButtonClass = (platform) => {
-  if (activePlatform.value === platform) {
-    switch(platform) {
-      case 'all':
-        return 'bg-citebots-orange text-white'
-      case 'chatgpt':
-        return 'bg-green-500 text-white'
-      case 'perplexity':
-        return 'bg-blue-500 text-white'
-      default:
-        return 'bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-white'
-    }
-  }
-  return 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300'
-}
 
 // Calculate brand performance metrics
 const brandMetrics = computed(() => {
@@ -354,17 +317,10 @@ const brandMetrics = computed(() => {
     }
   }
 
-  let filteredQueries = props.data.analysis_queries
+  // Use the pre-filtered data from parent component (already filtered by platform)
+  const filteredQueries = props.data.analysis_queries
   console.log('Debug - All queries count:', filteredQueries.length)
   console.log('Debug - Sample query:', filteredQueries[0])
-
-  // Filter by platform if not 'all'
-  if (activePlatform.value !== 'all') {
-    filteredQueries = filteredQueries.filter(q =>
-      q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
-    )
-    console.log('Debug - Filtered queries count:', filteredQueries.length)
-  }
 
   const totalQueries = filteredQueries.length
   const mentionedQueries = filteredQueries.filter(q => {
@@ -425,13 +381,9 @@ const brandMetrics = computed(() => {
 const mentionTypes = computed(() => {
   if (!props.data?.analysis_queries) return []
 
-  let filteredQueries = props.data.analysis_queries
-  if (activePlatform.value !== 'all') {
-    filteredQueries = filteredQueries.filter(q => 
-      q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
-    )
-  }
-  
+  // Use the pre-filtered data from parent component (already filtered by platform)
+  const filteredQueries = props.data.analysis_queries
+
   const brandQueries = filteredQueries.filter(q => q.brand_mentioned)
   const total = brandQueries.length
   
@@ -457,13 +409,9 @@ const mentionTypes = computed(() => {
 const intentPerformance = computed(() => {
   if (!props.data?.analysis_queries) return []
 
-  let filteredQueries = props.data.analysis_queries
-  if (activePlatform.value !== 'all') {
-    filteredQueries = filteredQueries.filter(q => 
-      q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
-    )
-  }
-  
+  // Use the pre-filtered data from parent component (already filtered by platform)
+  const filteredQueries = props.data.analysis_queries
+
   // Group by intent
   const intentGroups = {}
   filteredQueries.forEach(q => {
@@ -488,7 +436,7 @@ const intentPerformance = computed(() => {
     .slice(0, 6) // Top 6 intents
 })
 
-// Calculate citation metrics
+// Calculate citation metrics using real page analysis data
 const citationMetrics = computed(() => {
   if (!props.data?.analysis_queries) return {
     mentionRate: 0,
@@ -497,58 +445,103 @@ const citationMetrics = computed(() => {
     vsCompetitors: 0
   }
 
-  let filteredQueries = props.data.analysis_queries
-  if (activePlatform.value !== 'all') {
-    filteredQueries = filteredQueries.filter(q => 
-      q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
+  // Use the pre-filtered data from parent component (already filtered by platform)
+  const filteredQueries = props.data.analysis_queries
+  console.log('DEBUG Citation - Filtered queries count:', filteredQueries.length)
+  console.log('DEBUG Citation - Sample query keys:', filteredQueries[0] ? Object.keys(filteredQueries[0]) : 'no queries')
+  console.log('DEBUG Citation - Sample query has associated_pages:', !!filteredQueries[0]?.associated_pages)
+  console.log('DEBUG Citation - Sample associated_pages count:', filteredQueries[0]?.associated_pages?.length || 0)
+
+  // Extract all page analyses from queries (using associated_pages) or from separate page_analyses array
+  let allPageAnalyses = []
+
+  // Extract from associated_pages within each query (this is the correct data structure)
+  console.log('DEBUG Citation - Extracting from associated_pages in queries')
+  filteredQueries.forEach(query => {
+    if (query.associated_pages && Array.isArray(query.associated_pages)) {
+      console.log(`DEBUG Citation - Query ${query.id} has ${query.associated_pages.length} associated pages`)
+      allPageAnalyses.push(...query.associated_pages)
+    } else {
+      console.log(`DEBUG Citation - Query ${query.id} has no associated_pages`)
+    }
+  })
+
+  // Fallback: try separate page_analyses array if associated_pages didn't work
+  if (allPageAnalyses.length === 0 && props.data.page_analyses && Array.isArray(props.data.page_analyses)) {
+    console.log('DEBUG Citation - Fallback: Using separate page_analyses array, count:', props.data.page_analyses.length)
+    const filteredQueryIds = new Set(filteredQueries.map(q => q.id))
+    allPageAnalyses = props.data.page_analyses.filter(page =>
+      filteredQueryIds.has(page.query_id)
     )
   }
-  
-  // Count client domain citations
-  const totalCitations = filteredQueries.reduce((sum, q) => {
-    if (q.page_analyses) {
-      return sum + q.page_analyses.filter(p => p.is_client_domain).length
+
+  console.log('DEBUG Citation - Total page analyses found:', allPageAnalyses.length)
+  console.log('DEBUG Citation - Sample page analysis:', allPageAnalyses[0])
+  console.log('DEBUG Citation - Client domain:', props.client?.domain)
+
+  // Count brand/client citations
+  const brandCitations = allPageAnalyses.filter(page => {
+    const isBrandMentioned = page.brand_mentioned === true
+    const isClientDomain = page.is_client_domain === true
+    const isDomainMatch = page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain)
+    const isBrandCitation = isBrandMentioned || isClientDomain || isDomainMatch
+
+    if (isBrandCitation) {
+      console.log(`DEBUG Citation - Found brand citation:`, {
+        url: page.citation_url,
+        domain: page.domain_name,
+        brand_mentioned: page.brand_mentioned,
+        is_client_domain: page.is_client_domain,
+        client_domain: props.client?.domain
+      })
     }
-    return sum
-  }, 0)
-  
-  const citedQueries = filteredQueries.filter(q => 
-    q.page_analyses && q.page_analyses.some(p => p.is_client_domain)
-  ).length
-  
+
+    return isBrandCitation
+  })
+
+  console.log('DEBUG Citation - Brand citations found:', brandCitations.length)
+
+  // Count competitor citations
+  const competitorCitations = allPageAnalyses.filter(page =>
+    page.competitor_mentioned === true ||
+    page.is_competitor_domain === true
+  )
+
+  // Count queries that have brand citations
+  const queriesWithBrandCitations = new Set()
+  brandCitations.forEach(page => {
+    const query = filteredQueries.find(q => q.id === page.query_id)
+    if (query) queriesWithBrandCitations.add(query.id)
+  })
+
+  const totalCitations = brandCitations.length
+  const citedQueries = queriesWithBrandCitations.size
   const mentionRate = filteredQueries.length > 0 ? (citedQueries / filteredQueries.length) * 100 : 0
-  
-  // Calculate vs competitors (simplified)
-  const competitorCitations = filteredQueries.reduce((sum, q) => {
-    if (q.page_analyses) {
-      return sum + q.page_analyses.filter(p => p.is_competitor_domain).length
-    }
-    return sum
-  }, 0)
-  
-  const vsCompetitors = competitorCitations > 0 
-    ? ((totalCitations - competitorCitations) / competitorCitations) * 100 
-    : 0
-  
-  return {
+
+  // Calculate brand vs competitor citation performance
+  const totalCompetitorCitations = competitorCitations.length
+  const vsCompetitors = totalCompetitorCitations > 0
+    ? ((totalCitations / totalCompetitorCitations) * 100) - 100  // % difference from competitors
+    : (totalCitations > 0 ? 100 : 0) // If no competitor citations but we have citations, we're 100% ahead
+
+  const result = {
     mentionRate: Math.round(mentionRate * 10) / 10,
     totalCitations,
     citedQueries,
     vsCompetitors: Math.round(vsCompetitors * 10) / 10
   }
+
+  console.log('DEBUG Citation - Final citation metrics:', result)
+  return result
 })
 
 // Get competitor comparison data
 const getCompetitorComparison = () => {
   if (!props.data?.analysis_queries || !props.competitors.length) return []
 
-  let filteredQueries = props.data.analysis_queries
-  if (activePlatform.value !== 'all') {
-    filteredQueries = filteredQueries.filter(q => 
-      q.data_source?.toLowerCase() === activePlatform.value.toLowerCase()
-    )
-  }
-  
+  // Use the pre-filtered data from parent component (already filtered by platform)
+  const filteredQueries = props.data.analysis_queries
+
   let competitorsToShow = props.competitors
   if (selectedCompetitor.value !== 'all') {
     competitorsToShow = props.competitors.filter(c => c.id === selectedCompetitor.value)

@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
     <!-- Platform Filter -->
-    <div v-if="availablePlatforms.length > 1" class="bg-white rounded-lg border border-gray-200 p-4">
-      <label class="block text-sm font-medium text-gray-700 mb-3">Filter by Platform</label>
+    <div v-if="availablePlatforms.length > 1" class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+      <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Filter by Platform</label>
       <div class="flex flex-wrap gap-2">
         <button
           v-for="platform in availablePlatforms"
@@ -12,7 +12,7 @@
             'px-3 py-1 rounded-full text-sm font-medium transition-colors',
             selectedPlatforms.includes(platform.value)
               ? 'bg-citebots-orange text-white'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
           ]"
         >
           {{ platform.label }}
@@ -22,19 +22,19 @@
 
     <!-- Key Metrics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
               </svg>
             </div>
           </div>
           <div class="ml-4 flex-1">
-            <h3 class="text-sm font-medium text-gray-500">Technical SEO Score (Brand Pages)</h3>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Technical SEO Score (Brand Pages)</h3>
             <div class="flex items-center gap-3">
-              <p class="text-2xl font-semibold text-gray-900">{{ techSeoScore }}%</p>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ techSeoScore }}%</p>
               <div class="flex items-center gap-1 text-xs" :class="getComparisonIndicator(techSeoScore, benchmarkAverages.avgTechSeoScore).color">
                 <span>{{ getComparisonIndicator(techSeoScore, benchmarkAverages.avgTechSeoScore).icon }}</span>
                 <span>other pages: {{ benchmarkAverages.avgTechSeoScore }}%</span>
@@ -45,19 +45,19 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+            <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
               </svg>
             </div>
           </div>
           <div class="ml-4 flex-1">
-            <h3 class="text-sm font-medium text-gray-500">Content Quality Score (Brand Pages)</h3>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Content Quality Score (Brand Pages)</h3>
             <div class="flex items-center gap-3">
-              <p class="text-2xl font-semibold text-gray-900">{{ contentQualityScore }}%</p>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ contentQualityScore }}%</p>
               <div class="flex items-center gap-1 text-xs" :class="getComparisonIndicator(contentQualityScore, benchmarkAverages.avgContentQualityScore).color">
                 <span>{{ getComparisonIndicator(contentQualityScore, benchmarkAverages.avgContentQualityScore).icon }}</span>
                 <span>other pages: {{ benchmarkAverages.avgContentQualityScore }}%</span>
@@ -67,19 +67,19 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+            <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
               </svg>
             </div>
           </div>
           <div class="ml-4 flex-1">
-            <h3 class="text-sm font-medium text-gray-500">Page Performance Score (Brand Pages)</h3>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Page Performance Score (Brand Pages)</h3>
             <div class="flex items-center gap-3">
-              <p class="text-2xl font-semibold text-gray-900">{{ pagePerformanceScore }}%</p>
+              <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ pagePerformanceScore }}%</p>
               <div class="flex items-center gap-1 text-xs" :class="getComparisonIndicator(pagePerformanceScore, benchmarkAverages.avgPagePerformanceScore).color">
                 <span>{{ getComparisonIndicator(pagePerformanceScore, benchmarkAverages.avgPagePerformanceScore).icon }}</span>
                 <span>other pages: {{ benchmarkAverages.avgPagePerformanceScore }}%</span>
@@ -89,45 +89,50 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-lg border border-gray-200 p-6">
+      <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
         <div class="flex items-center">
           <div class="flex-shrink-0">
-            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+            <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
           <div class="ml-4">
-            <h3 class="text-sm font-medium text-gray-500">Brand Pages Found</h3>
-            <p class="text-2xl font-semibold text-gray-900">{{ totalBrandPages }}</p>
-            <div class="text-xs text-gray-500 mt-1">out of {{ totalPages }} total pages</div>
+            <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400">Brand Pages Found</h3>
+            <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ totalBrandPages }}</p>
+            <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">out of {{ totalPages }} total pages</div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Technical SEO Analysis -->
-    <div class="bg-white rounded-lg border border-gray-200">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Technical SEO Implementation</h3>
-        <p class="text-sm text-gray-500 mt-1">Analysis of technical SEO elements across your pages</p>
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Technical SEO Implementation</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Analysis of technical SEO elements across your pages</p>
+        <div v-if="crawlErrorCount > 0" class="mt-2 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/30 rounded-lg">
+          <p class="text-sm text-yellow-800 dark:text-yellow-200">
+            ⚠️ {{ crawlErrorCount }} of {{ totalBrandPages }} pages had crawl errors. Technical SEO analysis is limited for these pages, but basic metrics like HTTPS are still available.
+          </p>
+        </div>
       </div>
       <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div v-for="metric in technicalSeoMetrics" :key="metric.label" class="text-center">
             <div class="relative inline-flex items-center justify-center w-20 h-20 mb-3">
               <svg class="w-20 h-20 transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" fill="none" class="text-gray-200"/>
-                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" fill="none" 
-                        :class="metric.percentage >= 80 ? 'text-green-500' : metric.percentage >= 60 ? 'text-yellow-500' : 'text-red-500'"
+                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" fill="none" class="text-gray-200 dark:text-gray-700"/>
+                <circle cx="50" cy="50" r="40" stroke="currentColor" stroke-width="8" fill="none"
+                        :class="metric.percentage >= 80 ? 'text-green-500 dark:text-green-400' : metric.percentage >= 60 ? 'text-yellow-500 dark:text-yellow-400' : 'text-red-500 dark:text-red-400'"
                         :stroke-dasharray="`${metric.percentage * 2.51327} 251.327`"
                         stroke-linecap="round"/>
               </svg>
-              <span class="absolute text-sm font-semibold text-gray-900">{{ metric.percentage }}%</span>
+              <span class="absolute text-sm font-semibold text-gray-900 dark:text-white">{{ metric.percentage }}%</span>
             </div>
-            <div class="text-sm font-medium text-gray-900">{{ metric.label }}</div>
-            <div class="text-xs text-gray-500">{{ metric.count }}/{{ metric.totalBrandPages }} brand pages</div>
+            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ metric.label }}</div>
+            <div class="text-xs text-gray-500 dark:text-gray-400">{{ metric.count }}/{{ metric.totalBrandPages }} brand pages</div>
             <div class="text-xs mt-1" :class="getComparisonIndicator(metric.percentage, metric.avgPercentage).color">
               {{ getComparisonIndicator(metric.percentage, metric.avgPercentage).icon }} other pages: {{ metric.avgPercentage }}%
             </div>
@@ -137,47 +142,47 @@
     </div>
 
     <!-- Content Quality Analysis -->
-    <div class="bg-white rounded-lg border border-gray-200">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Content Quality Distribution</h3>
-        <p class="text-sm text-gray-500 mt-1">Word count, readability, and content structure analysis</p>
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Content Quality Distribution</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Word count, readability, and content structure analysis</p>
       </div>
       <div class="p-6">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Word Count Distribution -->
           <div>
-            <h4 class="text-sm font-medium text-gray-900 mb-4">Word Count Distribution</h4>
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Word Count Distribution</h4>
             <div class="space-y-3">
               <div v-for="range in wordCountDistribution" :key="range.range" class="flex items-center">
-                <div class="w-20 text-sm text-gray-600">{{ range.range }}</div>
+                <div class="w-20 text-sm text-gray-600 dark:text-gray-400">{{ range.range }}</div>
                 <div class="flex-1 mx-3">
-                  <div class="bg-gray-200 rounded-full h-2">
-                    <div class="bg-blue-500 h-2 rounded-full" :style="{ width: `${range.percentage}%` }"></div>
+                  <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div class="bg-blue-500 dark:bg-blue-400 h-2 rounded-full" :style="{ width: `${range.percentage}%` }"></div>
                   </div>
                 </div>
-                <div class="w-12 text-sm text-gray-900 text-right">{{ range.count }}</div>
+                <div class="w-12 text-sm text-gray-900 dark:text-white text-right">{{ range.count }}</div>
               </div>
             </div>
           </div>
 
           <!-- Content Structure -->
           <div>
-            <h4 class="text-sm font-medium text-gray-900 mb-4">Content Structure Elements</h4>
+            <h4 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Content Structure Elements</h4>
             <div class="space-y-3">
               <div v-for="element in contentStructure" :key="element.element" class="flex items-center justify-between">
                 <div class="flex items-center">
-                  <div class="text-sm text-gray-600">{{ element.element }}</div>
+                  <div class="text-sm text-gray-600 dark:text-gray-400">{{ element.element }}</div>
                 </div>
                 <div class="flex items-center space-x-2">
                   <div class="flex flex-col items-end">
-                    <div class="text-sm text-gray-900">{{ element.percentage }}%</div>
+                    <div class="text-sm text-gray-900 dark:text-white">{{ element.percentage }}%</div>
                     <div class="text-xs" :class="getComparisonIndicator(element.percentage, element.avgPercentage).color">
                       {{ getComparisonIndicator(element.percentage, element.avgPercentage).icon }} {{ element.avgPercentage }}%
                     </div>
                   </div>
-                  <div class="w-16 bg-gray-200 rounded-full h-2">
+                  <div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div class="h-2 rounded-full"
-                         :class="element.percentage >= element.avgPercentage ? 'bg-green-500' : 'bg-red-500'"
+                         :class="element.percentage >= element.avgPercentage ? 'bg-green-500 dark:bg-green-400' : 'bg-red-500 dark:bg-red-400'"
                          :style="{ width: `${element.percentage}%` }"></div>
                   </div>
                 </div>
@@ -189,36 +194,36 @@
     </div>
 
     <!-- Page Performance vs Citation Success -->
-    <div class="bg-white rounded-lg border border-gray-200">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Performance vs Citation Success</h3>
-        <p class="text-sm text-gray-500 mt-1">Correlation between technical metrics and citation frequency</p>
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Performance vs Citation Success</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Correlation between technical metrics and citation frequency</p>
       </div>
       <div class="p-6">
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead class="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metric Range</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pages</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Citations</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Citation Rate</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Quality Score</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Metric Range</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Pages</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Citations</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Citation Rate</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Quality Score</th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="range in performanceRanges" :key="range.range" class="hover:bg-gray-50">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ range.range }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ range.pages }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ range.citations }}</td>
+            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tr v-for="range in performanceRanges" :key="range.range" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ range.range }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ range.pages }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ range.citations }}</td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                        :class="range.citationRate >= 20 ? 'bg-green-100 text-green-800' : 
-                               range.citationRate >= 10 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'">
+                        :class="range.citationRate >= 20 ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' :
+                               range.citationRate >= 10 ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'">
                     {{ range.citationRate }}%
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ range.avgQualityScore }}%</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ range.avgQualityScore }}%</td>
               </tr>
             </tbody>
           </table>
@@ -227,21 +232,21 @@
     </div>
 
     <!-- Top Issues and Recommendations -->
-    <div class="bg-white rounded-lg border border-gray-200">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-medium text-gray-900">Brand Page Issues & Recommendations</h3>
-        <p class="text-sm text-gray-500 mt-1">Priority fixes for improving your brand page SEO performance</p>
+    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 class="text-lg font-medium text-gray-900 dark:text-white">Brand Page Issues & Recommendations</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Priority fixes for improving your brand page SEO performance</p>
       </div>
       <div class="p-6">
         <div class="space-y-4">
           <div v-for="issue in topIssues" :key="issue.issue"
                class="rounded-lg border"
-               :class="issue.priority === 'High' ? 'bg-red-50 border-red-200' : issue.priority === 'Medium' ? 'bg-yellow-50 border-yellow-200' : 'bg-blue-50 border-blue-200'">
+               :class="issue.priority === 'High' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800/30' : issue.priority === 'Medium' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800/30' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/30'">
             <div class="flex items-start p-4">
               <div class="flex-shrink-0">
                 <div class="w-6 h-6 rounded-full flex items-center justify-center"
-                     :class="issue.priority === 'High' ? 'bg-red-200' : issue.priority === 'Medium' ? 'bg-yellow-200' : 'bg-blue-200'">
-                  <svg class="w-4 h-4" :class="issue.priority === 'High' ? 'text-red-600' : issue.priority === 'Medium' ? 'text-yellow-600' : 'text-blue-600'"
+                     :class="issue.priority === 'High' ? 'bg-red-200 dark:bg-red-800/50' : issue.priority === 'Medium' ? 'bg-yellow-200 dark:bg-yellow-800/50' : 'bg-blue-200 dark:bg-blue-800/50'">
+                  <svg class="w-4 h-4" :class="issue.priority === 'High' ? 'text-red-600 dark:text-red-400' : issue.priority === 'Medium' ? 'text-yellow-600 dark:text-yellow-400' : 'text-blue-600 dark:text-blue-400'"
                        fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                   </svg>
@@ -249,38 +254,38 @@
               </div>
               <div class="ml-4 flex-1">
                 <div class="flex items-center justify-between">
-                  <h4 class="text-sm font-medium text-gray-900">{{ issue.issue }}</h4>
+                  <h4 class="text-sm font-medium text-gray-900 dark:text-white">{{ issue.issue }}</h4>
                   <button
                     @click="selectedIssue = selectedIssue === issue.issue ? null : issue.issue"
-                    class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                    class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
                     {{ selectedIssue === issue.issue ? 'Hide Details' : 'View Pages' }}
                   </button>
                 </div>
-                <p class="text-sm text-gray-600 mt-1">{{ issue.description }}</p>
-                <p class="text-xs text-gray-500 mt-2">Affects {{ issue.affectedPages }} brand pages • Priority: {{ issue.priority }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ issue.description }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">Affects {{ issue.affectedPages }} brand pages • Priority: {{ issue.priority }}</p>
               </div>
             </div>
 
             <!-- Dropdown with affected pages -->
-            <div v-if="selectedIssue === issue.issue && issue.pages" class="border-t border-gray-200 bg-white">
+            <div v-if="selectedIssue === issue.issue && issue.pages" class="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
               <div class="p-4">
-                <h5 class="text-sm font-medium text-gray-900 mb-3">Affected Brand Pages:</h5>
+                <h5 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Affected Brand Pages:</h5>
                 <div class="space-y-2">
                   <div v-for="page in issue.pages" :key="page.id"
-                       class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                       class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div class="flex-1 min-w-0">
-                      <div class="text-sm font-medium text-gray-900 truncate">
+                      <div class="text-sm font-medium text-gray-900 dark:text-white truncate">
                         {{ page.page_title || 'Untitled Page' }}
                       </div>
-                      <div class="text-xs text-gray-500 truncate">
+                      <div class="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {{ page.citation_url }}
                       </div>
-                      <div class="text-xs text-blue-600 mt-1">
-                        Query: "{{ page.query_text }}"
+                      <div class="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                        Query ID: {{ page.query_id }}
                       </div>
                     </div>
                     <a :href="page.citation_url" target="_blank"
-                       class="ml-3 text-blue-600 hover:text-blue-800 text-xs font-medium">
+                       class="ml-3 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-xs font-medium">
                       View Page →
                     </a>
                   </div>
@@ -294,15 +299,15 @@
 
     <!-- No Data State -->
     <div v-if="!hasData" class="text-center py-12">
-      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">No brand pages found</h3>
-      <p class="mt-1 text-sm text-gray-500">
+      <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No brand pages found</h3>
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
         {{ filteredData.length === 0 ? 'No queries match the current filters.' : 'No pages mentioning your brand were found in the analysis results.' }}
       </p>
-      <p class="mt-1 text-xs text-gray-400">
-        Total queries: {{ props.data?.queries?.length || 0 }} |
+      <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+        Total queries: {{ props.data?.analysis_queries?.length || 0 }} |
         Filtered queries: {{ filteredData.length }} |
         Total pages: {{ pageAnalyses.length }} |
         Brand pages: {{ brandPages.length }}
@@ -328,8 +333,8 @@ const props = defineProps({
 // Available platforms for filtering
 const availablePlatforms = computed(() => {
   const platforms = new Set()
-  if (props.data?.queries) {
-    props.data.queries.forEach(query => {
+  if (props.data?.analysis_queries) {
+    props.data.analysis_queries.forEach(query => {
       // Check both platform and data_source fields from schema
       const platform = query.platform || query.data_source
       if (platform) platforms.add(platform.toLowerCase())
@@ -356,9 +361,9 @@ const togglePlatform = (platform) => {
 
 // Filter data based on selected platforms
 const filteredData = computed(() => {
-  if (!props.data?.queries) return []
-  if (selectedPlatforms.value.length === 0) return props.data.queries
-  return props.data.queries.filter(item => {
+  if (!props.data?.analysis_queries) return []
+  if (selectedPlatforms.value.length === 0) return props.data.analysis_queries
+  return props.data.analysis_queries.filter(item => {
     const platform = (item.platform || item.data_source || '').toLowerCase()
     return platform && selectedPlatforms.value.includes(platform)
   })
@@ -370,19 +375,33 @@ const hasData = computed(() => {
 
 // Extract page analyses data
 const pageAnalyses = computed(() => {
-  const analyses = []
-  filteredData.value.forEach(query => {
-    if (query.page_analyses && Array.isArray(query.page_analyses)) {
-      // Add URL field from citation_url if missing and query context
-      const processedAnalyses = query.page_analyses.map(analysis => ({
-        ...analysis,
-        url: analysis.url || analysis.citation_url,
-        query_text: query.query_text,
-        query_keyword: query.query_keyword
-      }))
-      analyses.push(...processedAnalyses)
-    }
-  })
+  // First try direct page_analyses from the data structure
+  let analyses = props.data?.page_analyses || []
+
+  // If no direct page_analyses, extract from associated_pages in queries
+  if (analyses.length === 0 && props.data?.analysis_queries) {
+    analyses = []
+    props.data.analysis_queries.forEach(query => {
+      if (query.associated_pages && Array.isArray(query.associated_pages)) {
+        // Add query_id to each page analysis if not present
+        query.associated_pages.forEach(page => {
+          if (!page.query_id) {
+            page.query_id = query.id
+          }
+          analyses.push(page)
+        })
+      }
+    })
+  }
+
+  // Filter by selected platforms if any are selected
+  if (selectedPlatforms.value.length > 0) {
+    // Get query IDs for filtered queries
+    const filteredQueryIds = new Set(filteredData.value.map(q => q.id))
+
+    // Filter page analyses to only include those from filtered queries
+    return analyses.filter(analysis => filteredQueryIds.has(analysis.query_id))
+  }
 
   return analyses
 })
@@ -408,6 +427,13 @@ const nonBrandPages = computed(() => {
 const totalPages = computed(() => pageAnalyses.value.length)
 const totalBrandPages = computed(() => brandPages.value.length)
 const totalNonBrandPages = computed(() => nonBrandPages.value.length)
+
+// Count pages with crawl errors
+const crawlErrorCount = computed(() => {
+  return brandPages.value.filter(page =>
+    page.analysis_notes?.includes('Default analysis used due to crawl or AI error')
+  ).length
+})
 
 // Calculate benchmark averages across all pages
 const benchmarkAverages = computed(() => {
@@ -572,6 +598,17 @@ const techSeoScore = computed(() => {
     let score = 0
     const tech = page.technical_seo || {}
 
+    // If this page had crawl errors, use a default score based on basic URL analysis
+    const hasCrawlError = page.analysis_notes?.includes('Default analysis used due to crawl or AI error')
+
+    if (hasCrawlError) {
+      // For pages with crawl errors, give basic scores for what we can determine
+      if (page.citation_url?.startsWith('https://')) score += 20 // HTTPS
+      if (tech.mobile_friendly === true) score += 10 // Mobile friendly (often still detectable)
+      score += 30 // Give some baseline score for being a legitimate page
+      return score
+    }
+
     // HTTPS/SSL (20 points)
     if (page.citation_url?.startsWith('https://') || tech.http_response_code === 200) {
       score += 20
@@ -622,6 +659,26 @@ const contentQualityScore = computed(() => {
 
   // Use actual content_quality object with detailed scoring
   const scores = brandPages.value.map(page => {
+    // Check if this page had crawl errors
+    const hasCrawlError = page.analysis_notes?.includes('Default analysis used due to crawl or AI error')
+
+    if (hasCrawlError) {
+      // For pages with crawl errors, use basic content quality estimate
+      const content = page.content_quality || {}
+      let score = 0
+
+      // Use available scores or defaults
+      score += (content.content_depth_score || 3) * 5 // Default to 3 if no data
+      score += (content.analysis_score || 3) * 5
+      score += (content.eeat_score || 3) * 3
+      score += (content.readability_score || 3) * 3
+
+      // Add baseline for being a legitimate cited page
+      score += 20
+
+      return Math.min(score, 100)
+    }
+
     // First try direct score field from schema (scale from 0-5 to 0-100)
     if (page.content_quality_score && page.content_quality_score > 0) {
       return Number(page.content_quality_score) * 20
@@ -739,27 +796,50 @@ const technicalSeoMetrics = computed(() => {
     },
     {
       label: 'Schema Markup',
-      check: (page) => page.technical_seo?.schema_markup_present === true,
+      check: (page) => {
+        // For crawl errors, assume schema is not present unless specifically detected
+        const hasCrawlError = page.analysis_notes?.includes('Default analysis used due to crawl or AI error')
+        if (hasCrawlError) return false
+        return page.technical_seo?.schema_markup_present === true
+      },
       avgKey: 'schemaPercentage'
     },
     {
       label: 'Semantic HTML',
-      check: (page) => page.technical_seo?.semantic_html_usage === true,
+      check: (page) => {
+        // For crawl errors, assume semantic HTML is not present
+        const hasCrawlError = page.analysis_notes?.includes('Default analysis used due to crawl or AI error')
+        if (hasCrawlError) return false
+        return page.technical_seo?.semantic_html_usage === true
+      },
       avgKey: 'semanticHtmlPercentage'
     },
     {
       label: 'Mobile Friendly',
-      check: (page) => page.technical_seo?.mobile_friendly === true,
+      check: (page) => {
+        // Mobile friendly can often be detected even with crawl errors
+        return page.technical_seo?.mobile_friendly === true
+      },
       avgKey: 'mobilePercentage'
     },
     {
       label: 'ARIA Labels',
-      check: (page) => page.technical_seo?.aria_labels_present === true,
+      check: (page) => {
+        // For crawl errors, assume ARIA labels are not present
+        const hasCrawlError = page.analysis_notes?.includes('Default analysis used due to crawl or AI error')
+        if (hasCrawlError) return false
+        return page.technical_seo?.aria_labels_present === true
+      },
       avgKey: 'ariaPercentage'
     },
     {
       label: 'Meta Description',
-      check: (page) => page.technical_seo?.meta_description_present === true,
+      check: (page) => {
+        // For crawl errors, assume meta description is not present
+        const hasCrawlError = page.analysis_notes?.includes('Default analysis used due to crawl or AI error')
+        if (hasCrawlError) return false
+        return page.technical_seo?.meta_description_present === true
+      },
       avgKey: 'metaDescPercentage'
     }
   ]
@@ -909,8 +989,7 @@ const topIssues = computed(() => {
   // Check for SSL issues
   const noSSLPages = brandPages.value.filter(page => {
     const tech = page.technical_seo || {}
-    return !(tech.ssl_enabled || tech.https || tech.secure ||
-             page.url?.startsWith('https://') || page.citation_url?.startsWith('https://'))
+    return !(page.citation_url?.startsWith('https://') || tech.http_response_code === 200)
   })
   const noSSL = noSSLPages.length
 

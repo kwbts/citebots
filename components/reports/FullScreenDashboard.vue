@@ -7,8 +7,8 @@
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-citebots-orange rounded-xl flex items-center justify-center">
-              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
             </div>
             <div>
@@ -44,16 +44,6 @@
           </div>
           
           
-          <!-- View Type -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Analysis Focus</label>
-            <select v-model="viewType" class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-citebots-orange focus:border-transparent">
-              <option value="all">Complete Analysis</option>
-              <option value="brand">Brand Performance</option>
-              <option value="competitor">Competitive Analysis</option>
-              <option value="technical">Technical SEO</option>
-            </select>
-          </div>
         </div>
       </div>
       
@@ -106,6 +96,22 @@
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ getFilterSummary() }}</p>
           </div>
           <div class="flex items-center space-x-4">
+            <!-- Dark Mode Toggle -->
+            <button
+              @click="toggleDarkMode"
+              class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
+              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+            >
+              <!-- Sun icon (show when in dark mode) -->
+              <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <!-- Moon icon (show when in light mode) -->
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+              </svg>
+            </button>
+
             <!-- Quick Stats -->
             <div class="flex items-center space-x-6">
               <div class="text-center">
@@ -289,6 +295,7 @@
           v-else-if="activeTab === 'competitor-comparison'"
           :data="filteredData"
           :client="client"
+          :competitors="props.data?.competitors || []"
         />
 
         <RawDataView
@@ -320,6 +327,10 @@ const props = defineProps({
 
 defineEmits(['close'])
 
+// Dark mode functionality
+const { isDark, toggle } = useDarkMode()
+const toggleDarkMode = () => toggle()
+
 // Dashboard State
 const activeTab = ref('overview')
 const activePlatforms = ref(['chatgpt', 'perplexity'])
@@ -339,11 +350,11 @@ const platforms = ref([
 
 // Dashboard tabs configuration
 const dashboardTabs = ref([
-  { 
-    id: 'overview', 
-    name: 'Overview', 
+  {
+    id: 'overview',
+    name: 'Overview',
     icon: () => h('svg', { class: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' })
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2v0' })
     ])
   },
   { 
@@ -368,11 +379,11 @@ const dashboardTabs = ref([
       h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z' })
     ])
   },
-  { 
-    id: 'page-analytics', 
+  {
+    id: 'page-analytics',
     name: 'Page Analytics',
     icon: () => h('svg', { class: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' })
     ])
   },
   {
@@ -386,8 +397,7 @@ const dashboardTabs = ref([
     id: 'raw-data',
     name: 'Raw Data',
     icon: () => h('svg', { class: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' }),
-      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M11 13h6' })
+      h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'stroke-width': '2', d: 'M4 6h16M4 12h16M4 18h16' })
     ])
   }
 ])
@@ -572,8 +582,37 @@ const getActivityClass = (type) => {
 
 // Metric Card Component
 const MetricCard = (props) => {
+  // Define proper color classes for each color
+  const getColorClasses = (color) => {
+    const colorMap = {
+      blue: {
+        text: 'text-blue-600 dark:text-blue-400',
+        bg: 'bg-blue-100 dark:bg-blue-900/30',
+        icon: 'text-blue-600 dark:text-blue-300'
+      },
+      green: {
+        text: 'text-green-600 dark:text-green-400',
+        bg: 'bg-green-100 dark:bg-green-900/30',
+        icon: 'text-green-600 dark:text-green-300'
+      },
+      purple: {
+        text: 'text-purple-600 dark:text-purple-400',
+        bg: 'bg-purple-100 dark:bg-purple-900/30',
+        icon: 'text-purple-600 dark:text-purple-300'
+      },
+      orange: {
+        text: 'text-citebots-orange dark:text-orange-400',
+        bg: 'bg-orange-100 dark:bg-orange-900/30',
+        icon: 'text-citebots-orange dark:text-orange-300'
+      }
+    }
+    return colorMap[color] || colorMap.blue
+  }
+
+  const colors = getColorClasses(props.color)
+
   return h('div', {
-    class: 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6'
+    class: 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 transition-all duration-200'
   }, [
     h('div', { class: 'flex items-center justify-between' }, [
       h('div', {}, [
@@ -583,10 +622,10 @@ const MetricCard = (props) => {
             value: props.value,
             suffix: props.suffix || '',
             decimals: props.decimals || 0,
-            class: `text-2xl font-bold text-${props.color}-600 dark:text-${props.color}-400`
+            class: `text-2xl font-bold ${colors.text}`
           }),
           props.trend && h('span', {
-            class: `text-sm font-medium ${props.trend > 0 ? 'text-green-600' : 'text-red-600'}`
+            class: `text-sm font-medium ${props.trend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`
           }, `${props.trend > 0 ? '+' : ''}${props.trend}%`)
         ]),
         props.subtitle && h('p', {
@@ -594,10 +633,10 @@ const MetricCard = (props) => {
         }, props.subtitle)
       ]),
       h('div', {
-        class: `p-3 bg-${props.color}-100 dark:bg-${props.color}-900 rounded-lg`
+        class: `p-3 ${colors.bg} rounded-lg`
       }, [
         // Icon placeholder - in real implementation would use proper icons
-        h('div', { class: `w-6 h-6 text-${props.color}-600 dark:text-${props.color}-300` })
+        h('div', { class: `w-6 h-6 ${colors.icon}` })
       ])
     ])
   ])
@@ -606,9 +645,16 @@ const MetricCard = (props) => {
 // Chart creation functions
 const createMainTrendChart = () => {
   if (!mainTrendChart.value) return
-  
+
   const ctx = mainTrendChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  // Destroy existing chart if it exists
+  if (mainTrendChart.value.chart) {
+    mainTrendChart.value.chart.destroy()
+  }
+
+  const chart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
@@ -616,59 +662,142 @@ const createMainTrendChart = () => {
         {
           label: 'Brand Mentions (%)',
           data: [45, 52, 48, 61, 65, brandMentionRate.value],
-          borderColor: 'rgb(249, 115, 22)',
-          backgroundColor: 'rgba(249, 115, 22, 0.1)',
+          borderColor: isDarkMode ? '#FB923C' : '#EA580C', // Orange variants
+          backgroundColor: isDarkMode ? 'rgba(251, 146, 60, 0.1)' : 'rgba(234, 88, 12, 0.1)',
           tension: 0.4,
-          fill: true
+          fill: true,
+          pointBackgroundColor: isDarkMode ? '#FB923C' : '#EA580C',
+          pointBorderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          pointBorderWidth: 2
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      },
       plugins: {
         legend: {
           position: 'top',
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151',
+            usePointStyle: true,
+            padding: 20
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1
         }
       },
       scales: {
+        x: {
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280'
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
+        },
         y: {
           beginAtZero: true,
-          max: 100
+          max: 100,
+          ticks: {
+            color: isDarkMode ? '#9CA3AF' : '#6B7280',
+            callback: function(value) {
+              return value + '%'
+            }
+          },
+          grid: {
+            color: isDarkMode ? '#374151' : '#E5E7EB',
+            drawBorder: false
+          }
         }
       }
     }
   })
+
+  // Store chart instance for cleanup
+  mainTrendChart.value.chart = chart
 }
 
 const createQueryTypeChart = () => {
   if (!queryTypeChart.value) return
-  
+
   const ctx = queryTypeChart.value.getContext('2d')
-  new Chart(ctx, {
+  const isDarkMode = isDark.value
+
+  // Destroy existing chart if it exists
+  if (queryTypeChart.value.chart) {
+    queryTypeChart.value.chart.destroy()
+  }
+
+  const chart = new Chart(ctx, {
     type: 'doughnut',
     data: {
       labels: ['Informational', 'Commercial', 'Navigational', 'Transactional'],
       datasets: [{
         data: [45, 30, 15, 10],
-        backgroundColor: [
-          'rgba(59, 130, 246, 0.8)',
-          'rgba(16, 185, 129, 0.8)',
-          'rgba(245, 158, 11, 0.8)',
-          'rgba(239, 68, 68, 0.8)'
-        ]
+        backgroundColor: isDarkMode ? [
+          'rgba(96, 165, 250, 0.8)', // blue-400
+          'rgba(52, 211, 153, 0.8)', // emerald-400
+          'rgba(251, 191, 36, 0.8)', // amber-400
+          'rgba(248, 113, 113, 0.8)' // red-400
+        ] : [
+          'rgba(37, 99, 235, 0.8)', // blue-600
+          'rgba(5, 150, 105, 0.8)', // emerald-600
+          'rgba(217, 119, 6, 0.8)', // amber-600
+          'rgba(220, 38, 38, 0.8)' // red-600
+        ],
+        borderColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+        borderWidth: 2
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      cutout: '60%',
       plugins: {
         legend: {
-          position: 'bottom'
+          position: 'bottom',
+          labels: {
+            color: isDarkMode ? '#E5E7EB' : '#374151',
+            usePointStyle: true,
+            padding: 15,
+            font: {
+              size: 12
+            }
+          }
+        },
+        tooltip: {
+          backgroundColor: isDarkMode ? '#1F2937' : '#FFFFFF',
+          titleColor: isDarkMode ? '#F3F4F6' : '#111827',
+          bodyColor: isDarkMode ? '#D1D5DB' : '#374151',
+          borderColor: isDarkMode ? '#374151' : '#E5E7EB',
+          borderWidth: 1,
+          callbacks: {
+            label: function(context) {
+              const label = context.label || ''
+              const value = context.parsed || 0
+              const total = context.dataset.data.reduce((a, b) => a + b, 0)
+              const percentage = Math.round((value / total) * 100)
+              return `${label}: ${percentage}%`
+            }
+          }
         }
       }
     }
   })
+
+  // Store chart instance for cleanup
+  queryTypeChart.value.chart = chart
 }
 
 // Initialize charts
@@ -683,6 +812,15 @@ onMounted(async () => {
 // Watch for tab changes and recreate charts
 watch(activeTab, async (newTab) => {
   if (newTab === 'overview') {
+    await nextTick()
+    createMainTrendChart()
+    createQueryTypeChart()
+  }
+})
+
+// Watch for dark mode changes and recreate charts
+watch(isDark, async () => {
+  if (activeTab.value === 'overview') {
     await nextTick()
     createMainTrendChart()
     createQueryTypeChart()
