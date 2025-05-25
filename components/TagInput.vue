@@ -1,12 +1,12 @@
 <template>
   <div class="space-y-2">
-    <label v-if="label" class="block text-sm font-medium text-gray-700">
+    <label v-if="label" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
       {{ label }}
       <span v-if="isAI" class="ml-1 text-xs text-purple-600">✨ AI Enhanced</span>
     </label>
-    
+
     <!-- Tag list -->
-    <div class="flex flex-wrap gap-2.5 p-3 bg-gray-50 rounded-lg border border-gray-200 min-h-[60px]">
+    <div class="flex flex-wrap gap-2.5 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 min-h-[60px]">
       <!-- Existing tags -->
       <TransitionGroup name="tag" tag="div" class="contents">
         <div
@@ -18,9 +18,9 @@
             selectedTags.includes(index) 
               ? 'ring-2 ring-citebots-orange' 
               : '',
-            tagSource[index] === 'ai' 
-              ? 'bg-purple-100 text-purple-800 border border-purple-200 hover:bg-purple-200' 
-              : 'bg-white text-gray-800 border border-gray-300 hover:bg-gray-50'
+            tagSource[index] === 'ai'
+              ? 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-800'
+              : 'bg-white dark:bg-gray-600 text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-500'
           ]"
         >
           <span v-if="tagSource[index] === 'ai'" class="mr-1.5 text-xs">✨</span>
@@ -44,7 +44,7 @@
           />
           <button
             @click.stop="removeTag(index)"
-            class="ml-1.5 -mr-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+            class="ml-1.5 -mr-1 text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
             :title="`Remove ${tag}`"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,7 +65,7 @@
             @focus="inputFocused = true"
             @blur="handleBlur"
             :placeholder="placeholder || 'Add new...'"
-            class="px-3 py-1.5 pr-8 border border-gray-300 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-citebots-orange focus:border-citebots-orange bg-white"
+            class="px-3 py-1.5 pr-8 border border-gray-300 dark:border-gray-500 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-citebots-orange focus:border-citebots-orange bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400"
             type="text"
             ref="inputRef"
           />
@@ -84,9 +84,9 @@
           </div>
         </div>
         <transition name="hint">
-          <span 
-            v-if="inputFocused && !newTag" 
-            class="absolute left-3 top-full mt-1 text-xs text-gray-500"
+          <span
+            v-if="inputFocused && !newTag"
+            class="absolute left-3 top-full mt-1 text-xs text-gray-500 dark:text-gray-400"
           >
             Press Enter to add
           </span>
@@ -95,7 +95,7 @@
     </div>
     
     <!-- Helper text -->
-    <div v-if="showHelperText" class="flex items-center gap-4 text-xs text-gray-500">
+    <div v-if="showHelperText" class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
       <span>Click to select • Double-click to edit • Delete or Backspace to remove</span>
       <span v-if="tagSource.some(s => s === 'ai')" class="text-purple-600">
         ✨ AI-suggested tags

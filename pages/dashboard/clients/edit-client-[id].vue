@@ -1,208 +1,283 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-3xl">
-    <h1 class="text-3xl font-bold mb-8 text-gray-900">Edit Client</h1>
+  <div class="max-w-4xl mx-auto space-y-8">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="page-title text-gray-900 dark:text-white">Edit Client</h1>
+          <p class="page-subtitle text-gray-600 dark:text-gray-300">
+            Update client information and enhance with AI
+          </p>
+        </div>
+        <NuxtLink 
+          :to="`/dashboard/clients/${clientId}`"
+          class="btn-secondary"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          Back to Client
+        </NuxtLink>
+      </div>
+    </div>
     
     <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      <p class="mt-4 text-gray-600">Loading client data...</p>
+    <div v-if="isLoading" class="card">
+      <div class="animate-pulse space-y-6">
+        <div class="space-y-4">
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+          <div class="space-y-3">
+            <div class="h-10 bg-gray-300 dark:bg-gray-600 rounded"></div>
+            <div class="h-10 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
+          <div class="space-y-3">
+            <div class="h-10 bg-gray-300 dark:bg-gray-600 rounded"></div>
+            <div class="h-10 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 rounded-lg p-4 mb-6">
-      <p class="text-red-700">Error: {{ error }}</p>
+    <div v-else-if="error" class="card text-center py-12">
+      <svg class="w-12 h-12 text-red-400 dark:text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+      </svg>
+      <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">Error Loading Client</h3>
+      <p class="text-red-600 dark:text-red-400 mb-4">{{ error }}</p>
+      <button @click="() => window.location.reload()" class="btn-primary">
+        Reload Page
+      </button>
     </div>
     
     <!-- Edit Form -->
-    <form v-else @submit.prevent="handleSubmit" class="space-y-6">
+    <form v-else @submit.prevent="handleSubmit" class="space-y-8">
       <!-- Brand Information -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Brand Information</h2>
+      <div class="card">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Brand Information</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Basic information about the client's brand</p>
+        </div>
         
-        <div class="space-y-4">
-          <div>
-            <label for="brandName" class="block text-sm font-medium text-gray-700 mb-1">
-              Brand Name
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label for="brandName" class="form-label">
+              Brand Name <span class="text-red-500">*</span>
             </label>
             <input
               id="brandName"
               v-model="form.brandName"
               type="text"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="input-field"
+              placeholder="e.g., Knak"
             />
           </div>
           
-          <div>
-            <label for="domain" class="block text-sm font-medium text-gray-700 mb-1">
-              Domain
+          <div class="space-y-2">
+            <label for="domain" class="form-label">
+              Domain <span class="text-red-500">*</span>
             </label>
             <input
               id="domain"
               v-model="form.domain"
               type="text"
               required
-              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="input-field"
+              placeholder="e.g., knak.com"
             />
           </div>
         </div>
       </div>
 
-      <!-- Competitors -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Competitors</h2>
+      <!-- Competitors Section -->
+      <div class="card">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Competitors</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Known competitors for analysis and comparison</p>
+        </div>
         
         <div class="space-y-4">
+          <div v-if="form.competitors.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <p class="text-sm">No competitors added yet</p>
+          </div>
+          
           <div v-for="(competitor, index) in form.competitors" :key="competitor.id || competitor.tempId"
-               class="flex gap-3">
-            <div class="flex-1 relative">
-              <input
-                v-model="competitor.name"
-                type="text"
-                :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
-                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Competitor name"
-              />
-              <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7h4v2H8V7zm0 4h4v2H8v-2z"/>
-                </svg>
-              </span>
+               class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Company Name</label>
+              <div class="relative">
+                <input
+                  v-model="competitor.name"
+                  type="text"
+                  :class="competitor.source === 'ai' ? 'pr-8 border-purple-300 dark:border-purple-600' : ''"
+                  class="input-field"
+                  placeholder="e.g., Acme Corp"
+                />
+                <span v-if="competitor.source === 'ai'" class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                  <span class="text-sm">✨</span>
+                </span>
+              </div>
             </div>
-            <div class="flex-1 relative">
-              <input
-                v-model="competitor.domain"
-                type="text"
-                :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
-                class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Competitor domain"
-              />
-              <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM8 7h4v2H8V7zm0 4h4v2H8v-2z"/>
-                </svg>
-              </span>
+            
+            <div class="space-y-2">
+              <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Domain</label>
+              <div class="relative">
+                <input
+                  v-model="competitor.domain"
+                  type="text"
+                  :class="competitor.source === 'ai' ? 'pr-8 border-purple-300 dark:border-purple-600' : ''"
+                  class="input-field"
+                  placeholder="e.g., acme.com"
+                />
+                <span v-if="competitor.source === 'ai'" class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                  <span class="text-sm">✨</span>
+                </span>
+              </div>
             </div>
-            <button
-              type="button"
-              @click="removeCompetitor(index)"
-              class="p-2 text-red-600 hover:text-red-800"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
-            </button>
+            
+            <div class="md:col-span-2 flex justify-end">
+              <button
+                type="button"
+                @click="removeCompetitor(index)"
+                class="inline-flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+              >
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+                Remove
+              </button>
+            </div>
           </div>
           
           <button
             type="button"
             @click="addCompetitor"
-            class="mt-2 w-full py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center justify-center"
+            class="w-full py-3 px-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center transition-colors group"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
             </svg>
             Add Competitor
           </button>
         </div>
       </div>
 
-      <!-- AI Enhanced Fields -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-semibold text-gray-900">AI-Enhanced Information</h2>
-          <div class="flex gap-2">
+      <!-- AI Enhanced Information -->
+      <div class="card">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">AI-Enhanced Information</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Detailed client information generated and enhanced by AI</p>
+          </div>
+          <div class="flex gap-3">
             <button
               type="button"
               @click="clearDataExceptBrandAndDomain"
-              class="px-3 py-1 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm flex items-center gap-2"
+              class="btn-secondary text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 border-red-200 hover:border-red-300 dark:border-red-700 dark:hover:border-red-600"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
               </svg>
               Clear Data
             </button>
             <button
               type="button"
               @click="enhanceWithAI"
-              :disabled="isEnhancing"
-              class="px-3 py-1 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:bg-gray-400 text-sm flex items-center gap-2"
+              :disabled="isEnhancing || !form.brandName || !form.domain"
+              class="btn bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg v-if="isEnhancing" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              {{ isEnhancing ? 'Refreshing...' : 'Refresh AI Data' }}
+              <span>{{ isEnhancing ? 'Refreshing...' : 'Refresh AI Data' }}</span>
+              <span class="text-sm ml-1">✨</span>
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Industry Classification -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Primary Industry
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <input
-              v-model="form.industryPrimary"
-              type="text"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
+        <!-- Industry Classification -->
+        <div class="mb-8">
+          <h3 class="font-medium text-gray-900 dark:text-white mb-4">Industry Classification</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="space-y-2">
+              <label class="form-label">
+                Primary Industry
+                <span class="ml-1 text-xs text-purple-600">✨ AI</span>
+              </label>
+              <input
+                v-model="form.industryPrimary"
+                type="text"
+                class="input-field border-purple-300 dark:border-purple-600"
+                placeholder="e.g., Technology"
+              />
+            </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Secondary Industry
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <input
-              v-model="form.industrySecondary"
-              type="text"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
+            <div class="space-y-2">
+              <label class="form-label">
+                Business Model
+                <span class="ml-1 text-xs text-purple-600">✨ AI</span>
+              </label>
+              <input
+                v-model="form.businessModel"
+                type="text"
+                class="input-field border-purple-300 dark:border-purple-600"
+                placeholder="e.g., B2B SaaS"
+              />
+            </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Sub-Industry
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <input
-              v-model="form.subIndustry"
-              type="text"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+            <div class="space-y-2">
+              <label class="form-label">
+                Secondary Industry
+                <span class="ml-1 text-xs text-purple-600">✨ AI</span>
+              </label>
+              <input
+                v-model="form.industrySecondary"
+                type="text"
+                class="input-field border-purple-300 dark:border-purple-600"
+                placeholder="e.g., Marketing"
+              />
+            </div>
           </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div class="space-y-2">
+              <label class="form-label">
+                Sub-Industry / Specialization
+                <span class="ml-1 text-xs text-purple-600">✨ AI</span>
+              </label>
+              <input
+                v-model="form.subIndustry"
+                type="text"
+                class="input-field border-purple-300 dark:border-purple-600"
+                placeholder="e.g., Email Marketing Automation"
+              />
+            </div>
 
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Business Model
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <input
-              v-model="form.businessModel"
-              type="text"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Geographic Focus
-              <span class="ml-1 text-xs text-purple-600">(AI)</span>
-            </label>
-            <input
-              v-model="form.geographicFocus"
-              type="text"
-              class="w-full px-3 py-2 border border-purple-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
+            <div class="space-y-2">
+              <label class="form-label">
+                Geographic Focus
+                <span class="ml-1 text-xs text-purple-600">✨ AI</span>
+              </label>
+              <input
+                v-model="form.geographicFocus"
+                type="text"
+                class="input-field border-purple-300 dark:border-purple-600"
+                placeholder="e.g., North America, Global"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- Text Areas for more complex data -->
-        <div class="mt-4 space-y-4">
+        <!-- Enhanced Data Fields -->
+        <div class="space-y-6">
           <TagInput
             v-model="form.targetAudience"
             v-model:source="form.targetAudienceSource"
@@ -266,28 +341,48 @@
             placeholder="Add regulation"
             :isAI="hasAIData"
           />
+
+          <TagInput
+            v-model="form.geographicRegions"
+            v-model:source="form.geographicRegionsSource"
+            label="Geographic Regions"
+            placeholder="Add region"
+            :isAI="hasAIData"
+          />
         </div>
 
-        <div v-if="form.aiEnhancedAt" class="mt-4 text-sm text-gray-500">
-          Last enhanced: {{ new Date(form.aiEnhancedAt).toLocaleString() }}
+        <div v-if="form.aiEnhancedAt" class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div class="flex items-center text-sm text-blue-700 dark:text-blue-300">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Last enhanced: {{ formatDate(form.aiEnhancedAt) }} 
+            <span v-if="form.aiEnhancementCount > 0" class="ml-2">({{ form.aiEnhancementCount }} times)</span>
+          </div>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="flex justify-between">
-        <button
-          type="button"
-          @click="navigateTo(`/dashboard/clients/${clientId}`)"
-          class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+      <!-- Form Actions -->
+      <div class="flex flex-col sm:flex-row justify-between gap-4">
+        <NuxtLink
+          :to="`/dashboard/clients/${clientId}`"
+          class="btn-secondary order-2 sm:order-1"
         >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
           Cancel
-        </button>
+        </NuxtLink>
         <button
           type="submit"
-          :disabled="isSubmitting"
-          class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400"
+          :disabled="isSubmitting || !form.brandName || !form.domain"
+          class="btn-primary order-1 sm:order-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+          <svg v-if="isSubmitting" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isSubmitting ? 'Saving Changes...' : 'Save Changes' }}
         </button>
       </div>
     </form>
@@ -356,6 +451,12 @@ const hasAIData = ref(false)
 
 const originalCompetitors = ref([])
 
+// Format date helper
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleString()
+}
+
 // Load client data
 onMounted(async () => {
   if (!clientId) {
@@ -372,7 +473,8 @@ onMounted(async () => {
         competitors (
           id,
           name,
-          domain
+          domain,
+          source
         )
       `)
       .eq('id', clientId)
@@ -436,7 +538,8 @@ const addCompetitor = () => {
   form.value.competitors.push({ 
     tempId: Date.now(),
     name: '', 
-    domain: '' 
+    domain: '',
+    source: 'manual'
   })
 }
 
@@ -606,8 +709,8 @@ const enhanceWithAI = async () => {
       form.value.aiEnhancementCount = (form.value.aiEnhancementCount || 0) + 1
 
       // Add AI competitors if they don't exist
-      if (result.competitors && result.competitors.length > 0) {
-        for (const aiCompetitor of result.competitors) {
+      if (result.competitors?.competitors?.length > 0) {
+        for (const aiCompetitor of result.competitors.competitors) {
           const exists = form.value.competitors.some(c =>
             c.domain === aiCompetitor.domain
           )
@@ -625,10 +728,6 @@ const enhanceWithAI = async () => {
     }
   } catch (err) {
     console.error('Error enhancing client:', err)
-    console.error('Full error object:', err)
-    if (err.response) {
-      console.error('Response data:', err.response)
-    }
     error.value = err.message || 'Failed to enhance client with AI'
   } finally {
     isEnhancing.value = false

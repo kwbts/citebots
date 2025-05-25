@@ -3,8 +3,8 @@
     <!-- Page Header -->
     <div class="page-header flex justify-between items-center">
       <div>
-        <h1 class="page-title">Manage Clients</h1>
-        <p class="page-subtitle">View and manage your client profiles</p>
+        <h1 class="page-title text-gray-900 dark:text-white">Manage Clients</h1>
+        <p class="page-subtitle text-gray-600 dark:text-gray-300">View and manage your client profiles</p>
       </div>
       <button
         @click="navigateTo('/dashboard/clients/provision')"
@@ -17,21 +17,21 @@
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-12">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-citebots-orange"></div>
-      <p class="mt-4 text-citebots-gray-600">Loading clients...</p>
+      <p class="mt-4 text-gray-600 dark:text-gray-300">Loading clients...</p>
     </div>
     
     <!-- Error State -->
-    <div v-else-if="error" class="bg-red-50 rounded-lg p-4">
-      <p class="text-red-700">Error loading clients: {{ error }}</p>
+    <div v-else-if="error" class="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
+      <p class="text-red-700 dark:text-red-400">Error loading clients: {{ error }}</p>
     </div>
     
     <!-- Empty State -->
     <div v-else-if="clients.length === 0" class="text-center py-12 card">
-      <svg class="mx-auto h-12 w-12 text-citebots-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
       </svg>
-      <h3 class="mt-2 text-lg font-medium text-citebots-dark">No clients yet</h3>
-      <p class="mt-1 text-citebots-gray-500">Get started by creating a new client.</p>
+      <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">No clients yet</h3>
+      <p class="mt-1 text-gray-500 dark:text-gray-400">Get started by creating a new client.</p>
       <button
         @click="navigateTo('/dashboard/clients/provision')"
         class="mt-4 btn-primary"
@@ -50,19 +50,19 @@
       >
         <div class="flex justify-between items-start">
           <div>
-            <h3 class="text-lg font-semibold text-citebots-dark">{{ client.name }}</h3>
-            <p class="text-citebots-gray-600">{{ client.domain }}</p>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ client.name }}</h3>
+            <p class="text-gray-600 dark:text-gray-300">{{ client.domain }}</p>
             <div class="mt-2 flex flex-wrap gap-1">
-              <span v-if="client.industry_primary" class="text-xs bg-citebots-gray-100 text-citebots-gray-600 px-2 py-1 rounded">
+              <span v-if="client.industry_primary" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
                 {{ client.industry_primary }}
               </span>
-              <span v-if="client.business_model" class="text-xs bg-citebots-gray-100 text-citebots-gray-600 px-2 py-1 rounded">
+              <span v-if="client.business_model" class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded">
                 {{ client.business_model }}
               </span>
             </div>
           </div>
           <div class="text-right">
-            <p class="text-xs text-citebots-gray-500">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
               Updated {{ formatDate(client.updated_at) }}
             </p>
             <div class="mt-2 flex gap-2 justify-end">

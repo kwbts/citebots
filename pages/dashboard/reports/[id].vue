@@ -1,7 +1,7 @@
 <template>
-  <div class="h-screen w-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+  <div class="h-full">
     <!-- Loading State -->
-    <div v-if="loading" class="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div v-if="loading" class="flex items-center justify-center py-32">
       <div class="text-center">
         <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-citebots-orange"></div>
         <p class="mt-4 text-gray-600 dark:text-gray-400">Loading dashboard...</p>
@@ -9,7 +9,7 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="h-screen w-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div v-else-if="error" class="flex items-center justify-center py-32">
       <div class="text-center bg-white dark:bg-gray-800 rounded-xl border border-red-200 dark:border-red-800 p-8 max-w-md mx-4">
         <div class="text-red-500 mb-4">
           <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,13 +23,14 @@
       </div>
     </div>
 
-    <!-- Full-Screen Dashboard -->
-    <FullScreenDashboard
-      v-else-if="reportData && client"
-      :data="reportData"
-      :client="client"
-      @close="handleClose"
-    />
+    <!-- Dashboard Content -->
+    <div v-else-if="reportData && client" class="h-full">
+      <FullScreenDashboard
+        :data="reportData"
+        :client="client"
+        @close="handleClose"
+      />
+    </div>
   </div>
 </template>
 
@@ -43,7 +44,7 @@ const { isDark } = useDarkMode()
 
 definePageMeta({
   middleware: 'auth',
-  layout: false
+  layout: 'dashboard'
 })
 
 const route = useRoute()

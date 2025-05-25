@@ -2,8 +2,8 @@
   <div class="max-w-4xl mx-auto">
     <!-- Page Header -->
     <div class="page-header">
-      <h1 class="page-title">Add New Client</h1>
-      <p class="page-subtitle mb-6">Provision a new client profile and enhance it with AI</p>
+      <h1 class="page-title text-gray-900 dark:text-white">Add New Client</h1>
+      <p class="page-subtitle text-gray-600 dark:text-gray-300 mb-6">Provision a new client profile and enhance it with AI</p>
     </div>
 
     <!-- Top Actions -->
@@ -20,34 +20,41 @@
           type="button"
           @click="enhanceWithAI"
           :disabled="!form.brandName || !form.domain || isEnhancing"
-          class="btn bg-purple-600 hover:bg-purple-700 text-white"
+          class="btn bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg v-if="isEnhancing" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span>{{ isEnhancing ? 'Enhancing...' : 'Enhance with AI' }}</span>
-          <span class="text-sm">✨</span>
+          <span>{{ isEnhancing ? 'Enhancing with AI...' : 'Enhance with AI' }}</span>
+          <span class="text-sm ml-1">✨</span>
         </button>
         <button
           type="button"
           @click="handleSubmit"
-          :disabled="isSubmitting"
-          class="btn-primary"
+          :disabled="isSubmitting || !form.brandName || !form.domain"
+          class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
-          {{ isSubmitting ? 'Saving...' : 'Save Client' }}
+          <svg v-if="isSubmitting" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isSubmitting ? 'Saving Client...' : 'Save Client' }}
         </button>
       </div>
     </div>
     
-    <form @submit.prevent="handleSubmit" @keydown.enter.prevent class="space-y-6">
+    <form @submit.prevent="handleSubmit" @keydown.enter.prevent class="space-y-8">
       <!-- Brand Information & Competitors Group -->
       <div class="card">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Brand Information</h2>
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Brand Information</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Enter your brand's basic information to get started.</p>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label for="brandName" class="block text-sm font-medium text-gray-700 mb-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div class="space-y-2">
+            <label for="brandName" class="form-label">
               Brand Name <span class="text-red-500">*</span>
             </label>
             <input
@@ -60,8 +67,8 @@
             />
           </div>
 
-          <div>
-            <label for="domain" class="block text-sm font-medium text-gray-700 mb-1">
+          <div class="space-y-2">
+            <label for="domain" class="form-label">
               Domain <span class="text-red-500">*</span>
             </label>
             <input
@@ -75,53 +82,74 @@
           </div>
         </div>
 
-        <!-- Competitors moved here -->
-        <div class="border-t pt-4">
-          <h3 class="font-medium text-gray-900 mb-3">Competitors</h3>
-          <div class="space-y-3">
-            <div v-for="(competitor, index) in form.competitors" :key="index" class="flex gap-3">
-              <div class="flex-1 relative">
-                <input
-                  v-model="competitor.name"
-                  type="text"
-                  :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Competitor name"
-                />
-                <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
-                  <span class="text-sm">✨</span>
-                </span>
+        <!-- Competitors Section -->
+        <div class="border-t dark:border-gray-600 pt-6">
+          <div class="mb-4">
+            <h3 class="font-medium text-gray-900 dark:text-white mb-1">Competitors</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Add known competitors to help with analysis.</p>
+          </div>
+
+          <div class="space-y-4">
+            <div v-if="form.competitors.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+              <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              <p class="text-sm">No competitors added yet</p>
+            </div>
+
+            <div v-for="(competitor, index) in form.competitors" :key="index" class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+              <div class="space-y-2">
+                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Company Name</label>
+                <div class="relative">
+                  <input
+                    v-model="competitor.name"
+                    type="text"
+                    :class="competitor.source === 'ai' ? 'pr-8 border-purple-300 dark:border-purple-600' : ''"
+                    class="input-field"
+                    placeholder="e.g., Acme Corp"
+                  />
+                  <span v-if="competitor.source === 'ai'" class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                    <span class="text-sm">✨</span>
+                  </span>
+                </div>
               </div>
-              <div class="flex-1 relative">
-                <input
-                  v-model="competitor.domain"
-                  type="text"
-                  :class="competitor.source === 'ai' ? 'pr-8 border-purple-300' : ''"
-                  class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Competitor domain"
-                />
-                <span v-if="competitor.source === 'ai'" class="absolute right-2 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
-                  <span class="text-sm">✨</span>
-                </span>
+
+              <div class="space-y-2">
+                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400">Domain</label>
+                <div class="relative">
+                  <input
+                    v-model="competitor.domain"
+                    type="text"
+                    :class="competitor.source === 'ai' ? 'pr-8 border-purple-300 dark:border-purple-600' : ''"
+                    class="input-field"
+                    placeholder="e.g., acme.com"
+                  />
+                  <span v-if="competitor.source === 'ai'" class="absolute right-3 top-1/2 -translate-y-1/2 text-purple-600" title="Added by AI">
+                    <span class="text-sm">✨</span>
+                  </span>
+                </div>
               </div>
-              <button
-                type="button"
-                @click="removeCompetitor(index)"
-                class="p-2 text-red-600 hover:text-red-800"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                </svg>
-              </button>
+
+              <div class="md:col-span-2 flex justify-end">
+                <button
+                  type="button"
+                  @click="removeCompetitor(index)"
+                  class="inline-flex items-center px-3 py-1.5 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                >
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                  Remove
+                </button>
+              </div>
             </div>
 
             <button
               type="button"
               @click="addCompetitor"
-              class="mt-2 w-full py-2 px-4 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 flex items-center justify-center"
+              class="w-full py-3 px-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center transition-colors group"
             >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
               </svg>
               Add Competitor
@@ -131,70 +159,79 @@
       </div>
 
       <!-- Industry Information -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Industry Information</h2>
+      <div class="card">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Industry Information</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Help us understand your industry context and business model.</p>
+        </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="form-label">
               Primary Industry
               <span v-if="form.industryPrimary && aiFields.includes('industryPrimary')" class="ml-1 text-xs text-purple-600">✨ AI</span>
             </label>
             <input
               v-model="form.industryPrimary"
               type="text"
-              :class="aiFields.includes('industryPrimary') ? 'border-purple-300' : 'border-gray-300'"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              :class="aiFields.includes('industryPrimary') ? 'border-purple-300 dark:border-purple-600' : ''"
+              class="input-field"
+              placeholder="e.g., Technology, Healthcare"
             />
           </div>
           
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Secondary Industry
-              <span v-if="form.industrySecondary && aiFields.includes('industrySecondary')" class="ml-1 text-xs text-purple-600">✨ AI</span>
-            </label>
-            <input
-              v-model="form.industrySecondary"
-              type="text"
-              :class="aiFields.includes('industrySecondary') ? 'border-purple-300' : 'border-gray-300'"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
+            <label class="form-label">
               Business Model
               <span v-if="form.businessModel && aiFields.includes('businessModel')" class="ml-1 text-xs text-purple-600">✨ AI</span>
             </label>
             <input
               v-model="form.businessModel"
               type="text"
-              :class="aiFields.includes('businessModel') ? 'border-purple-300' : 'border-gray-300'"
-              class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="B2B, B2C, etc."
+              :class="aiFields.includes('businessModel') ? 'border-purple-300 dark:border-purple-600' : ''"
+              class="input-field"
+              placeholder="e.g., B2B SaaS, B2C E-commerce"
+            />
+          </div>
+
+          <div>
+            <label class="form-label">
+              Secondary Industry
+              <span v-if="form.industrySecondary && aiFields.includes('industrySecondary')" class="ml-1 text-xs text-purple-600">✨ AI</span>
+            </label>
+            <input
+              v-model="form.industrySecondary"
+              type="text"
+              :class="aiFields.includes('industrySecondary') ? 'border-purple-300 dark:border-purple-600' : ''"
+              class="input-field"
+              placeholder="e.g., Marketing, Finance"
             />
           </div>
         </div>
         
-        <div class="mt-4">
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Sub-Industry
+        <div class="mt-6">
+          <label class="form-label">
+            Sub-Industry / Specialization
             <span v-if="form.subIndustry && aiFields.includes('subIndustry')" class="ml-1 text-xs text-purple-600">✨ AI</span>
           </label>
           <input
             v-model="form.subIndustry"
             type="text"
-            :class="aiFields.includes('subIndustry') ? 'border-purple-300' : 'border-gray-300'"
-            class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            :class="aiFields.includes('subIndustry') ? 'border-purple-300 dark:border-purple-600' : ''"
+            class="input-field"
+            placeholder="e.g., Email Marketing Automation, Cloud Security"
           />
         </div>
       </div>
 
       <!-- Target Market & Products -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Target Market & Products</h2>
-        
-        <div class="space-y-4">
+      <div class="card">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Target Market & Products</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Define your target audience and key offerings.</p>
+        </div>
+
+        <div class="space-y-6">
           <TagInput
             v-model="form.targetAudience"
             v-model:source="form.targetAudienceSource"
@@ -229,13 +266,14 @@
         </div>
       </div>
 
-      <!-- Business Context (now includes geographic regions) -->
-
       <!-- Business Context -->
       <div class="card">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">Business Context</h2>
-        
-        <div class="space-y-4">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Business Context</h2>
+          <p class="text-sm text-gray-600 dark:text-gray-400">Provide context about your business operations and market.</p>
+        </div>
+
+        <div class="space-y-6">
           <TagInput
             v-model="form.customerProblems"
             v-model:source="form.customerProblemsSource"
@@ -292,21 +330,25 @@
             type="button"
             @click="enhanceWithAI"
             :disabled="!form.brandName || !form.domain || isEnhancing"
-            class="btn bg-purple-600 hover:bg-purple-700 text-white"
+            class="btn bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
-            <svg v-if="isEnhancing" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg v-if="isEnhancing" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <span>{{ isEnhancing ? 'Enhancing...' : 'Enhance with AI' }}</span>
-            <span class="text-sm">✨</span>
+            <span>{{ isEnhancing ? 'Enhancing with AI...' : 'Enhance with AI' }}</span>
+            <span class="text-sm ml-1">✨</span>
           </button>
           <button
             type="submit"
-            :disabled="isSubmitting"
-            class="btn-primary"
+            :disabled="isSubmitting || !form.brandName || !form.domain"
+            class="btn-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
           >
-            {{ isSubmitting ? 'Saving...' : 'Save Client' }}
+            <svg v-if="isSubmitting" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isSubmitting ? 'Saving Client...' : 'Save Client' }}
           </button>
         </div>
       </div>
