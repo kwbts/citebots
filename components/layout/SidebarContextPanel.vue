@@ -1,35 +1,57 @@
 <template>
-  <div class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+  <div class="bg-gray-800 border-r border-gray-700/60 flex flex-col h-full" style="width: 288px; min-width: 288px; max-width: 288px; flex-shrink: 0;">
     <!-- Section Header -->
-    <div class="h-16 flex items-center px-4 border-b border-gray-700">
-      <h2 class="text-lg font-semibold text-white">{{ sectionTitle }}</h2>
+    <div class="h-16 flex items-center px-6 border-b border-gray-700/60 flex-shrink-0">
+      <h2 class="text-lg font-bold text-white tracking-tight">{{ sectionTitle }}</h2>
     </div>
 
     <!-- Navigation Content -->
-    <nav class="flex-1 px-3 py-4 space-y-1">
+    <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
       <!-- Dashboard Section -->
       <template v-if="activeSection === 'dashboard'">
-        <div class="mb-4">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">OVERVIEW</h3>
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">OVERVIEW</h3>
           <NuxtLink to="/dashboard" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
             </svg>
             Home
           </NuxtLink>
-          <NuxtLink to="/dashboard/user" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/user' }">
+        </div>
+
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">QUICK ACTIONS</h3>
+          <NuxtLink to="/dashboard/clients" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            Profile
+            Manage Clients
+          </NuxtLink>
+          <NuxtLink to="/dashboard/analysis" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis' }">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Run Analysis
+          </NuxtLink>
+          <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' }">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            View Reports
+          </NuxtLink>
+          <NuxtLink to="/dashboard/activity" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/activity' }">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            View Activity
           </NuxtLink>
         </div>
       </template>
 
       <!-- Clients Section -->
       <template v-if="activeSection === 'clients'">
-        <div class="mb-4">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">MANAGE</h3>
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">MANAGE</h3>
           <NuxtLink to="/dashboard/clients" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -47,8 +69,8 @@
 
       <!-- Analysis Section -->
       <template v-if="activeSection === 'analysis'">
-        <div class="mb-4">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">ANALYSIS</h3>
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">ANALYSIS</h3>
           <NuxtLink to="/dashboard/analysis" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -65,42 +87,32 @@
         </div>
       </template>
 
-      <!-- Reports Section -->
-      <template v-if="activeSection === 'reports'">
-        <!-- Navigation Links -->
-        <div class="mb-4">
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">REPORTS</h3>
-          <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' }">
+      <!-- Admin Section -->
+      <template v-if="activeSection === 'admin'">
+        <div class="mb-6">
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">ADMINISTRATION</h3>
+          <NuxtLink to="/dashboard/admin/profile" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/admin/profile' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            All Reports
+            Profile
+          </NuxtLink>
+          <NuxtLink to="/dashboard/admin/access-requests" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/admin/access-requests' }">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            Access Requests
           </NuxtLink>
         </div>
+      </template>
 
+      <!-- Reports Section -->
+      <template v-if="activeSection === 'reports'">
         <!-- Report Dashboard Navigation (when viewing a specific report) -->
         <template v-if="$route.path.startsWith('/dashboard/reports/') && $route.path !== '/dashboard/reports'">
-          <!-- Platform Filters -->
-          <div class="mb-6">
-            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">PLATFORM FILTER</h3>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="platform in platforms"
-                :key="platform.value"
-                @click="togglePlatform(platform.value)"
-                class="px-3 py-2 text-sm font-medium rounded-lg transition-colors"
-                :class="activePlatforms.includes(platform.value)
-                  ? 'bg-citebots-orange text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'"
-              >
-                {{ platform.label }}
-              </button>
-            </div>
-          </div>
-
           <!-- Dashboard Tabs -->
           <div class="mb-6">
-            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">DASHBOARD</h3>
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">DASHBOARD</h3>
             <div class="space-y-1">
               <button
                 @click="setActiveTab('overview')"
@@ -176,32 +188,30 @@
               >
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+              </svg>
+              Raw Data
+            </button>
+
+              <NuxtLink to="/dashboard/reports" class="nav-item w-full" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' }">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                Raw Data
-              </button>
+                All Reports
+              </NuxtLink>
             </div>
           </div>
+        </template>
 
-          <!-- Action Buttons -->
-          <div class="space-y-2">
-            <button
-              @click="exportReport"
-              class="w-full flex items-center justify-center px-4 py-2 bg-citebots-orange text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <!-- Navigation Links (when NOT viewing a specific report) -->
+        <template v-else>
+          <div class="mb-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">REPORTS</h3>
+            <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' }">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Export Report
-            </button>
-            <button
-              @click="refreshData"
-              class="w-full flex items-center justify-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh Data
-            </button>
+              All Reports
+            </NuxtLink>
           </div>
         </template>
       </template>
@@ -224,14 +234,6 @@ const route = useRoute()
 
 // Dashboard navigation state (for reports pages)
 const activeTab = ref('overview')
-const activePlatforms = ref(['all', 'chatgpt', 'perplexity'])
-
-// Platform filter options
-const platforms = [
-  { label: 'All', value: 'all' },
-  { label: 'ChatGPT', value: 'chatgpt' },
-  { label: 'Perplexity', value: 'perplexity' }
-]
 
 const sectionTitle = computed(() => {
   switch (props.activeSection) {
@@ -239,6 +241,7 @@ const sectionTitle = computed(() => {
     case 'clients': return 'Clients'
     case 'analysis': return 'Analysis'
     case 'reports': return 'Reports'
+    case 'admin': return 'Admin'
     default: return 'Dashboard'
   }
 })
@@ -252,59 +255,25 @@ const setActiveTab = (tab) => {
   })
   window.dispatchEvent(event)
 }
-
-// Platform filter toggle
-const togglePlatform = (platform) => {
-  if (platform === 'all') {
-    if (activePlatforms.value.includes('all')) {
-      activePlatforms.value = []
-    } else {
-      activePlatforms.value = ['all', 'chatgpt', 'perplexity']
-    }
-  } else {
-    if (activePlatforms.value.includes(platform)) {
-      activePlatforms.value = activePlatforms.value.filter(p => p !== platform && p !== 'all')
-    } else {
-      activePlatforms.value.push(platform)
-      if (activePlatforms.value.includes('chatgpt') && activePlatforms.value.includes('perplexity')) {
-        activePlatforms.value.push('all')
-      }
-    }
-  }
-
-  // Emit event for platform filter changes
-  const event = new CustomEvent('platform-filter-changed', {
-    detail: { platforms: activePlatforms.value }
-  })
-  window.dispatchEvent(event)
-}
-
-// Action handlers
-const exportReport = () => {
-  const event = new CustomEvent('export-report')
-  window.dispatchEvent(event)
-}
-
-const refreshData = () => {
-  const event = new CustomEvent('refresh-data')
-  window.dispatchEvent(event)
-}
 </script>
 
 <style scoped>
 .nav-item {
-  @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-300 hover:text-white hover:bg-gray-700 transition-colors;
+  @apply flex items-center px-4 py-3 text-sm font-semibold rounded-lg text-gray-300 hover:text-white hover:bg-gray-700/50 transition-all duration-150 ease-out border border-transparent focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-800 whitespace-nowrap overflow-hidden text-ellipsis;
+  width: 100%;
+  max-width: 256px;
 }
 
 .nav-item svg {
-  @apply mr-3;
+  @apply mr-3 w-4 h-4;
+  stroke-width: 2;
 }
 
 .nav-item-active {
-  @apply bg-citebots-orange text-white;
+  @apply bg-citebots-orange/15 text-citebots-orange border-citebots-orange/30;
 }
 
 .nav-item-active:hover {
-  @apply bg-citebots-orange/90;
+  @apply bg-citebots-orange/20;
 }
 </style>

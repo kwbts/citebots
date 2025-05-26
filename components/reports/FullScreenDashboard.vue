@@ -4,28 +4,12 @@
     <div class="h-full flex flex-col">
       <!-- Top Header Bar -->
       <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 shadow-sm">
-        <div class="flex items-center justify-between">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ getCurrentTabName() }}</h2>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ getFilterSummary() }}</p>
           </div>
           <div class="flex items-center space-x-4">
-            <!-- Dark Mode Toggle -->
-            <button
-              @click="toggleDarkMode"
-              class="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-200"
-              :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
-            >
-              <!-- Sun icon (show when in dark mode) -->
-              <svg v-if="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <!-- Moon icon (show when in light mode) -->
-              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            </button>
-
             <!-- Quick Stats -->
             <div class="flex items-center space-x-6">
               <div class="text-center">
@@ -47,10 +31,11 @@
 
       <!-- Dashboard Content -->
       <div class="flex-1 p-6 overflow-y-auto">
+        <div class="max-w-7xl mx-auto">
         <!-- Key Metrics Overview -->
-        <div v-if="activeTab === 'overview'" class="space-y-6">
+        <div v-if="activeTab === 'overview'" class="space-y-8">
           <!-- Top Metrics Row -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <MetricCard
               title="Total Queries"
               :value="totalQueries"
@@ -78,16 +63,32 @@
           </div>
 
           <!-- Competitor Performance -->
-          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Competitors</h3>
-            <div class="space-y-3">
-              <div v-for="competitor in topCompetitors" :key="competitor.name" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="w-8 h-8 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-lg flex items-center justify-center">
+                <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Top Competitors</h3>
+            </div>
+            <div class="space-y-4" v-if="topCompetitors.length > 0">
+              <div v-for="competitor in topCompetitors" :key="competitor.name" class="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-gray-700/30 border border-gray-200/50 dark:border-gray-600/50 rounded-xl hover:bg-gray-100/50 dark:hover:bg-gray-600/30 transition-colors duration-200">
                 <span class="font-medium text-gray-900 dark:text-white">{{ competitor.name }}</span>
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center gap-4">
                   <span class="text-sm text-gray-600 dark:text-gray-400">{{ competitor.count }} mentions</span>
-                  <span class="px-2 py-1 bg-citebots-orange text-white text-xs rounded-full">{{ competitor.percentage }}%</span>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-500/20">{{ competitor.percentage }}%</span>
                 </div>
               </div>
+            </div>
+            <div v-else class="text-center py-8">
+              <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 border border-gray-200/50 dark:border-gray-600/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Competitor Data</h3>
+              <p class="text-gray-600 dark:text-gray-400">Competitor mentions will appear here once analysis is complete</p>
             </div>
           </div>
         </div>
@@ -109,6 +110,7 @@
 
         <!-- Raw Data View -->
         <RawDataView v-else-if="activeTab === 'raw-data'" :data="filteredData" />
+        </div>
       </div>
     </div>
   </div>
@@ -130,10 +132,6 @@ const props = defineProps({
 })
 
 defineEmits(['close'])
-
-// Dark mode functionality
-const { isDark, toggle } = useDarkMode()
-const toggleDarkMode = () => toggle()
 
 // Dashboard state
 const activeTab = ref('overview')

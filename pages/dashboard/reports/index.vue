@@ -1,255 +1,233 @@
 <template>
-  <div class="max-w-6xl mx-auto space-y-8">
+  <div class="max-w-7xl mx-auto">
     <!-- Page Header -->
-    <div class="page-header">
-      <h1 class="page-title text-gray-900 dark:text-white">Reports</h1>
-      <p class="page-subtitle text-gray-600 dark:text-gray-300">View and analyze your client reports and insights</p>
+    <div class="mb-8">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">All Reports</h1>
+            <p class="text-gray-600 dark:text-gray-300 text-base">View and manage all your analysis reports</p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="text-right bg-citebots-orange/10 dark:bg-citebots-orange/15 rounded-lg px-4 py-3 border border-citebots-orange/20 dark:border-citebots-orange/30">
+              <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Total Reports</div>
+              <div class="flex items-center text-sm font-semibold text-citebots-orange mt-1">
+                <div class="w-2 h-2 bg-citebots-orange rounded-full mr-2"></div>
+                <span class="tabular-nums">{{ filteredReports.length }}</span> reports
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
+
+    <!-- Filters -->
+    <div class="mb-8">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200">
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div class="flex flex-col sm:flex-row gap-4 flex-1">
+            <!-- Client Filter -->
+            <div class="min-w-0 flex-1 sm:max-w-xs">
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Filter by Client
+              </label>
+              <div class="relative">
+                <select 
+                  v-model="selectedClientFilter" 
+                  class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none"
+                >
+                  <option value="">All Clients</option>
+                  <option v-for="client in uniqueClients" :key="client.id" :value="client.id">
+                    {{ client.name }}
+                  </option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="min-w-0 flex-1 sm:max-w-xs">
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Filter by Status
+              </label>
+              <div class="relative">
+                <select 
+                  v-model="selectedStatusFilter" 
+                  class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="completed">Completed</option>
+                  <option value="running">Running</option>
+                  <option value="failed">Failed</option>
+                  <option value="pending">Pending</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Clear Filters & Actions -->
+          <div class="flex gap-3">
+            <button 
+              v-if="selectedClientFilter || selectedStatusFilter"
+              @click="clearFilters"
+              class="bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 font-medium text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-150 ease-out"
+            >
+              Clear Filters
+            </button>
+            
+            <NuxtLink
+              to="/dashboard/analysis"
+              class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-4 py-3 font-medium text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out inline-flex items-center"
+            >
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+              </svg>
+              New Analysis
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Loading State -->
-    <div v-if="loadingClients" class="card">
-      <div class="animate-pulse space-y-4">
-        <div class="h-4 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
-        <div class="space-y-3">
-          <div class="h-10 bg-gray-300 dark:bg-gray-600 rounded"></div>
-          <div class="h-10 bg-gray-300 dark:bg-gray-600 rounded"></div>
+    <div v-if="loading" class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8">
+      <div class="animate-pulse space-y-6">
+        <div class="h-6 bg-gray-300 dark:bg-gray-600 rounded w-1/4"></div>
+        <div class="space-y-4">
+          <div class="h-16 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          <div class="h-16 bg-gray-300 dark:bg-gray-600 rounded"></div>
+          <div class="h-16 bg-gray-300 dark:bg-gray-600 rounded"></div>
         </div>
-        <div class="h-12 bg-gray-300 dark:bg-gray-600 rounded w-1/3"></div>
       </div>
     </div>
 
-    <!-- Report Selection -->
-    <div v-else class="card">
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Select Report</h2>
-        <p class="text-sm text-gray-600 dark:text-gray-400">Choose a client and analysis run to view detailed reports</p>
-      </div>
-      
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Client Selection -->
-        <div class="space-y-2">
-          <label class="form-label">
-            Client
-            <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <select 
-              v-model="selectedClientId" 
-              @change="onClientChange"
-              class="input-field pr-10 appearance-none"
-              :class="{ 'border-red-300 dark:border-red-600': !selectedClientId && attempted }"
-            >
-              <option value="">Choose a client...</option>
-              <option v-for="client in clients" :key="client.id" :value="client.id">
-                {{ client.name }}
-              </option>
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
+    <!-- Reports List -->
+    <div v-else-if="filteredReports.length > 0" class="space-y-4">
+      <div
+        v-for="report in filteredReports"
+        :key="report.id"
+        @click="viewReport(report.id)"
+        class="group cursor-pointer bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]"
+      >
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center space-x-4 mb-3">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-citebots-orange transition-colors tracking-tight">
+                {{ report.client_name }}
+              </h3>
+              <span :class="getStatusClass(report.status)" class="px-3 py-1 rounded-lg text-xs font-semibold">
+                {{ report.status }}
+              </span>
             </div>
-          </div>
-          <p v-if="clients.length === 0" class="text-sm text-amber-600 dark:text-amber-400">
-            No clients found. <NuxtLink to="/dashboard/clients" class="underline hover:no-underline">Create your first client</NuxtLink>
-          </p>
-        </div>
-        
-        <!-- Analysis Run Selection -->
-        <div class="space-y-2">
-          <label class="form-label">
-            Analysis Run
-            <span class="text-red-500">*</span>
-          </label>
-          <div class="relative">
-            <select 
-              v-model="selectedAnalysisRunId" 
-              @change="onAnalysisRunChange"
-              :disabled="!selectedClientId || loadingAnalysisRuns"
-              class="input-field pr-10 appearance-none disabled:opacity-50 disabled:cursor-not-allowed"
-              :class="{ 'border-red-300 dark:border-red-600': !selectedAnalysisRunId && selectedClientId && attempted }"
-            >
-              <option value="">
-                {{ getAnalysisRunPlaceholder() }}
-              </option>
-              <option v-for="run in analysisRuns" :key="run.id" :value="run.id">
-                {{ formatAnalysisRunOption(run) }}
-              </option>
-            </select>
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-              <svg v-if="loadingAnalysisRuns" class="w-5 h-5 text-gray-400 dark:text-gray-500 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              <svg v-else class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
-            </div>
-          </div>
-          <p v-if="selectedClientId && analysisRuns.length === 0 && !loadingAnalysisRuns" class="text-sm text-amber-600 dark:text-amber-400">
-            No analysis runs found for this client. <NuxtLink to="/dashboard/analysis" class="underline hover:no-underline">Run your first analysis</NuxtLink>
-          </p>
-        </div>
-      </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
+              <div class="flex items-center text-gray-600 dark:text-gray-400">
+                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span class="font-medium">{{ report.platform?.toUpperCase() || 'N/A' }}</span>
+              </div>
+              
+              <div class="flex items-center text-gray-600 dark:text-gray-400">
+                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <span class="tabular-nums">{{ report.queries_total || 0 }} queries</span>
+              </div>
 
-      <!-- Selected Analysis Info -->
-      <div v-if="selectedAnalysisRun" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-        <div class="flex items-start justify-between">
-          <div class="flex-1">
-            <h3 class="font-medium text-blue-900 dark:text-blue-200 mb-1">
-              {{ formatAnalysisRunTitle(selectedAnalysisRun) }}
-            </h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <span class="text-blue-700 dark:text-blue-300">Status:</span>
-                <span :class="getStatusClass(selectedAnalysisRun.status)" class="ml-1 px-2 py-0.5 rounded-full text-xs font-medium">
-                  {{ selectedAnalysisRun.status || 'unknown' }}
-                </span>
+              <div class="flex items-center text-gray-600 dark:text-gray-400">
+                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                {{ formatDate(report.created_at) }}
               </div>
-              <div class="text-blue-700 dark:text-blue-300">
-                <span>Queries:</span> <span class="font-medium">{{ selectedAnalysisRun.queries_total || 0 }}</span>
+
+              <div v-if="report.completed_at" class="flex items-center text-gray-600 dark:text-gray-400">
+                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Completed {{ formatDate(report.completed_at) }}
               </div>
-              <div class="text-blue-700 dark:text-blue-300">
-                <span>Platform:</span> <span class="font-medium uppercase">{{ selectedAnalysisRun.platform || 'N/A' }}</span>
+
+              <div v-if="report.queries_completed" class="flex items-center text-gray-600 dark:text-gray-400">
+                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span class="tabular-nums">{{ report.queries_completed }}/{{ report.queries_total }} completed</span>
               </div>
-              <div class="text-blue-700 dark:text-blue-300">
-                <span>Created:</span> <span class="font-medium">{{ formatDate(selectedAnalysisRun.created_at) }}</span>
+
+              <div class="flex items-center text-citebots-orange opacity-0 group-hover:opacity-100 transition-opacity">
+                <span class="mr-2 font-medium">View Report</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row gap-3">
-        <button 
-          v-if="selectedClientId && selectedAnalysisRunId"
-          @click="viewReport"
-          class="btn-primary flex items-center justify-center"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-          </svg>
-          Open Analytics Dashboard
-        </button>
-        
-        <button 
-          v-else
-          @click="attempted = true"
-          class="btn bg-gray-400 dark:bg-gray-600 text-white cursor-not-allowed opacity-50"
-          disabled
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-          </svg>
-          Select Client & Analysis Run
-        </button>
-
-        <NuxtLink
-          to="/dashboard/analysis"
-          class="btn-outline flex items-center justify-center"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-          </svg>
-          Run New Analysis
-        </NuxtLink>
       </div>
     </div>
 
     <!-- Empty States -->
-    <div v-if="!loadingClients" class="space-y-8">
-      <!-- No Clients -->
-      <div v-if="clients.length === 0" class="card text-center py-12">
-        <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-        </svg>
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Clients Found</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-          You need to create at least one client before you can view reports. Clients help organize your analysis runs and data.
-        </p>
-        <NuxtLink to="/dashboard/clients" class="btn-primary inline-flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+    <div v-else-if="!loading">
+      <!-- No Reports (Filtered) -->
+      <div v-if="reports.length > 0 && filteredReports.length === 0" class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 text-center">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700/60 rounded-lg flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
           </svg>
-          Create Your First Client
-        </NuxtLink>
-      </div>
-
-      <!-- No Selection Made -->
-      <div v-else-if="!selectedClientId || !selectedAnalysisRunId" class="card text-center py-12">
-        <svg class="w-16 h-16 text-gray-400 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Ready to View Reports</h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-lg mx-auto">
-          Select a client and one of their analysis runs above to open the comprehensive analytics dashboard with detailed insights, visualizations, and performance metrics.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-          <button 
-            @click="focusClientSelect"
-            class="btn-secondary"
-          >
-            Select Client & Analysis
-          </button>
-          <NuxtLink to="/dashboard/analysis" class="btn-outline inline-flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-            </svg>
-            Run New Analysis
-          </NuxtLink>
         </div>
-      </div>
-    </div>
-
-    <!-- Recent Reports Quick Access -->
-    <div v-if="recentReports.length > 0 && !selectedAnalysisRunId" class="card">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Recent Reports</h3>
-        <span class="text-sm text-gray-500 dark:text-gray-400">Click to view details</span>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div
-          v-for="report in recentReports"
-          :key="report.id"
-          @click="selectReport(report)"
-          @keydown.enter="selectReport(report)"
-          @keydown.space.prevent="selectReport(report)"
-          tabindex="0"
-          role="link"
-          :aria-label="`View report for ${report.client_name} - ${formatAnalysisRunTitle(report)}`"
-          class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-md dark:hover:shadow-lg cursor-pointer transition-all duration-200 group bg-white dark:bg-gray-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">No Reports Match Your Filters</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto text-base">
+          Try adjusting your filter criteria to see more reports.
+        </p>
+        <button 
+          @click="clearFilters"
+          class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out"
         >
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex-1 min-w-0">
-              <h4 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
-                {{ report.client_name }}
-              </h4>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                {{ formatAnalysisRunTitle(report) }}
-              </p>
-            </div>
-            <span :class="getStatusClass(report.status)" class="px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0 ml-3">
-              {{ report.status }}
-            </span>
-          </div>
+          Clear All Filters
+        </button>
+      </div>
 
-          <div class="flex items-center justify-between">
-            <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
-              <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              {{ formatDate(report.created_at) }}
-            </div>
-
-            <div class="flex items-center text-xs text-blue-600 dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span class="mr-1">View Report</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </div>
+      <!-- No Reports at All -->
+      <div v-else class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 text-center">
+        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700/60 rounded-lg flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">No Reports Yet</h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto text-base">
+          You haven't created any analysis reports yet. Run your first analysis to get started.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <NuxtLink 
+            to="/dashboard/clients" 
+            class="bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-150 ease-out inline-flex items-center justify-center"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            Manage Clients
+          </NuxtLink>
+          <NuxtLink 
+            to="/dashboard/analysis" 
+            class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out inline-flex items-center justify-center"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Run First Analysis
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -257,7 +235,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -268,157 +246,135 @@ const supabase = useSupabaseClient()
 const user = useSupabaseUser()
 
 // Data
-const clients = ref([])
-const analysisRuns = ref([])
-const recentReports = ref([])
-const selectedClientId = ref('')
-const selectedAnalysisRunId = ref('')
-const loadingClients = ref(true)
-const loadingAnalysisRuns = ref(false)
-const attempted = ref(false)
+const reports = ref([])
+const loading = ref(true)
+const selectedClientFilter = ref('')
+const selectedStatusFilter = ref('')
 
 // Computed
-const selectedClient = computed(() => {
-  return clients.value.find(c => c.id === selectedClientId.value)
+const uniqueClients = computed(() => {
+  const clientMap = new Map()
+  reports.value.forEach(report => {
+    if (report.client_id && report.client_name) {
+      clientMap.set(report.client_id, {
+        id: report.client_id,
+        name: report.client_name
+      })
+    }
+  })
+  return Array.from(clientMap.values()).sort((a, b) => a.name.localeCompare(b.name))
 })
 
-const selectedAnalysisRun = computed(() => {
-  return analysisRuns.value.find(r => r.id === selectedAnalysisRunId.value)
+const filteredReports = computed(() => {
+  let filtered = [...reports.value]
+  
+  if (selectedClientFilter.value) {
+    filtered = filtered.filter(report => report.client_id === selectedClientFilter.value)
+  }
+  
+  if (selectedStatusFilter.value) {
+    filtered = filtered.filter(report => report.status === selectedStatusFilter.value)
+  }
+  
+  return filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 })
 
 // Methods
-const fetchClients = async () => {
+const fetchAllReports = async () => {
   try {
-    loadingClients.value = true
-    const { data, error } = await supabase
-      .from('clients')
-      .select('id, name')
-      .eq('created_by', user.value.id)
-      .order('name')
+    loading.value = true
 
-    if (error) throw error
-    clients.value = data || []
-  } catch (error) {
-    console.error('Error fetching clients:', error)
-  } finally {
-    loadingClients.value = false
-  }
-}
-
-const fetchRecentReports = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('analysis_runs')
-      .select(`
-        *,
-        clients!inner(name)
-      `)
-      .eq('created_by', user.value.id)
-      .eq('status', 'completed')
-      .order('created_at', { ascending: false })
-      .limit(6)
-
-    if (error) throw error
-    
-    recentReports.value = (data || []).map(report => ({
-      ...report,
-      client_name: report.clients.name
-    }))
-  } catch (error) {
-    console.error('Error fetching recent reports:', error)
-  }
-}
-
-const onClientChange = async () => {
-  selectedAnalysisRunId.value = ''
-  analysisRuns.value = []
-  attempted.value = false
-  
-  if (!selectedClientId.value) return
-  
-  loadingAnalysisRuns.value = true
-  
-  try {
-    const { data, error } = await supabase
+    // First, let's try fetching analysis_runs and clients separately to debug
+    const { data: analysisRuns, error: runsError } = await supabase
       .from('analysis_runs')
       .select('*')
-      .eq('client_id', selectedClientId.value)
       .eq('created_by', user.value.id)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
-    analysisRuns.value = data || []
+    if (runsError) {
+      console.error('Error fetching analysis runs:', runsError)
+      throw runsError
+    }
+
+    console.log('Analysis runs fetched:', analysisRuns?.length || 0)
+
+    if (!analysisRuns || analysisRuns.length === 0) {
+      reports.value = []
+      return
+    }
+
+    // Get unique client IDs
+    const clientIds = [...new Set(analysisRuns.map(run => run.client_id).filter(Boolean))]
+
+    console.log('Client IDs found:', clientIds.length)
+
+    // Fetch client names
+    const { data: clients, error: clientsError } = await supabase
+      .from('clients')
+      .select('id, name')
+      .in('id', clientIds)
+
+    if (clientsError) {
+      console.error('Error fetching clients:', clientsError)
+      throw clientsError
+    }
+
+    console.log('Clients fetched:', clients?.length || 0)
+
+    // Create client lookup map
+    const clientMap = new Map()
+    clients?.forEach(client => {
+      clientMap.set(client.id, client.name)
+    })
+
+    // Combine the data
+    reports.value = analysisRuns.map(report => ({
+      ...report,
+      client_name: clientMap.get(report.client_id) || 'Unknown Client'
+    }))
+
+    console.log('Final reports count:', reports.value.length)
+
   } catch (error) {
-    console.error('Error fetching analysis runs:', error)
+    console.error('Error fetching reports:', error)
+    reports.value = []
   } finally {
-    loadingAnalysisRuns.value = false
+    loading.value = false
   }
 }
 
-const onAnalysisRunChange = () => {
-  attempted.value = false
+const clearFilters = () => {
+  selectedClientFilter.value = ''
+  selectedStatusFilter.value = ''
 }
 
-const viewReport = () => {
-  if (!selectedAnalysisRunId.value) return
-  navigateTo(`/dashboard/reports/${selectedAnalysisRunId.value}`)
-}
-
-const selectReport = (report) => {
-  // Navigate directly to the report page
-  navigateTo(`/dashboard/reports/${report.id}`)
-}
-
-const focusClientSelect = () => {
-  const select = document.querySelector('select')
-  if (select) {
-    select.focus()
-  }
-}
-
-const getAnalysisRunPlaceholder = () => {
-  if (loadingAnalysisRuns.value) return 'Loading analysis runs...'
-  if (!selectedClientId.value) return 'Select a client first'
-  if (analysisRuns.value.length === 0) return 'No analysis runs found'
-  return 'Choose an analysis run...'
-}
-
-const formatAnalysisRunOption = (run) => {
-  const date = new Date(run.created_at).toLocaleDateString()
-  const status = run.status || 'unknown'
-  const platform = run.platform || 'unknown'
-  const queries = run.queries_total || 0
-  
-  return `${platform.toUpperCase()} - ${date} (${queries} queries, ${status})`
-}
-
-const formatAnalysisRunTitle = (run) => {
-  const date = new Date(run.created_at).toLocaleDateString()
-  return `${run.platform?.toUpperCase() || 'Analysis'} - ${date}`
+const viewReport = (reportId) => {
+  navigateTo(`/dashboard/reports/${reportId}`)
 }
 
 const getStatusClass = (status) => {
   const classes = {
-    'completed': 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
-    'running': 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
-    'failed': 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
-    'pending': 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+    'completed': 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-700/50',
+    'running': 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700/50',
+    'failed': 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-700/50',
+    'pending': 'bg-gray-100 dark:bg-gray-700/60 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-600/50'
   }
   return classes[status] || classes.pending
 }
 
 const formatDate = (dateString) => {
-  if (!dateString) return ''
+  if (!dateString) return 'N/A'
   const date = new Date(dateString)
   return date.toLocaleDateString(undefined, { 
     month: 'short', 
     day: 'numeric', 
-    year: 'numeric' 
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 
 onMounted(async () => {
-  await fetchClients()
-  await fetchRecentReports()
+  await fetchAllReports()
 })
 </script>
