@@ -1,16 +1,16 @@
 <template>
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-    <div class="flex items-center">
-      <div class="flex-shrink-0">
+  <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+    <div class="flex items-center justify-between">
+      <div class="flex-1">
+        <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">{{ title }}</p>
+        <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ value }}</p>
+      </div>
+      <div class="flex-shrink-0 ml-6">
         <div :class="iconContainerClass">
-          <svg class="w-5 h-5" :class="iconClass" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-8 h-8" :class="iconClass" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="iconPath" />
           </svg>
         </div>
-      </div>
-      <div class="ml-3">
-        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ title }}</p>
-        <p class="text-2xl font-semibold text-gray-900 dark:text-white">{{ value }}</p>
       </div>
     </div>
   </div>
@@ -27,7 +27,7 @@ const props = defineProps({
 })
 
 const iconContainerClass = computed(() => {
-  return `w-8 h-8 bg-${props.color}-100 dark:bg-${props.color}-900 rounded-lg flex items-center justify-center`
+  return `w-16 h-16 bg-${props.color}-50 dark:bg-${props.color}-500/10 border border-${props.color}-200/50 dark:border-${props.color}-500/20 rounded-2xl flex items-center justify-center`
 })
 
 const iconClass = computed(() => {

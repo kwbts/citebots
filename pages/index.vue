@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-citebots-gray-50">
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
     <div class="max-w-md w-full">
       <!-- Logo and Header -->
       <div class="text-center mb-8">
@@ -11,40 +11,12 @@
             </svg>
           </div>
         </div>
-        <h1 class="text-2xl font-bold text-citebots-dark">Citebots</h1>
-        <p class="text-citebots-gray-600 mt-2">Generative Engine Optimization Dashboard</p>
-      </div>
-
-      <!-- Toggle between forms -->
-      <div class="mb-6">
-        <div class="flex bg-citebots-gray-100 p-1 rounded-lg">
-          <button
-            @click="activeForm = 'login'"
-            :class="[
-              'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200',
-              activeForm === 'login' 
-                ? 'bg-white text-citebots-dark shadow-sm' 
-                : 'text-citebots-gray-600 hover:text-citebots-gray-800'
-            ]"
-          >
-            Sign In
-          </button>
-          <button
-            @click="activeForm = 'request'"
-            :class="[
-              'flex-1 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200',
-              activeForm === 'request' 
-                ? 'bg-white text-citebots-dark shadow-sm' 
-                : 'text-citebots-gray-600 hover:text-citebots-gray-800'
-            ]"
-          >
-            Request Access
-          </button>
-        </div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Citebots</h1>
+        <p class="text-gray-600 dark:text-gray-400 mt-2">Generative Engine Optimization Dashboard</p>
       </div>
 
       <!-- Login Form -->
-      <div v-if="activeForm === 'login'" class="card">
+      <div class="card">
         <form @submit.prevent="handleLogin">
           <div class="mb-4">
             <label for="email" class="form-label">Email</label>
@@ -76,66 +48,9 @@
         </form>
       </div>
 
-      <!-- Request Access Form -->
-      <div v-else class="card">
-        <form @submit.prevent="handleRequest">
-          <div class="mb-4">
-            <label for="first-name" class="form-label">First Name</label>
-            <input
-              type="text"
-              id="first-name"
-              v-model="requestForm.firstName"
-              class="input-field"
-              placeholder="John"
-              required
-            />
-          </div>
-
-          <div class="mb-4">
-            <label for="last-name" class="form-label">Last Name</label>
-            <input
-              type="text"
-              id="last-name"
-              v-model="requestForm.lastName"
-              class="input-field"
-              placeholder="Doe"
-              required
-            />
-          </div>
-
-          <div class="mb-4">
-            <label for="request-email" class="form-label">Email</label>
-            <input
-              type="email"
-              id="request-email"
-              v-model="requestForm.email"
-              class="input-field"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          <div class="mb-6">
-            <label for="company" class="form-label">Company</label>
-            <input
-              type="text"
-              id="company"
-              v-model="requestForm.company"
-              class="input-field"
-              placeholder="Your Company"
-              required
-            />
-          </div>
-
-          <button type="submit" class="w-full btn-primary" :disabled="isSubmitting">
-            {{ isSubmitting ? 'Processing...' : 'Request Access' }}
-          </button>
-        </form>
-      </div>
-
       <!-- Messages -->
       <div v-if="message" class="mt-4 p-4 rounded-md" 
-        :class="messageType === 'error' ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'">
+        :class="messageType === 'error' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800' : 'bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800'">
         {{ message }}
       </div>
     </div>
@@ -145,10 +60,11 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useDarkMode } from '~/composables/useDarkMode'
 
 const router = useRouter()
 const supabase = useSupabaseClient()
-const activeForm = ref('login')
+const { isDark } = useDarkMode() // Initialize dark mode
 const message = ref('')
 const messageType = ref('')
 const isSubmitting = ref(false)
@@ -156,13 +72,6 @@ const isSubmitting = ref(false)
 const loginForm = ref({
   email: '',
   password: ''
-})
-
-const requestForm = ref({
-  firstName: '',
-  lastName: '',
-  email: '',
-  company: ''
 })
 
 const handleLogin = async () => {
@@ -196,66 +105,6 @@ const handleLogin = async () => {
     }, 500)
   } catch (error) {
     message.value = error.message || 'Login failed. Please check your credentials.'
-    messageType.value = 'error'
-  } finally {
-    isSubmitting.value = false
-  }
-}
-
-const handleRequest = async () => {
-  message.value = ''
-  isSubmitting.value = true
-
-  try {
-    // Basic validation
-    if (!requestForm.value.firstName || !requestForm.value.lastName ||
-        !requestForm.value.email || !requestForm.value.company) {
-      throw new Error('Please fill in all fields')
-    }
-
-    // Check if email is jon@knowbots.ca
-    if (requestForm.value.email === 'jon@knowbots.ca') {
-      message.value = 'Processing Super Admin account creation...'
-      messageType.value = 'success'
-
-      // Call Netlify function to create super admin account
-      const response = await $fetch('/.netlify/functions/auth-provision', {
-        method: 'POST',
-        body: {
-          firstName: requestForm.value.firstName,
-          lastName: requestForm.value.lastName,
-          email: requestForm.value.email,
-          company: requestForm.value.company,
-          role: 'super_admin'
-        }
-      })
-
-      console.log('API Response:', response) // Debug log
-
-      if (response && response.password) {
-        message.value = `Account created successfully! Your password is: ${response.password}`
-      } else {
-        message.value = 'Account created but password not received. Check the access_requests table in Supabase.'
-        console.error('No password in response:', response)
-      }
-      // Reset form
-      requestForm.value = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        company: ''
-      }
-    } else {
-      // For other users, just store the request
-      message.value = 'Access request submitted. Super Admin approval required.'
-      messageType.value = 'success'
-    }
-  } catch (error) {
-    console.error('Request error:', error)
-    if (error.data) {
-      console.error('Error data:', error.data)
-    }
-    message.value = error.message || 'Failed to submit request. Please try again.'
     messageType.value = 'error'
   } finally {
     isSubmitting.value = false

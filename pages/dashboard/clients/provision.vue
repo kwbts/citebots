@@ -7,14 +7,7 @@
     </div>
 
     <!-- Top Actions -->
-    <div class="flex justify-between items-center mb-6">
-      <button
-        type="button"
-        @click="navigateTo('/dashboard/clients')"
-        class="btn-secondary"
-      >
-        Cancel
-      </button>
+    <div class="flex justify-end items-center mb-6">
       <div class="flex gap-2">
         <button
           type="button"
@@ -317,14 +310,7 @@
       </div>
 
       <!-- Bottom Actions -->
-      <div class="flex justify-between items-center">
-        <button
-          type="button"
-          @click="navigateTo('/dashboard/clients')"
-          class="btn-secondary"
-        >
-          Cancel
-        </button>
+      <div class="flex justify-end items-center">
         <div class="flex gap-2">
           <button
             type="button"

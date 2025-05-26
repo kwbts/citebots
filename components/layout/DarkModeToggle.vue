@@ -46,5 +46,5 @@
 <script setup>
 import { useDarkMode } from '~/composables/useDarkMode'
 
-const { isDarkMode, toggleDarkMode } = useDarkMode()
+const { isDark: isDarkMode, toggle: toggleDarkMode } = useDarkMode()
 </script>

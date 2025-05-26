@@ -1,81 +1,113 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Brand Performance Overview</h2>
-      
-      <TextBox>
-        Track how often your brand is mentioned in LLM responses and how you perform compared to competitors. 
-        Higher mention rates indicate stronger brand visibility in AI-generated content.
-      </TextBox>
-      
-      
-      <!-- Key Performance Metrics Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Brand Mention Rate -->
-        <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Brand Mention Rate</div>
-          <div class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-            <AnimatedNumber :value="brandMetrics.mentionRate" :format-fn="formatPercentage" />
+  <div class="space-y-8">
+    <!-- Key Performance Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Brand Mention Rate -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Brand Mention Rate</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">
+              <AnimatedNumber :value="brandMetrics.mentionRate" :format-fn="formatPercentage" />
+            </p>
           </div>
-          <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div
-              class="h-2 bg-citebots-orange rounded-full transition-all duration-700"
-              :style="`width: ${brandMetrics.mentionRate}%`"
-            ></div>
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {{ brandMetrics.mentionedQueries }}/{{ brandMetrics.totalQueries }} queries
+          <div class="w-16 h-16 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-2xl flex items-center justify-center ml-6">
+            <svg class="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
           </div>
         </div>
-        
-        <!-- Total Queries with Brand -->
-        <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Queries with Brand</div>
-          <div class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-            <AnimatedNumber :value="brandMetrics.mentionedQueries" />
+        <div class="w-full h-3 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden mb-2">
+          <div
+            class="h-3 bg-orange-500 rounded-full transition-all duration-700"
+            :style="`width: ${brandMetrics.mentionRate}%`"
+          ></div>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{ brandMetrics.mentionedQueries }}/{{ brandMetrics.totalQueries }} queries
+        </p>
+      </div>
+
+      <!-- Total Queries with Brand -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Queries with Brand</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">
+              <AnimatedNumber :value="brandMetrics.mentionedQueries" />
+            </p>
           </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">
-            Out of {{ brandMetrics.totalQueries }} total queries
+          <div class="w-16 h-16 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-2xl flex items-center justify-center ml-6">
+            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
           </div>
         </div>
-        
-        <!-- Average Brand Mentions -->
-        <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Avg Brand Mentions</div>
-          <div class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2">
-            <AnimatedNumber :value="brandMetrics.avgMentions" :format-fn="formatDecimal" />
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Out of {{ brandMetrics.totalQueries }} total queries
+        </p>
+      </div>
+
+      <!-- Average Brand Mentions -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Avg Brand Mentions</p>
+            <p class="text-3xl font-bold text-gray-900 dark:text-white">
+              <AnimatedNumber :value="brandMetrics.avgMentions" :format-fn="formatDecimal" />
+            </p>
           </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">
-            Per query when mentioned
-          </div>
-        </div>
-        
-        <!-- Brand Sentiment -->
-        <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-4">
-          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Brand Sentiment</div>
-          <div class="text-3xl font-bold mb-2" :class="getSentimentColor(brandMetrics.sentiment)">
-            <AnimatedNumber :value="brandMetrics.sentiment" :format-fn="formatSentiment" />
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">
-            {{ getSentimentLabel(brandMetrics.sentiment) }}
+          <div class="w-16 h-16 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 rounded-2xl flex items-center justify-center ml-6">
+            <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
           </div>
         </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          Per query when mentioned
+        </p>
+      </div>
+
+      <!-- Brand Sentiment -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex-1">
+            <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Brand Sentiment</p>
+            <p class="text-3xl font-bold mb-2" :class="getSentimentColor(brandMetrics.sentiment)">
+              <AnimatedNumber :value="brandMetrics.sentiment" :format-fn="formatSentiment" />
+            </p>
+          </div>
+          <div class="w-16 h-16 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-2xl flex items-center justify-center ml-6">
+            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-4-8V3a1 1 0 011-1h2a1 1 0 011 1v3M7 21h10a2 2 0 002-2v-5a2 2 0 00-2-2H7a2 2 0 00-2 2v5a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          {{ getSentimentLabel(brandMetrics.sentiment) }}
+        </p>
       </div>
     </div>
     
     <!-- Two Column Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <!-- Brand vs Competitor Comparison -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Brand vs Competitors</h3>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-8 h-8 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Brand vs Competitors</h3>
+        </div>
         
         <!-- Competitor Selection -->
-        <div class="mb-6">
-          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">Compare with:</label>
-          <select 
-            v-model="selectedCompetitor" 
-            class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 text-sm bg-white dark:bg-gray-700"
+        <div class="mb-8">
+          <label class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 block">Compare with:</label>
+          <select
+            v-model="selectedCompetitor"
+            class="w-full border border-gray-200/50 dark:border-gray-600/50 rounded-lg px-4 py-3 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-4 focus:ring-orange-200 dark:focus:ring-orange-500/30 focus:border-orange-300 dark:focus:border-orange-500/50 transition-all duration-200"
           >
             <option value="all">All Competitors</option>
             <option v-for="competitor in competitors" :key="competitor.id" :value="competitor.id">
@@ -85,30 +117,30 @@
         </div>
         
         <!-- Comparison Chart -->
-        <div class="space-y-4">
+        <div class="space-y-6">
           <!-- Brand Performance -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ client?.name || 'Your Brand' }}</span>
-              <span class="text-gray-500 dark:text-gray-400">{{ formatPercentage(brandMetrics.mentionRate) }}</span>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-medium text-gray-900 dark:text-white">{{ client?.name || 'Your Brand' }}</span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-500/20">{{ formatPercentage(brandMetrics.mentionRate) }}</span>
             </div>
-            <div class="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div class="relative h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
               <div
-                class="absolute top-0 left-0 h-full bg-citebots-orange rounded-full transition-all duration-700"
+                class="absolute top-0 left-0 h-full bg-orange-500 rounded-full transition-all duration-700"
                 :style="`width: ${Math.min(brandMetrics.mentionRate, 100)}%`"
               ></div>
             </div>
           </div>
-          
+
           <!-- Competitor Performance -->
-          <div v-for="comp in getCompetitorComparison()" :key="comp.name" class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ comp.name }}</span>
-              <span class="text-gray-500 dark:text-gray-400">{{ formatPercentage(comp.mentionRate) }}</span>
+          <div v-for="comp in getCompetitorComparison()" :key="comp.name" class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-medium text-gray-900 dark:text-white">{{ comp.name }}</span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/20">{{ formatPercentage(comp.mentionRate) }}</span>
             </div>
-            <div class="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div 
-                class="absolute top-0 left-0 h-full bg-gray-400 dark:bg-gray-600 rounded-full transition-all duration-700"
+            <div class="relative h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+              <div
+                class="absolute top-0 left-0 h-full bg-gray-400 dark:bg-gray-500 rounded-full transition-all duration-700"
                 :style="`width: ${Math.min(comp.mentionRate, 100)}%`"
               ></div>
             </div>
@@ -116,16 +148,16 @@
         </div>
         
         <!-- Competitive Insights -->
-        <div class="mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 rounded-lg p-4">
-          <div class="flex items-start">
-            <div class="flex-shrink-0 mt-0.5">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 dark:text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+        <div class="mt-8 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-xl p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-8 h-8 bg-blue-100 dark:bg-blue-500/20 border border-blue-200/50 dark:border-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div class="ml-3">
-              <h5 class="text-sm font-medium text-blue-800 dark:text-blue-300">Competitive Position</h5>
-              <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
+            <div>
+              <h5 class="font-medium text-blue-800 dark:text-blue-300 mb-2">Competitive Position</h5>
+              <p class="text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
                 {{ getCompetitiveInsight() }}
               </p>
             </div>
@@ -134,33 +166,40 @@
       </div>
       
       <!-- Brand Mention Type Distribution -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Brand Mention Types</h3>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-8 h-8 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Brand Mention Types</h3>
+        </div>
         
-        <div class="space-y-4">
+        <div class="space-y-6">
           <!-- Mention Type Breakdown -->
-          <div v-for="(type, index) in mentionTypes" :key="type.name" class="space-y-2">
-            <div class="flex justify-between text-sm">
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ type.name }}</span>
-              <span class="text-gray-500 dark:text-gray-400">{{ type.count }} ({{ formatPercentage(type.percentage) }})</span>
+          <div v-for="(type, index) in mentionTypes" :key="type.name" class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="font-medium text-gray-900 dark:text-white">{{ type.name }}</span>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/20">{{ type.count }} ({{ formatPercentage(type.percentage) }})</span>
             </div>
-            <div class="relative h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div 
+            <div class="relative h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+              <div
                 class="absolute top-0 left-0 h-full rounded-full transition-all duration-700"
                 :class="getMentionTypeColor(index)"
                 :style="`width: ${type.percentage}%`"
               ></div>
             </div>
           </div>
-          
+
           <!-- Legend -->
-          <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
-            <div v-for="(type, index) in mentionTypes" :key="type.name" class="flex items-center">
-              <div 
-                class="w-3 h-3 rounded-full mr-2" 
+          <div class="mt-8 grid grid-cols-2 gap-3">
+            <div v-for="(type, index) in mentionTypes" :key="type.name" class="flex items-center gap-3">
+              <div
+                class="w-4 h-4 rounded-full border border-gray-200/50 dark:border-gray-600/50"
                 :class="getMentionTypeColor(index)"
               ></div>
-              <span class="text-gray-600 dark:text-gray-400">{{ type.name }}</span>
+              <span class="text-sm text-gray-600 dark:text-gray-400">{{ type.name }}</span>
             </div>
           </div>
         </div>
@@ -168,38 +207,45 @@
     </div>
     
     <!-- Query Intent Performance -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Query Intent vs Brand Success</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="intent in intentPerformance" :key="intent.name" class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 rounded-lg p-4">
-          <div class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ intent.name }}</div>
-          <div class="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-1">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Query Intent vs Brand Success</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="intent in intentPerformance" :key="intent.name" class="bg-gray-50/50 dark:bg-gray-700/30 border border-gray-200/50 dark:border-gray-600/50 rounded-xl p-6 hover:bg-gray-100/50 dark:hover:bg-gray-600/30 transition-colors duration-200">
+          <p class="text-gray-600 dark:text-gray-400 font-medium mb-3">{{ intent.name }}</p>
+          <p class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {{ formatPercentage(intent.successRate) }}
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+          </p>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
             {{ intent.mentions }}/{{ intent.total }} queries
-          </div>
-          <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div 
-              class="h-2 bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-700"
+          </p>
+          <div class="w-full h-3 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+            <div
+              class="h-3 bg-gradient-to-r from-green-400 to-green-600 rounded-full transition-all duration-700"
               :style="`width: ${intent.successRate}%`"
             ></div>
           </div>
         </div>
       </div>
-      
+
       <!-- Intent Insights -->
-      <div class="mt-6 bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800/30 rounded-lg p-4">
-        <div class="flex items-start">
-          <div class="flex-shrink-0 mt-0.5">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600 dark:text-green-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+      <div class="mt-8 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-8 h-8 bg-green-100 dark:bg-green-500/20 border border-green-200/50 dark:border-green-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <div class="ml-3">
-            <h5 class="text-sm font-medium text-green-800 dark:text-green-300">Intent Performance</h5>
-            <p class="text-sm text-green-700 dark:text-green-400 mt-1">
+          <div>
+            <h5 class="font-medium text-green-800 dark:text-green-300 mb-2">Intent Performance</h5>
+            <p class="text-sm text-green-700 dark:text-green-400 leading-relaxed">
               {{ getIntentInsight() }}
             </p>
           </div>
@@ -208,21 +254,28 @@
     </div>
     
     <!-- Citation Performance -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Citation Performance</h3>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Citation Performance</h3>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Citation Mention Rate -->
         <div class="text-center">
-          <div class="relative w-32 h-32 mx-auto mb-4">
+          <div class="relative w-32 h-32 mx-auto mb-6">
             <svg viewBox="0 0 100 100" class="w-full h-full">
-              <circle 
-                cx="50" 
-                cy="50" 
-                r="45" 
-                fill="none" 
-                stroke="#e5e7eb" 
-                stroke-width="10"
+              <circle
+                cx="50"
+                cy="50"
+                r="45"
+                fill="none"
+                stroke="#e5e7eb"
+                stroke-width="8"
                 stroke-linecap="round"
                 class="dark:stroke-gray-700"
               />
@@ -232,44 +285,44 @@
                 r="45"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="10"
+                stroke-width="8"
                 stroke-linecap="round"
                 stroke-dasharray="282.7"
                 :stroke-dashoffset="calculateStrokeDashOffset(citationMetrics.mentionRate, 100)"
                 transform="rotate(-90 50 50)"
-                class="transition-all duration-700 ease-in-out text-citebots-orange"
+                class="transition-all duration-700 ease-in-out text-orange-500"
               />
             </svg>
             <div class="absolute inset-0 flex items-center justify-center flex-col">
-              <span class="text-2xl font-bold text-gray-800 dark:text-gray-200">{{ formatPercentage(citationMetrics.mentionRate) }}</span>
+              <span class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatPercentage(citationMetrics.mentionRate) }}</span>
               <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">Citation Rate</span>
             </div>
           </div>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
             Pages citing your brand per query
           </p>
         </div>
-        
+
         <!-- Total Citations -->
         <div class="text-center">
-          <div class="text-4xl font-bold text-gray-800 dark:text-gray-200 mb-2">
+          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
             <AnimatedNumber :value="citationMetrics.totalCitations" />
           </div>
-          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Total Citations</div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Total Citations</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
             Across {{ citationMetrics.citedQueries }} queries
-          </div>
+          </p>
         </div>
-        
+
         <!-- Vs Competitors Citation -->
         <div class="text-center">
-          <div class="text-4xl font-bold mb-2" :class="getComparisonColor(citationMetrics.vsCompetitors)">
+          <div class="text-4xl font-bold mb-4" :class="getComparisonColor(citationMetrics.vsCompetitors)">
             {{ citationMetrics.vsCompetitors > 0 ? '+' : '' }}{{ formatPercentage(Math.abs(citationMetrics.vsCompetitors)) }}
           </div>
-          <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">vs Competitors</div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">
+          <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">vs Competitors</p>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
             {{ citationMetrics.vsCompetitors > 0 ? 'Above' : 'Below' }} average
-          </div>
+          </p>
         </div>
       </div>
     </div>

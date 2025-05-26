@@ -1,22 +1,26 @@
 <template>
-  <div class="h-16 bg-gray-900 border-b border-gray-700 flex items-center justify-between px-6">
-    <!-- Left: Project Info -->
-    <div class="flex items-center space-x-4">
-      <NuxtLink to="/dashboard" class="text-lg font-semibold text-white hover:text-citebots-orange transition-colors">
-        {{ companyName || 'Knowbots' }}
+  <div class="h-16 bg-gray-900 border-b border-gray-700/60 flex items-center justify-between">
+    <!-- Left: Logo positioned exactly like sidebar icons -->
+    <div class="w-16 flex-shrink-0 px-2 flex items-center justify-center">
+      <NuxtLink to="/" class="w-12 h-12 bg-citebots-orange/10 dark:bg-citebots-orange/15 rounded-lg flex items-center justify-center hover:bg-citebots-orange/20 dark:hover:bg-citebots-orange/25 transition-all duration-150 ease-out group focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900">
+        <svg class="w-6 h-6 text-citebots-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
       </NuxtLink>
-      <span class="text-gray-400 text-sm">Production</span>
     </div>
 
-    <!-- Center: Empty for cleaner look -->
-    <div></div>
+    <!-- Center: Brand text -->
+    <div class="flex-1 px-6">
+      <span class="text-xl font-bold text-white tracking-tight">Citebots</span>
+    </div>
 
     <!-- Right: User & Actions -->
-    <div class="flex items-center space-x-3">
+    <div class="flex items-center space-x-4 pr-8">
       <!-- Dark Mode Toggle -->
       <button
         @click="darkMode.toggle"
-        class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+        class="p-3 text-gray-400 hover:text-white hover:bg-gray-800/60 rounded-lg transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900"
         title="Toggle dark mode"
       >
         <svg v-if="darkMode.isDark.value" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -27,55 +31,60 @@
         </svg>
       </button>
 
-      <!-- Help -->
-      <button class="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </button>
-
       <!-- User Menu -->
       <div class="relative">
         <button
           @click="userMenuOpen = !userMenuOpen"
-          class="flex items-center space-x-2 p-2 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          class="flex items-center space-x-3 p-3 text-gray-300 hover:text-white hover:bg-gray-800/60 rounded-lg transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900"
         >
-          <div class="w-6 h-6 bg-citebots-orange rounded-full flex items-center justify-center">
-            <span class="text-white text-xs font-medium">{{ userInitials }}</span>
+          <div class="w-8 h-8 bg-citebots-orange/10 dark:bg-citebots-orange/15 border border-citebots-orange/20 rounded-lg flex items-center justify-center">
+            <span class="text-citebots-orange text-sm font-semibold">{{ userInitials }}</span>
           </div>
-          <span class="text-sm">{{ userEmail }}</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <span class="text-base font-medium">{{ userEmail }}</span>
+          <svg class="w-4 h-4 transition-transform duration-150" :class="{ 'rotate-180': userMenuOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </button>
 
         <!-- Dropdown -->
         <transition
-          enter-active-class="transition ease-out duration-100"
+          enter-active-class="transition ease-out duration-150"
           enter-from-class="transform opacity-0 scale-95"
           enter-to-class="transform opacity-100 scale-100"
-          leave-active-class="transition ease-in duration-75"
+          leave-active-class="transition ease-in duration-100"
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
           <div
             v-if="userMenuOpen"
-            class="absolute right-0 top-full mt-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg py-1 z-50"
+            class="absolute right-0 top-full mt-3 w-56 bg-gray-800 border border-gray-700/60 rounded-lg shadow-xl py-2 z-50"
           >
-            <NuxtLink
-              to="/dashboard/user"
-              class="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700"
-              @click="userMenuOpen = false"
-            >
-              Profile Settings
-            </NuxtLink>
-            <hr class="border-gray-700 my-1">
-            <button
-              @click="signOut"
-              class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-700"
-            >
-              Sign Out
-            </button>
+            <div class="px-4 py-3 border-b border-gray-700/50">
+              <p class="text-sm font-semibold text-white">{{ userEmail }}</p>
+              <p class="text-xs text-gray-400 mt-1">Signed in</p>
+            </div>
+            <div class="py-2">
+              <NuxtLink
+                to="/dashboard/admin/profile"
+                class="flex items-center px-4 py-3 text-base text-gray-300 hover:text-white hover:bg-gray-700/60 transition-all duration-150"
+                @click="userMenuOpen = false"
+              >
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Profile Settings
+              </NuxtLink>
+              <hr class="border-gray-700/50 my-2">
+              <button
+                @click="signOut"
+                class="flex items-center w-full text-left px-4 py-3 text-base text-gray-300 hover:text-white hover:bg-gray-700/60 transition-all duration-150"
+              >
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign Out
+              </button>
+            </div>
           </div>
         </transition>
       </div>
@@ -127,7 +136,20 @@ const userInitials = computed(() => {
 })
 
 const userEmail = computed(() => {
-  return user.value?.email?.split('@')[0] || 'User'
+  if (!user.value?.email) return 'User'
+
+  const emailPrefix = user.value.email.split('@')[0]
+
+  // Handle names with dots (like john.doe)
+  if (emailPrefix.includes('.')) {
+    return emailPrefix
+      .split('.')
+      .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ')
+  }
+
+  // Handle single names
+  return emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1).toLowerCase()
 })
 
 

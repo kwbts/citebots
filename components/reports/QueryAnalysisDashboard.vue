@@ -1,142 +1,150 @@
 <template>
-  <div class="space-y-6">
-    <!-- Header -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Query Analysis</h2>
-      
-      <TextBox>
-        Analyze query performance across different types, intents, and competitive contexts. Track brand mention success rates and identify optimization opportunities.
-      </TextBox>
-      
-      <!-- Platform Selector -->
-      <div class="flex mb-6">
-        <button 
-          v-for="platform in platforms" 
-          :key="platform.value"
-          @click="activePlatform = platform.value" 
-          class="px-4 py-2 text-sm font-medium transition-colors"
-          :class="getPlatformButtonClass(platform.value)"
-        >
-          {{ platform.label }}
-        </button>
-      </div>
-    </div>
+  <div class="space-y-8">
 
     <!-- Key Metrics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Queries</p>
-            <div class="flex items-center space-x-2">
-              <AnimatedNumber :value="totalQueries" class="text-2xl font-bold text-gray-900 dark:text-white" />
-            </div>
-          </div>
-          <div class="p-3 bg-blue-100 dark:bg-blue-900 rounded-full">
-            <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-16 h-16 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
             </svg>
           </div>
         </div>
+        <div>
+          <p class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">Total Queries</p>
+          <AnimatedNumber :value="totalQueries" class="text-4xl font-bold text-gray-900 dark:text-white" />
+        </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Brand Mention Rate</p>
-            <div class="flex items-center space-x-2">
-              <AnimatedNumber :value="brandMentionRate" suffix="%" class="text-2xl font-bold text-green-600 dark:text-green-400" />
-              <span class="text-sm text-gray-500 dark:text-gray-400">
-                ({{ brandMentionCount }}/{{ totalQueries }})
-              </span>
-            </div>
-          </div>
-          <div class="p-3 bg-green-100 dark:bg-green-900 rounded-full">
-            <svg class="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-16 h-16 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
           </div>
         </div>
-      </div>
-
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Avg Citations per Query</p>
-            <div class="flex items-center space-x-2">
-              <AnimatedNumber :value="avgCitationCount" :decimals="1" class="text-2xl font-bold text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
-          <div class="p-3 bg-purple-100 dark:bg-purple-900 rounded-full">
-            <svg class="w-6 h-6 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-            </svg>
+        <div>
+          <p class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">Brand Mention Rate</p>
+          <div class="flex items-baseline gap-4">
+            <AnimatedNumber :value="brandMentionRate" suffix="%" class="text-4xl font-bold text-green-600 dark:text-green-400" />
+            <span class="text-lg text-gray-500 dark:text-gray-400">
+              ({{ brandMentionCount }}/{{ totalQueries }})
+            </span>
           </div>
         </div>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Competitive Advantage</p>
-            <div class="flex items-center space-x-2">
-              <AnimatedNumber :value="competitiveAdvantageRate" suffix="%" class="text-2xl font-bold text-orange-600 dark:text-orange-400" />
-            </div>
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-16 h-16 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+            </svg>
           </div>
-          <div class="p-3 bg-orange-100 dark:bg-orange-900 rounded-full">
-            <svg class="w-6 h-6 text-orange-600 dark:text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        </div>
+        <div>
+          <p class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">Avg Citations per Query</p>
+          <AnimatedNumber :value="avgCitationCount" :decimals="1" class="text-4xl font-bold text-purple-600 dark:text-purple-400" />
+        </div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+        <div class="flex items-center justify-between mb-6">
+          <div class="w-16 h-16 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
             </svg>
           </div>
+        </div>
+        <div>
+          <p class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">Competitive Advantage</p>
+          <AnimatedNumber :value="competitiveAdvantageRate" suffix="%" class="text-4xl font-bold text-orange-600 dark:text-orange-400" />
         </div>
       </div>
     </div>
 
     <!-- Query Type vs Brand Mention Success -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Brand Mention Success by Query Type</h3>
-      <div class="h-64">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Brand Mention Success by Query Type</h3>
+      </div>
+      <div class="h-80">
         <canvas ref="queryTypeChart"></canvas>
       </div>
     </div>
 
     <!-- Query Intent Performance Breakdown -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Performance by Query Intent</h3>
-      <div class="h-64">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Performance by Query Intent</h3>
+      </div>
+      <div class="h-80">
         <canvas ref="queryIntentChart"></canvas>
       </div>
     </div>
 
     <!-- Citation Count Distribution -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Citation Count Distribution</h3>
-      <div class="h-64">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Citation Count Distribution</h3>
+      </div>
+      <div class="h-80">
         <canvas ref="citationDistributionChart"></canvas>
       </div>
     </div>
 
     <!-- Funnel Stage Analysis -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Brand Performance by Funnel Stage</h3>
-      <div class="h-64">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/50 dark:border-indigo-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Brand Performance by Funnel Stage</h3>
+      </div>
+      <div class="h-80">
         <canvas ref="funnelStageChart"></canvas>
       </div>
     </div>
 
     <!-- Competitive Context Analysis -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Competitive Context Analysis</h3>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div>
-          <h4 class="text-md font-medium text-gray-600 dark:text-gray-400 mb-3">Query Competition Distribution</h4>
-          <div class="h-48">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-red-50 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Competitive Context Analysis</h3>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-6">
+          <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-6">Query Competition Distribution</h4>
+          <div class="h-64">
             <canvas ref="competitionChart"></canvas>
           </div>
         </div>
-        <div>
-          <h4 class="text-md font-medium text-gray-600 dark:text-gray-400 mb-3">Competitor Context</h4>
-          <div class="h-48">
+        <div class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-6">
+          <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-6">Competitor Context</h4>
+          <div class="h-64">
             <canvas ref="competitorContextChart"></canvas>
           </div>
         </div>
@@ -144,19 +152,26 @@
     </div>
 
     <!-- Response Match Quality -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">Response Match Quality</h3>
-      <div class="space-y-4">
-        <div v-for="match in responseMatchData" :key="match.type" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-8 h-8 bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+        </div>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Response Match Quality</h3>
+      </div>
+      <div class="space-y-6">
+        <div v-for="match in responseMatchData" :key="match.type" class="flex items-center justify-between p-6 bg-gray-50/50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl transition-all duration-200 hover:bg-gray-100/50 dark:hover:bg-gray-700/50">
           <div>
-            <span class="font-medium text-gray-700 dark:text-gray-200">{{ match.type }}</span>
-            <span class="text-sm text-gray-500 dark:text-gray-400 ml-2">({{ match.count }} queries)</span>
+            <span class="text-lg font-semibold text-gray-900 dark:text-white">{{ match.type }}</span>
+            <span class="text-base text-gray-500 dark:text-gray-400 ml-3">({{ match.count }} queries)</span>
           </div>
-          <div class="flex items-center space-x-3">
-            <div class="w-32 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-              <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" :style="`width: ${match.percentage}%`"></div>
+          <div class="flex items-center space-x-6">
+            <div class="w-48 bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500" :style="`width: ${match.percentage}%`"></div>
             </div>
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ match.percentage }}%</span>
+            <span class="text-lg font-bold text-gray-900 dark:text-white min-w-[60px] text-right">{{ match.percentage }}%</span>
           </div>
         </div>
       </div>
@@ -366,8 +381,8 @@ const responseMatchData = computed(() => {
 const getPlatformButtonClass = (platform) => {
   const isActive = activePlatform.value === platform
   return isActive
-    ? 'bg-citebots-orange text-white border-citebots-orange border'
-    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 border hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors'
+    ? 'bg-orange-600 text-white border-2 border-orange-600 shadow-lg'
+    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
 }
 
 // Dark mode support
