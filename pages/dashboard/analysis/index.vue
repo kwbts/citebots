@@ -50,31 +50,6 @@
         </p>
       </div>
 
-      <!-- Platform Selection -->
-      <div class="mb-8" v-if="selectedClientId">
-        <label for="platform-select" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 tracking-tight">
-          Analysis Platform <span class="text-red-500">*</span>
-        </label>
-        <div class="relative">
-          <select
-            id="platform-select"
-            v-model="platform"
-            class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none"
-            :disabled="loading"
-          >
-            <option value="chatgpt">ChatGPT</option>
-            <option value="perplexity">Perplexity</option>
-          </select>
-          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-            <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </div>
-        </div>
-        <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
-          Choose which AI platform to analyze for brand mentions and citations
-        </p>
-      </div>
 
       <!-- Keywords Section -->
       <div v-if="selectedClient" class="mb-8">
@@ -252,7 +227,7 @@ const totalKeywords = computed(() => {
 })
 
 const canGenerateQueries = computed(() => {
-  return selectedClientId.value && platform.value && totalKeywords.value > 0
+  return selectedClientId.value && totalKeywords.value > 0
 })
 
 // Methods
@@ -290,9 +265,9 @@ async function fetchClients() {
 
 async function generateQueries() {
   attempted.value = true
-  
-  if (!selectedClientId.value || !platform.value) {
-    statusMessage.value = 'Please select a client and platform'
+
+  if (!selectedClientId.value) {
+    statusMessage.value = 'Please select a client'
     statusClass.value = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
     return
   }
@@ -320,12 +295,11 @@ async function generateQueries() {
   statusMessage.value = ''
   statusClass.value = ''
 
-  // Navigate to preview page with all keywords
+  // Navigate to preview page with all keywords (no platform selected yet)
   router.push({
     path: '/dashboard/analysis/preview-queries',
     query: {
       client_id: selectedClientId.value,
-      platform: platform.value,
       keywords: allKeywords.join(',')
     }
   })

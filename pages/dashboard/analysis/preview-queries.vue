@@ -43,22 +43,101 @@
     
     <!-- Query Preview -->
     <div v-else>
-      <!-- Query Parameters Info -->
+      <!-- Analysis Parameters -->
       <div v-if="clientId && keywords.length > 0" class="card mb-8">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Analysis Parameters</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Analysis Parameters</h2>
+
+        <!-- Platform Selection -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            Analysis Platforms <span class="text-red-500">*</span>
+          </label>
+          <div class="space-y-3">
+            <label class="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="selectedPlatforms"
+                value="chatgpt"
+                class="h-4 w-4 text-citebots-orange rounded focus:ring-citebots-orange focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                :disabled="loading"
+              />
+              <div class="ml-3 flex items-center">
+                <div class="flex items-center">
+                  <div class="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <span class="text-gray-900 dark:text-white font-medium">ChatGPT</span>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">OpenAI's conversational AI platform</p>
+                  </div>
+                </div>
+              </div>
+            </label>
+
+            <label class="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                v-model="selectedPlatforms"
+                value="perplexity"
+                class="h-4 w-4 text-citebots-orange rounded focus:ring-citebots-orange focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+                :disabled="loading"
+              />
+              <div class="ml-3 flex items-center">
+                <div class="flex items-center">
+                  <div class="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <span class="text-gray-900 dark:text-white font-medium">Perplexity</span>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">AI-powered search and answer engine</p>
+                  </div>
+                </div>
+              </div>
+            </label>
+          </div>
+          <p class="text-sm text-gray-600 dark:text-gray-400 mt-3">
+            Select one or more AI platforms to analyze for brand mentions and citations
+          </p>
+        </div>
+
+        <!-- Summary -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-6">
           <div>
-            <span class="text-gray-600 dark:text-gray-400">Client ID:</span>
-            <span class="font-medium text-gray-900 dark:text-white ml-2">{{ clientId }}</span>
+            <span class="text-gray-600 dark:text-gray-400">Client:</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">{{ clientName }}</span>
           </div>
           <div>
-            <span class="text-gray-600 dark:text-gray-400">Platform:</span>
-            <span class="font-medium text-gray-900 dark:text-white ml-2 capitalize">{{ selectedPlatform }}</span>
+            <span class="text-gray-600 dark:text-gray-400">Platforms:</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">
+              {{ selectedPlatforms.length > 0 ? selectedPlatforms.join(', ') : 'None selected' }}
+            </span>
           </div>
           <div>
             <span class="text-gray-600 dark:text-gray-400">Keywords:</span>
-            <span class="font-medium text-gray-900 dark:text-white ml-2">{{ keywords.join(', ') }}</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">{{ keywords.length }}</span>
           </div>
+        </div>
+
+        <!-- Run Analysis Button -->
+        <div class="flex justify-center">
+          <button
+            @click="runAnalysis"
+            :disabled="!canRunAnalysis || loading"
+            class="bg-citebots-orange text-white border border-citebots-orange rounded-lg px-8 py-3 font-semibold text-sm hover:bg-citebots-orange/90 hover:scale-[0.98] active:scale-[0.96] transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center"
+          >
+            <svg v-if="loading" class="animate-spin h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            {{ loading ? 'Starting Analysis...' : 'Run Analysis' }}
+          </button>
         </div>
       </div>
 
@@ -255,7 +334,8 @@ const {
 
 // Query parameters
 const clientId = ref('')
-const selectedPlatform = ref('both')
+const clientName = ref('')
+const selectedPlatforms = ref([])
 const keywords = ref([])
 
 // State
@@ -270,6 +350,12 @@ const showProgressUI = ref(false)
 // Computed
 const selectedCount = computed(() => {
   return queries.value.filter(q => q.selected).length
+})
+
+const canRunAnalysis = computed(() => {
+  return selectedPlatforms.value.length > 0 &&
+         queries.value.length > 0 &&
+         queries.value.some(q => q.selected)
 })
 
 // Methods
@@ -344,6 +430,11 @@ const regenerateQueries = async () => {
 }
 
 const runAnalysis = async () => {
+  if (selectedPlatforms.value.length === 0) {
+    error.value = 'Please select at least one analysis platform'
+    return
+  }
+
   const selectedQueries = queries.value.filter(q => q.selected)
 
   if (selectedQueries.length === 0) {
@@ -358,7 +449,7 @@ const runAnalysis = async () => {
   try {
     console.log('Running analysis with:', {
       client_id: clientId.value,
-      platform: selectedPlatform.value,
+      platforms: selectedPlatforms.value,
       queries: selectedQueries.length,
       useQueue: useQueueProcessing.value
     })
@@ -366,12 +457,19 @@ const runAnalysis = async () => {
     // Save queue preference
     toggleQueue(useQueueProcessing.value)
 
-    // Use the queue-enabled analysis function
-    const result = await runAnalysisWithQueue({
-      client_id: clientId.value,
-      platform: selectedPlatform.value,
-      queries: selectedQueries
-    })
+    // Run analysis for each selected platform
+    const results = []
+    for (const platform of selectedPlatforms.value) {
+      const result = await runAnalysisWithQueue({
+        client_id: clientId.value,
+        platform: platform,
+        queries: selectedQueries
+      })
+      results.push(result)
+    }
+
+    // Use the first result for navigation (we can enhance this later)
+    const result = results[0]
 
     console.log('Run analysis response:', result)
 
@@ -420,11 +518,32 @@ const handleQueueComplete = (runData) => {
 onMounted(async () => {
   // Get query parameters
   clientId.value = route.query.client_id || ''
-  selectedPlatform.value = route.query.platform || 'both'
+
+  // Handle platform parameter (convert to array for multi-select)
+  if (route.query.platform) {
+    selectedPlatforms.value = [route.query.platform]
+  }
 
   // Parse keywords
   if (route.query.keywords) {
     keywords.value = route.query.keywords.split(',').filter(k => k.trim())
+  }
+
+  // Fetch client name
+  if (clientId.value) {
+    try {
+      const { data: client } = await supabase
+        .from('clients')
+        .select('name')
+        .eq('id', clientId.value)
+        .single()
+
+      if (client) {
+        clientName.value = client.name
+      }
+    } catch (error) {
+      console.error('Error fetching client:', error)
+    }
   }
 
   // Initialize queue feature
@@ -433,7 +552,7 @@ onMounted(async () => {
 
   console.log('Page initialized with:', {
     clientId: clientId.value,
-    platform: selectedPlatform.value,
+    platforms: selectedPlatforms.value,
     keywords: keywords.value,
     queueEnabled: queueEnabled.value,
     useQueue: useQueue.value
