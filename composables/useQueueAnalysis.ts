@@ -38,35 +38,26 @@ export const useQueueAnalysis = () => {
   }) => {
     try {
       // Log the current queue setting
-      console.log(`Using queue processing: ${useQueue.value}`);
+      console.log(`Using local server processing: ${useQueue.value}`);
 
-      // Use Supabase client to invoke the edge function directly
-      const { data, error } = await supabase.functions.invoke('run-custom-analysis', {
-        body: {
-          ...params,
-          // Include platform as a query param in the body instead
-          _platform_info: params.platform,
-          _use_queue: useQueue.value
-        },
-        headers: {
-          // Only include headers that are in the allowed CORS list
-          'X-Use-Queue': useQueue.value ? 'true' : 'false'
-        }
+      // Use database function to submit analysis (bypasses RLS)
+      const { data: result, error } = await supabase.rpc('submit_analysis_to_queue', {
+        p_client_id: params.client_id,
+        p_platform: params.platform,
+        p_queries: params.queries
       })
 
       if (error) throw error
 
-      const result = data
-      
       if (!result.success) {
-        throw new Error(result.error || 'Failed to start analysis')
+        throw new Error(result.error || 'Failed to submit analysis to queue')
       }
-      
+
       return {
         ...result,
-        useQueue: result.processing_method === 'queue'
+        useQueue: true
       }
-      
+
     } catch (error) {
       console.error('Error running analysis:', error)
       throw error
@@ -140,25 +131,35 @@ export const useQueueAnalysis = () => {
     await triggerQueueWorker()
   }
   
-  // Trigger the queue worker
+  // Trigger the local server queue worker
   const triggerQueueWorker = async (batchSize = 5) => {
     try {
-      const config = useRuntimeConfig()
-      const response = await fetch(`${config.public.supabase.url}/functions/v1/process-queue-worker`, {
+      const response = await fetch('http://localhost:3002/trigger', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.value?.access_token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ batch_size: batchSize })
       })
-      
+
       const result = await response.json()
       return result
-      
+
     } catch (error) {
-      console.error('Error triggering queue worker:', error)
+      console.error('Error triggering local server queue worker:', error)
       return null
+    }
+  }
+
+  // Check local server status
+  const checkServerStatus = async () => {
+    try {
+      const response = await fetch('http://localhost:3002/status')
+      const result = await response.json()
+      return result
+    } catch (error) {
+      console.error('Local server not available:', error)
+      return { status: 'offline', error: error.message }
     }
   }
   
@@ -171,6 +172,7 @@ export const useQueueAnalysis = () => {
     monitorQueueStatus,
     getFailedQueries,
     retryFailedQueries,
-    triggerQueueWorker
+    triggerQueueWorker,
+    checkServerStatus
   }
 }

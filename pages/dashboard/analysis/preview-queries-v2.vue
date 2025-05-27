@@ -104,6 +104,7 @@ definePageMeta({
 const router = useRouter()
 const route = useRoute()
 const supabase = useSupabaseClient()
+const { runAnalysisWithQueue } = useQueueAnalysis()
 
 // Route parameters
 const clientId = route.query.client_id
@@ -176,18 +177,16 @@ const runAnalysis = async () => {
   loading.value = true
   
   try {
-    const { data, error: runError } = await supabase.functions.invoke('run-custom-analysis', {
-      body: {
-        client_id: clientId,
-        platform: selectedPlatform,
-        queries: selectedQueries
-      }
+    const result = await runAnalysisWithQueue({
+      client_id: clientId,
+      platform: selectedPlatform,
+      queries: selectedQueries
     })
-    
-    if (runError) throw runError
-    
+
+    if (!result.success) throw new Error('Failed to start analysis')
+
     // Navigate to results
-    router.push(`/dashboard/analysis/${data.analysis_run.id}`)
+    router.push(`/dashboard/analysis/${result.analysis_run_id}`)
   } catch (err) {
     error.value = err.message
     loading.value = false
