@@ -1,8 +1,0 @@
-fetch('https://trmaeodthlywcjwfzdka.supabase.co/functions/v1/process-queue-worker', { 
-  method: 'POST', 
-  headers: { 
-    'Content-Type': 'application/json', 
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRybWFlb2R0aGx5d2Nqd2Z6ZGthIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzQzNDg1NCwiZXhwIjoyMDYzMDEwODU0fQ.vsCoNS_Cc-iCAw99AAAkDTTS829HWd4xnypVlBKHGZ0' 
-  }, 
-  body: JSON.stringify({ batch_size: 1 }) 
-}).then(response => response.json()).then(data => console.log('Worker response:', data))
