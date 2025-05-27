@@ -43,3 +43,13 @@ coverage/
 supabase/.branches
 supabase/.temp
 **/.claude/settings.local.json
+
+# Build directories (contain secrets)
+.nuxt/
+.output/
+dist/
+
+# Local environment files
+.env
+.env.local
+local-server/.env
