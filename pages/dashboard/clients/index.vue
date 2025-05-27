@@ -221,7 +221,7 @@ const fetchClientsData = async () => {
     const { count: clientCount } = await client
       .from('clients')
       .select('*', { count: 'exact', head: true })
-      .or(`created_by.eq.${user.value.id},user_id.eq.${user.value.id}`)
+      .eq('created_by', user.value.id)
 
     clientsCount.value = clientCount || 0
 
@@ -229,7 +229,7 @@ const fetchClientsData = async () => {
     const { data: clientsData } = await client
       .from('clients')
       .select('*')
-      .or(`created_by.eq.${user.value.id},user_id.eq.${user.value.id}`)
+      .eq('created_by', user.value.id)
       .order('created_at', { ascending: false })
       .limit(5)
 
