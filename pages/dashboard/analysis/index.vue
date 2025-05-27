@@ -8,15 +8,6 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-wide">Run Analysis</h1>
             <p class="text-gray-600 dark:text-gray-300 text-base">Analyze citations and track your brand presence in AI responses</p>
           </div>
-          <div class="flex items-center space-x-4">
-            <div class="text-right bg-citebots-orange/10 dark:bg-citebots-orange/15 rounded-lg px-4 py-3 border border-citebots-orange/20 dark:border-citebots-orange/30">
-              <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Keywords Ready</div>
-              <div class="flex items-center text-sm font-semibold text-citebots-orange mt-1">
-                <div class="w-2 h-2 bg-citebots-orange rounded-full mr-2"></div>
-                <span class="tabular-nums">{{ totalKeywords }}</span> keywords
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -87,69 +78,25 @@
 
       <!-- Keywords Section -->
       <div v-if="selectedClient" class="mb-8">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight">Keywords</h3>
-
-        <!-- Client Keywords Display -->
-        <div v-if="selectedClient.keywords && selectedClient.keywords.length > 0" class="mb-8">
-          <div class="mb-4">
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 tracking-tight">Client Keywords</h4>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              Keywords from {{ selectedClient.name }}'s profile
-            </p>
-          </div>
-          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-lg p-6">
-            <div class="flex flex-wrap gap-3">
-              <span 
-                v-for="(keyword, index) in selectedClient.keywords" 
-                :key="index"
-                class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-700/50"
-              >
-                {{ keyword }}
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <div v-else class="mb-8">
-          <div class="text-center py-12 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
-            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-            </svg>
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">No keywords defined for this client</h4>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">Add keywords to the client profile to improve analysis accuracy</p>
-            <NuxtLink 
-              :to="`/dashboard/clients/edit-client-${selectedClientId}`" 
-              class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-4 py-3 font-semibold text-sm hover:bg-citebots-orange/20 hover:scale-[0.98] active:scale-[0.96] transition-all duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 inline-flex items-center"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Add keywords to client profile
-            </NuxtLink>
-          </div>
-        </div>
-
-        <!-- Custom Keywords Input -->
-        <div>
-          <div class="mb-4">
-            <label for="custom-keywords" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
-              Additional Keywords
-            </label>
-            <p class="text-sm text-gray-600 dark:text-gray-400">
-              Add custom keywords for this analysis (one per line)
-            </p>
-          </div>
-          <textarea
-            id="custom-keywords"
-            v-model="customKeywords"
-            class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150"
-            rows="4"
-            placeholder="Enter additional keywords, one per line&#10;e.g.:&#10;email marketing&#10;automation software&#10;lead generation"
-          ></textarea>
-          <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
-            These keywords will be combined with your client's profile keywords to generate analysis queries
+        <div class="mb-4">
+          <label for="custom-keywords" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Keywords <span class="text-red-500">*</span>
+          </label>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Enter keywords for this analysis (one per line)
           </p>
         </div>
+        <textarea
+          id="custom-keywords"
+          v-model="customKeywords"
+          class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150"
+          rows="4"
+          placeholder="Enter keywords, one per line&#10;e.g.:&#10;email marketing&#10;automation software&#10;lead generation"
+          :class="{ 'border-red-300 dark:border-red-600 ring-2 ring-red-200 dark:ring-red-800': !customKeywords && attempted }"
+        ></textarea>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+          These keywords will be used to generate analysis queries
+        </p>
       </div>
 
       <!-- Action Section -->
@@ -174,7 +121,7 @@
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             {{ loading ? 'Generating Queries...' : 'Generate Queries' }}
           </button>
@@ -294,23 +241,14 @@ const selectedClient = computed(() =>
 )
 
 const totalKeywords = computed(() => {
-  let count = 0
-  
-  // Count client keywords
-  if (selectedClient.value?.keywords?.length) {
-    count += selectedClient.value.keywords.length
-  }
-  
-  // Count custom keywords
-  if (customKeywords.value) {
-    const customKeywordsList = customKeywords.value
-      .split('\n')
-      .map(k => k.trim())
-      .filter(k => k)
-    count += customKeywordsList.length
-  }
-  
-  return count
+  if (!customKeywords.value) return 0
+
+  const customKeywordsList = customKeywords.value
+    .split('\n')
+    .map(k => k.trim())
+    .filter(k => k)
+
+  return customKeywordsList.length
 })
 
 const canGenerateQueries = computed(() => {
@@ -359,27 +297,21 @@ async function generateQueries() {
     return
   }
 
-  // Prepare the keywords
-  const allKeywords = []
-
-  // Add client keywords if available
-  if (selectedClient.value?.keywords && selectedClient.value.keywords.length > 0) {
-    allKeywords.push(...selectedClient.value.keywords)
+  // Prepare the keywords from custom input only
+  if (!customKeywords.value) {
+    statusMessage.value = 'Please provide at least one keyword'
+    statusClass.value = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+    return
   }
 
-  // Add custom keywords if provided
-  if (customKeywords.value) {
-    const customKeywordsList = customKeywords.value
-      .split('\n')
-      .map(k => k.trim())
-      .filter(k => k) // Filter out empty strings
-
-    allKeywords.push(...customKeywordsList)
-  }
+  const allKeywords = customKeywords.value
+    .split('\n')
+    .map(k => k.trim())
+    .filter(k => k) // Filter out empty strings
 
   // Check if we have any keywords
   if (allKeywords.length === 0) {
-    statusMessage.value = 'Please provide at least one keyword (either in client profile or custom keywords)'
+    statusMessage.value = 'Please provide at least one keyword'
     statusClass.value = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
     return
   }

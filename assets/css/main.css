@@ -68,11 +68,31 @@
 
   /* Forms */
   .input-field {
-    @apply w-full px-4 py-2.5 border border-citebots-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-citebots-orange focus:border-citebots-orange transition-colors duration-200;
+    @apply w-full px-4 py-2.5 bg-white border border-citebots-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-citebots-orange focus:border-citebots-orange transition-colors duration-200 text-gray-900 placeholder-gray-500;
   }
 
   .dark .input-field {
-    @apply bg-gray-700 border-gray-600 text-white placeholder-gray-400;
+    @apply bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-citebots-orange focus:border-citebots-orange;
+  }
+
+  /* Fix browser autofill styling in dark mode */
+  .dark .input-field:-webkit-autofill,
+  .dark .input-field:-webkit-autofill:hover,
+  .dark .input-field:-webkit-autofill:focus,
+  .dark .input-field:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgb(55 65 81) inset !important;
+    -webkit-text-fill-color: white !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Light mode autofill (for consistency) */
+  .input-field:-webkit-autofill,
+  .input-field:-webkit-autofill:hover,
+  .input-field:-webkit-autofill:focus,
+  .input-field:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: rgb(17 24 39) !important;
+    transition: background-color 5000s ease-in-out 0s;
   }
 
   .form-label {

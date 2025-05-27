@@ -27,17 +27,11 @@
             </svg>
             Manage Clients
           </NuxtLink>
-          <NuxtLink to="/dashboard/analysis" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis' }">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            Run Analysis
-          </NuxtLink>
-          <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' }">
+          <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' || $route.path.startsWith('/dashboard/analysis') }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            View Reports
+            Reports & Analysis
           </NuxtLink>
           <NuxtLink to="/dashboard/activity" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/activity' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,12 +45,18 @@
       <!-- Clients Section -->
       <template v-if="activeSection === 'clients'">
         <div class="mb-6">
-          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">MANAGE</h3>
+          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">CLIENT MANAGEMENT</h3>
           <NuxtLink to="/dashboard/clients" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients' }">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            Overview
+          </NuxtLink>
+          <NuxtLink to="/dashboard/clients/manage" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients/manage' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
-            All Clients
+            Manage
           </NuxtLink>
           <NuxtLink to="/dashboard/clients/provision" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients/provision' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -65,6 +65,7 @@
             Add Client
           </NuxtLink>
         </div>
+
       </template>
 
       <!-- Analysis Section -->
@@ -73,7 +74,8 @@
           <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">ANALYSIS</h3>
           <NuxtLink to="/dashboard/analysis" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis' }">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="" />
             </svg>
             Run Analysis
           </NuxtLink>
@@ -205,6 +207,24 @@
         <!-- Navigation Links (when NOT viewing a specific report) -->
         <template v-else>
           <div class="mb-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">ANALYSIS</h3>
+            <NuxtLink to="/dashboard/analysis" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis' }">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="" />
+              </svg>
+              Run Analysis
+            </NuxtLink>
+            <NuxtLink to="/dashboard/analysis/preview-queries" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis/preview-queries' }">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              Preview Queries
+            </NuxtLink>
+          </div>
+
+          <div class="mb-6">
             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">REPORTS</h3>
             <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' }">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,8 +259,8 @@ const sectionTitle = computed(() => {
   switch (props.activeSection) {
     case 'dashboard': return 'Dashboard'
     case 'clients': return 'Clients'
-    case 'analysis': return 'Analysis'
-    case 'reports': return 'Reports'
+    case 'analysis': return 'Reports & Analysis'
+    case 'reports': return 'Reports & Analysis'
     case 'admin': return 'Admin'
     default: return 'Dashboard'
   }

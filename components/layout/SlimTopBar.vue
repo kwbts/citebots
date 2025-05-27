@@ -4,8 +4,19 @@
     <div class="w-16 flex-shrink-0 px-2 flex items-center justify-center">
       <NuxtLink to="/" class="w-12 h-12 bg-citebots-orange/10 dark:bg-citebots-orange/15 rounded-lg flex items-center justify-center hover:bg-citebots-orange/20 dark:hover:bg-citebots-orange/25 transition-all duration-150 ease-out group focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900">
         <svg class="w-6 h-6 text-citebots-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <!-- Large robot head outline -->
+          <rect x="4.5" y="6" width="15" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+
+          <!-- Antenna -->
+          <line x1="12" y1="6" x2="12" y2="3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="12" cy="3" r="0.8" stroke="currentColor" stroke-width="1.5"/>
+
+          <!-- Minimal eyes -->
+          <line x1="9" y1="10.5" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="15" y1="10.5" x2="15" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+
+          <!-- Mouth line -->
+          <line x1="10.5" y1="15" x2="13.5" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
       </NuxtLink>
     </div>

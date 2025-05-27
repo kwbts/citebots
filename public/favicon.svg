@@ -1,7 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Orange background -->
   <rect width="32" height="32" rx="6" fill="#D36641"/>
-  <rect x="6" y="20" width="4" height="8" fill="white" rx="1"/>
-  <rect x="12" y="16" width="4" height="12" fill="white" rx="1"/>
-  <rect x="18" y="12" width="4" height="16" fill="white" rx="1"/>
-  <rect x="24" y="8" width="4" height="20" fill="white" rx="1"/>
+  
+  <!-- Large robot head outline -->
+  <rect x="6" y="8" width="20" height="16" rx="2" fill="none" stroke="white" stroke-width="2"/>
+
+  <!-- Antenna -->
+  <line x1="16" y1="8" x2="16" y2="5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="16" cy="4" r="1" fill="none" stroke="white" stroke-width="2"/>
+
+  <!-- Minimal eyes -->
+  <line x1="12" y1="14" x2="12" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  <line x1="20" y1="14" x2="20" y2="16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Mouth line -->
+  <line x1="14" y1="20" x2="18" y2="20" stroke="white" stroke-width="2" stroke-linecap="round"/>
 </svg>

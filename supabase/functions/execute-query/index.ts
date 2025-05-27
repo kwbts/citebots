@@ -586,7 +586,7 @@ IMPORTANT: Return ONLY valid JSON with these exact fields.`
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -598,7 +598,7 @@ IMPORTANT: Return ONLY valid JSON with these exact fields.`
           }
         ],
         temperature: 0.3,
-        max_tokens: 500,
+        max_tokens: 200,
         response_format: { type: 'json_object' }
       })
     })
@@ -703,7 +703,7 @@ async function analyzeBrandSentiment(response: string, brandName: string) {
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
@@ -715,7 +715,7 @@ async function analyzeBrandSentiment(response: string, brandName: string) {
           }
         ],
         temperature: 0.3,
-        max_tokens: 50,
+        max_tokens: 30,
         response_format: { type: 'json_object' }
       })
     })

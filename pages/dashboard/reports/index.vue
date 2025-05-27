@@ -8,15 +8,6 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">All Reports</h1>
             <p class="text-gray-600 dark:text-gray-300 text-base">View and manage all your analysis reports</p>
           </div>
-          <div class="flex items-center space-x-4">
-            <div class="text-right bg-citebots-orange/10 dark:bg-citebots-orange/15 rounded-lg px-4 py-3 border border-citebots-orange/20 dark:border-citebots-orange/30">
-              <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Total Reports</div>
-              <div class="flex items-center text-sm font-semibold text-citebots-orange mt-1">
-                <div class="w-2 h-2 bg-citebots-orange rounded-full mr-2"></div>
-                <span class="tabular-nums">{{ filteredReports.length }}</span> reports
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -224,7 +215,7 @@
             class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out inline-flex items-center justify-center"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             Run First Analysis
           </NuxtLink>

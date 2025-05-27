@@ -43,23 +43,6 @@
             </svg>
           </button>
 
-          <!-- Analysis -->
-          <button
-            @click="setActiveSection('analysis')"
-            :class="[
-              'rounded-lg flex items-center h-12 justify-center transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
-              'w-10',
-              activeSection === 'analysis'
-                ? 'bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30'
-                : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
-            ]"
-          >
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </button>
-
           <!-- Reports -->
           <button
             @click="setActiveSection('reports')"
@@ -72,8 +55,7 @@
             ]"
           >
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </button>
 
@@ -196,26 +178,6 @@
             </span>
           </button>
 
-          <!-- Analysis -->
-          <button
-            @click="setActiveSection('analysis')"
-            :class="[
-              'rounded-lg flex items-center h-12 justify-start transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
-              'w-full px-3',
-              activeSection === 'analysis'
-                ? 'bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30'
-                : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
-            ]"
-          >
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            <span class="ml-3 whitespace-nowrap font-semibold text-sm tracking-tight">
-              Analysis
-            </span>
-          </button>
-
           <!-- Reports -->
           <button
             @click="setActiveSection('reports')"
@@ -228,8 +190,7 @@
             ]"
           >
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             <span class="ml-3 whitespace-nowrap font-semibold text-sm tracking-tight">
               Reports

@@ -8,8 +8,19 @@
             <NuxtLink to="/dashboard" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <div class="bg-citebots-orange p-2 rounded-md">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <!-- Large robot head outline -->
+                  <rect x="4.5" y="6" width="15" height="12" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+
+                  <!-- Antenna -->
+                  <line x1="12" y1="6" x2="12" y2="3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="12" cy="3" r="0.8" stroke="currentColor" stroke-width="1.5"/>
+
+                  <!-- Minimal eyes -->
+                  <line x1="9" y1="10.5" x2="9" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <line x1="15" y1="10.5" x2="15" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+
+                  <!-- Mouth line -->
+                  <line x1="10.5" y1="15" x2="13.5" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               </div>
               <h1 class="text-xl font-bold text-citebots-dark">Citebots</h1>
@@ -31,27 +42,15 @@
             </NuxtLink>
             
             <NuxtLink
-              to="/dashboard/analysis"
-              :class="[
-                'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium',
-                isActive('/dashboard/analysis')
-                  ? 'border-citebots-orange text-citebots-dark'
-                  : 'border-transparent text-citebots-gray-600 hover:border-gray-300 hover:text-citebots-gray-800'
-              ]"
-            >
-              Run Analysis
-            </NuxtLink>
-            
-            <NuxtLink
               to="/dashboard/reports"
               :class="[
                 'inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium',
-                isActive('/dashboard/reports')
+                isActive('/dashboard/reports') || isActive('/dashboard/analysis')
                   ? 'border-citebots-orange text-citebots-dark'
                   : 'border-transparent text-citebots-gray-600 hover:border-gray-300 hover:text-citebots-gray-800'
               ]"
             >
-              Reports
+              Reports & Analysis
             </NuxtLink>
           </div>
         </div>
@@ -146,29 +145,16 @@
           </NuxtLink>
           
           <NuxtLink
-            to="/dashboard/analysis"
-            @click="mobileMenuOpen = false"
-            :class="[
-              'block pl-3 pr-4 py-2 border-l-4 text-base font-medium',
-              isActive('/dashboard/analysis')
-                ? 'bg-citebots-orange/10 border-citebots-orange text-citebots-dark'
-                : 'border-transparent text-citebots-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-citebots-gray-800'
-            ]"
-          >
-            Run Analysis
-          </NuxtLink>
-          
-          <NuxtLink
             to="/dashboard/reports"
             @click="mobileMenuOpen = false"
             :class="[
               'block pl-3 pr-4 py-2 border-l-4 text-base font-medium',
-              isActive('/dashboard/reports')
+              isActive('/dashboard/reports') || isActive('/dashboard/analysis')
                 ? 'bg-citebots-orange/10 border-citebots-orange text-citebots-dark'
                 : 'border-transparent text-citebots-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-citebots-gray-800'
             ]"
           >
-            Reports
+            Reports & Analysis
           </NuxtLink>
         </div>
       </div>

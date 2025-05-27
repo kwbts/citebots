@@ -8,15 +8,6 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-wide">Client Management</h1>
             <p class="text-gray-600 dark:text-gray-300 text-base">Create, manage, and analyze your client profiles</p>
           </div>
-          <div class="flex items-center space-x-4">
-            <div class="text-right bg-citebots-orange/10 dark:bg-citebots-orange/15 rounded-lg px-4 py-3 border border-citebots-orange/20 dark:border-citebots-orange/30">
-              <div class="text-sm text-gray-600 dark:text-gray-400 font-medium">Total Clients</div>
-              <div class="flex items-center text-sm font-semibold text-citebots-orange mt-1">
-                <div class="w-2 h-2 bg-citebots-orange rounded-full mr-2"></div>
-                <span class="tabular-nums">{{ clientsCount }}</span> active clients
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -98,8 +89,7 @@
           <div class="mb-6">
             <div class="bg-citebots-orange/10 dark:bg-citebots-orange/15 p-4 rounded-lg group-hover:bg-citebots-orange/15 dark:group-hover:bg-citebots-orange/20 transition-colors duration-150 inline-flex group-hover:shadow-sm">
               <svg class="w-7 h-7 text-citebots-orange" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
           </div>

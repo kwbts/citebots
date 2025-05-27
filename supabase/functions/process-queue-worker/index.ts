@@ -32,11 +32,18 @@ serve(async (req) => {
       return {}; // Default empty object if JSON parsing fails
     });
     
-    const batch_size = requestBody.batch_size || 3;
-    const max_runtime = requestBody.max_runtime || 25000;
+    const batch_size = requestBody.batch_size || 1; // Process 1 item at a time
+    const max_runtime = requestBody.max_runtime || 900000; // 15 minutes (Edge Function limit)
+    const delay_start = requestBody.delay_start || 0;
     
-    console.log(`Worker configuration: batch_size=${batch_size}, max_runtime=${max_runtime}ms`);
-    
+    console.log(`Worker configuration: batch_size=${batch_size}, max_runtime=${max_runtime}ms, delay_start=${delay_start}ms`);
+
+    // Add startup delay to prevent resource contention
+    if (delay_start > 0) {
+      console.log(`Delaying start by ${delay_start}ms to prevent resource contention`);
+      await new Promise(resolve => setTimeout(resolve, delay_start));
+    }
+
     // Create service client for full access
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '', 
@@ -51,14 +58,29 @@ serve(async (req) => {
     const startTime = Date.now();
     let processedCount = 0;
     let errorCount = 0;
+
+    // CRITICAL: Reset any stuck items before starting
+    try {
+      console.log('Resetting stuck items before processing...');
+      const { data: resetResult, error: resetError } = await supabase
+        .rpc('reset_stuck_queue_items');
+
+      if (resetError) {
+        console.error('Error resetting stuck items:', resetError);
+      } else {
+        console.log(`Reset ${resetResult || 0} stuck items`);
+      }
+    } catch (resetError) {
+      console.error('Failed to reset stuck items:', resetError);
+    }
     
     // Process batches until timeout approaches
     while (Date.now() - startTime < max_runtime) {
       console.log(`Claiming batch of ${batch_size} items...`);
       
-      // Claim a batch of work atomically
+      // Claim a batch of work atomically using optimized function
       const { data: batch, error: claimError } = await supabase
-        .rpc('claim_queue_batch', {
+        .rpc('claim_queue_batch_optimized', {
           p_batch_size: batch_size,
           p_processor_id: crypto.randomUUID()
         });
@@ -75,33 +97,63 @@ serve(async (req) => {
       
       console.log(`Processing ${batch.length} queue items`);
       
-      // Process items in parallel within the batch
-      const results = await Promise.allSettled(
-        batch.map(async (item) => {
-          try {
-            await processQueueItem(item, supabase);
-            processedCount++;
-          } catch (error) {
-            errorCount++;
-            console.error(`Error processing item ${item.id}:`, error);
-            
-            // Record the failure
-            try {
-              await supabase.rpc('handle_queue_failure', {
-                p_queue_id: item.id,
-                p_error_message: error.message || 'Unknown error',
-                p_error_details: {
-                  error: String(error),
-                  timestamp: new Date().toISOString(),
-                  attempts: item.attempts
-                }
-              });
-            } catch (rpcError) {
-              console.error('Failed to record queue failure:', rpcError);
-            }
+      // Process items sequentially with delays to prevent 503 BOOT_ERROR
+      console.log('Processing items sequentially with 2-second delays to prevent resource contention');
+
+      for (const [index, item] of batch.entries()) {
+        try {
+          // Add delay between items to prevent concurrent function starts
+          if (index > 0) {
+            console.log(`Adding 2-second delay before processing item ${index + 1}/${batch.length}`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
           }
-        })
-      );
+
+          await processQueueItem(item, supabase);
+          processedCount++;
+          console.log(`Successfully processed item ${item.id} (${index + 1}/${batch.length})`);
+        } catch (error) {
+          errorCount++;
+          console.error(`Error processing item ${item.id}:`, error);
+
+          // CRITICAL: Mark queue item as failed or pending for retry
+          try {
+            const newAttempts = (item.attempts || 0) + 1;
+            const maxAttempts = item.max_attempts || 3;
+
+            if (newAttempts >= maxAttempts) {
+              // Mark as permanently failed
+              await supabase
+                .from('analysis_queue')
+                .update({
+                  status: 'failed',
+                  error_message: error.message || 'Unknown error',
+                  completed_at: new Date().toISOString(),
+                  attempts: newAttempts
+                })
+                .eq('id', item.id);
+
+              console.log(`Item ${item.id} marked as failed after ${newAttempts} attempts`);
+            } else {
+              // Reset to pending for retry
+              await supabase
+                .from('analysis_queue')
+                .update({
+                  status: 'pending',
+                  error_message: error.message || 'Unknown error',
+                  processor_id: null,
+                  started_at: null,
+                  attempts: newAttempts
+                })
+                .eq('id', item.id);
+
+              console.log(`Item ${item.id} reset to pending for retry (attempt ${newAttempts}/${maxAttempts})`);
+            }
+          } catch (resetError) {
+            console.error('CRITICAL: Failed to reset queue item status:', resetError);
+            // If we can't reset the item, it will remain stuck in "processing"
+          }
+        }
+      }
       
       // Check if we have time for another batch
       const remainingTime = max_runtime - (Date.now() - startTime);
@@ -111,13 +163,60 @@ serve(async (req) => {
       }
     }
     
+    // Check for remaining work and trigger continuation if needed
+    let continuationTriggered = false;
+    try {
+      const { data: remainingWork, error: countError } = await supabase
+        .from('analysis_queue')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'pending')
+        .lt('attempts', 3); // Only count items that haven't hit max attempts
+
+      if (!countError && remainingWork > 0) {
+        console.log(`Found ${remainingWork} remaining items. Triggering IMMEDIATE continuation worker.`);
+
+        // Trigger another worker instance IMMEDIATELY (setTimeout doesn't work reliably in Edge Functions)
+        try {
+          const continueResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/process-queue-worker`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+            },
+            body: JSON.stringify({
+              batch_size: 3, // Smaller batches for more frequent continuation
+              max_runtime: 90000, // 90 seconds
+              delay_start: 2000  // 2 second delay before processing
+            })
+          });
+
+          if (continueResponse.ok) {
+            console.log('Continuation worker triggered successfully');
+            continuationTriggered = true;
+          } else {
+            const errorText = await continueResponse.text().catch(() => 'Unknown error');
+            console.error(`Failed to trigger continuation worker: ${continueResponse.status} - ${errorText}`);
+          }
+        } catch (triggerError) {
+          console.error('Failed to trigger continuation worker:', triggerError);
+        }
+      } else if (countError) {
+        console.error('Error checking for remaining work:', countError);
+      } else {
+        console.log('No remaining work found. Processing complete.');
+      }
+    } catch (continuationError) {
+      console.error('Error in continuation logic:', continuationError);
+    }
+
     const response = {
       success: true,
       processed: processedCount,
       errors: errorCount,
-      runtime: Date.now() - startTime
+      runtime: Date.now() - startTime,
+      continuation_triggered: continuationTriggered
     };
-    
+
     console.log('Worker completed:', response);
     
     return new Response(
