@@ -268,12 +268,12 @@ const createUser = async () => {
 
     console.log('Creating user with data:', requestBody)
 
-    // Call the appropriate endpoint based on environment
-    const endpoint = process.dev ? '/api/auth/provision' : '/.netlify/functions/auth-provision'
-    const response = await $fetch(endpoint, {
-      method: 'POST',
+    // Call Supabase edge function
+    const { data: response, error } = await supabase.functions.invoke('create-client-user', {
       body: requestBody
     })
+
+    if (error) throw error
     
     if (response.success) {
       message.value = 'User created successfully!'
