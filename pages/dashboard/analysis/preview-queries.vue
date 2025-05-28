@@ -457,19 +457,12 @@ const runAnalysis = async () => {
     // Save queue preference
     toggleQueue(useQueueProcessing.value)
 
-    // Run analysis for each selected platform
-    const results = []
-    for (const platform of selectedPlatforms.value) {
-      const result = await runAnalysisWithQueue({
-        client_id: clientId.value,
-        platform: platform,
-        queries: selectedQueries
-      })
-      results.push(result)
-    }
-
-    // Use the first result for navigation (we can enhance this later)
-    const result = results[0]
+    // Run analysis with all selected platforms in a single run
+    const result = await runAnalysisWithQueue({
+      client_id: clientId.value,
+      platforms: selectedPlatforms.value, // Pass array of platforms
+      queries: selectedQueries
+    })
 
     console.log('Run analysis response:', result)
 

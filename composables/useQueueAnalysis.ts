@@ -33,19 +33,40 @@ export const useQueueAnalysis = () => {
   // Run analysis with queue support
   const runAnalysisWithQueue = async (params: {
     client_id: string
-    platform: 'chatgpt' | 'perplexity' | 'both'
+    platform?: 'chatgpt' | 'perplexity' | 'both'  // Legacy support
+    platforms?: string[]  // New multi-platform support
     queries: any[]
   }) => {
     try {
       // Log the current queue setting
       console.log(`Using local server processing: ${useQueue.value}`);
 
+      // Handle legacy single platform or new multi-platform
+      const platforms = params.platforms || (params.platform ? [params.platform] : ['chatgpt'])
+
       // Use database function to submit analysis (bypasses RLS)
-      const { data: result, error } = await supabase.rpc('submit_analysis_to_queue', {
-        p_client_id: params.client_id,
-        p_platform: params.platform,
-        p_queries: params.queries
-      })
+      // Try new multi-platform function first, fallback to legacy if needed
+      let result, error;
+
+      if (platforms.length > 1) {
+        // Multi-platform call
+        const response = await supabase.rpc('submit_analysis_to_queue', {
+          p_client_id: params.client_id,
+          p_platforms: platforms,
+          p_queries: params.queries
+        });
+        result = response.data;
+        error = response.error;
+      } else {
+        // Single platform call (legacy)
+        const response = await supabase.rpc('submit_analysis_to_queue', {
+          p_client_id: params.client_id,
+          p_platform: platforms[0],
+          p_queries: params.queries
+        });
+        result = response.data;
+        error = response.error;
+      }
 
       if (error) throw error
 
