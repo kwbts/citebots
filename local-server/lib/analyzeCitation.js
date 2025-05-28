@@ -1,6 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Function to crawl a page using ScrapingBee
+// Function to detect URL type and determine if we should skip crawling
+function shouldSkipUrl(url) {
+  try {
+    const urlObj = new URL(url);
+
+    // Skip obvious 404 patterns
+    const path = urlObj.pathname.toLowerCase();
+    if (path.includes('/404') || path.includes('/not-found') || path.includes('/error')) {
+      return { skip: true, reason: 'Likely 404 page' };
+    }
+
+    // Skip Google search URLs unless specifically needed
+    if (urlObj.hostname.includes('google.') && urlObj.pathname.includes('/search')) {
+      return { skip: true, reason: 'Google search URL - requires custom_google parameter and high cost' };
+    }
+
+    // Skip other search engines that are likely to be blocked
+    const searchEngines = ['bing.com', 'yahoo.com', 'duckduckgo.com'];
+    if (searchEngines.some(engine => urlObj.hostname.includes(engine))) {
+      return { skip: true, reason: 'Search engine URL - likely blocked or irrelevant' };
+    }
+
+    return { skip: false };
+  } catch (e) {
+    return { skip: true, reason: 'Invalid URL format' };
+  }
+}
+
+// Function to crawl a page using ScrapingBee with intelligent fallback strategy
 async function crawlPage(url) {
   if (!process.env.SCRAPINGBEE_API_KEY) {
     throw new Error('ScrapingBee API key not configured');
@@ -8,25 +36,94 @@ async function crawlPage(url) {
 
   console.log(`Crawling page: ${url}`);
 
+  // Pre-flight check to avoid costly requests
+  const skipCheck = shouldSkipUrl(url);
+  if (skipCheck.skip) {
+    console.log(`Skipping URL: ${skipCheck.reason}`);
+    throw new Error(`Skipped crawling: ${skipCheck.reason}`);
+  }
+
+  // Try basic scraper first (lowest cost)
   try {
-    const scrapingBeeUrl = new URL('https://app.scrapingbee.com/api/v1/');
-    scrapingBeeUrl.searchParams.set('api_key', process.env.SCRAPINGBEE_API_KEY);
-    scrapingBeeUrl.searchParams.set('url', url);
-    scrapingBeeUrl.searchParams.set('render_js', 'false');
-    scrapingBeeUrl.searchParams.set('premium_proxy', 'true');
-    scrapingBeeUrl.searchParams.set('country_code', 'us');
+    console.log('Attempting basic ScrapingBee request...');
+    const basicUrl = new URL('https://app.scrapingbee.com/api/v1/');
+    basicUrl.searchParams.set('api_key', process.env.SCRAPINGBEE_API_KEY);
+    basicUrl.searchParams.set('url', url);
+    basicUrl.searchParams.set('render_js', 'false');
+    basicUrl.searchParams.set('premium_proxy', 'false');
+    basicUrl.searchParams.set('country_code', 'us');
+    basicUrl.searchParams.set('block_resources', 'true'); // Block images/CSS to save bandwidth
+    basicUrl.searchParams.set('timeout', '15000'); // 15 second timeout
 
-    const response = await fetch(scrapingBeeUrl.toString());
+    const basicResponse = await fetch(basicUrl.toString());
 
-    if (!response.ok) {
-      throw new Error(`ScrapingBee error: ${response.status} ${response.statusText}`);
+    if (basicResponse.ok) {
+      console.log('Basic ScrapingBee request succeeded');
+      const html = await basicResponse.text();
+
+      // Quick validation of response
+      if (html.length < 500 || html.includes('404') || html.includes('Not Found')) {
+        console.log('Response appears to be error page, checking content...');
+      }
+
+      return html;
+    } else {
+      console.log(`Basic request failed with ${basicResponse.status}, analyzing error...`);
+
+      // Check if it's worth trying premium
+      if (basicResponse.status === 404) {
+        throw new Error('Page not found (404) - skipping premium attempt');
+      }
+
+      if (basicResponse.status === 403) {
+        console.log('403 Forbidden - likely Cloudflare protection, trying premium with JS...');
+      }
+
+      throw new Error(`Basic ScrapingBee failed: ${basicResponse.status}`);
+    }
+  } catch (basicError) {
+    // Only try premium for specific error types
+    const errorMessage = basicError.message.toLowerCase();
+
+    if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+      console.log('404 error - not attempting expensive premium crawl');
+      throw new Error(`ScrapingBee failed: ${basicError.message}`);
     }
 
-    const html = await response.text();
-    return html;
-  } catch (error) {
-    console.error(`Error crawling ${url}:`, error.message);
-    throw error;
+    console.log('Basic ScrapingBee failed, attempting selective premium fallback...');
+
+    // Fallback to premium with stealth capabilities (higher cost - use selectively)
+    try {
+      const premiumUrl = new URL('https://app.scrapingbee.com/api/v1/');
+      premiumUrl.searchParams.set('api_key', process.env.SCRAPINGBEE_API_KEY);
+      premiumUrl.searchParams.set('url', url);
+      premiumUrl.searchParams.set('render_js', 'true'); // JS rendering for dynamic content
+      premiumUrl.searchParams.set('premium_proxy', 'true'); // Premium rotating proxies
+      premiumUrl.searchParams.set('country_code', 'us');
+      premiumUrl.searchParams.set('block_resources', 'true'); // Still block unnecessary resources
+      premiumUrl.searchParams.set('timeout', '20000'); // Slightly longer timeout for JS
+      premiumUrl.searchParams.set('wait_browser', 'networkidle2'); // Wait for page to fully load
+
+      const premiumResponse = await fetch(premiumUrl.toString());
+
+      if (!premiumResponse.ok) {
+        const errorText = await premiumResponse.text().catch(() => 'Unknown error');
+
+        // Parse specific error types
+        if (errorText.includes('403') && errorText.includes('Cloudflare')) {
+          throw new Error('Cloudflare protection detected - site actively blocking scrapers');
+        }
+
+        throw new Error(`Premium ScrapingBee error: ${premiumResponse.status} ${premiumResponse.statusText} - ${errorText}`);
+      }
+
+      console.log('Premium ScrapingBee request succeeded');
+      const html = await premiumResponse.text();
+      return html;
+    } catch (premiumError) {
+      console.error(`Both basic and premium ScrapingBee failed for ${url}:`, premiumError.message);
+      throw new Error(`ScrapingBee failed (basic: ${basicError.message}, premium: ${premiumError.message})`);
+    }
   }
 }
 
@@ -69,11 +166,33 @@ function extractPageInfo(html, url) {
 }
 
 // Function to generate default analysis when crawling fails
-function getDefaultAnalysis(url) {
-  const urlObj = new URL(url);
-  const domain = urlObj.hostname;
-  const folderDepth = urlObj.pathname.split('/').filter(p => p.length > 0).length;
-  
+function getDefaultAnalysis(url, errorReason = 'Crawling failed') {
+  let domain, folderDepth;
+
+  try {
+    const urlObj = new URL(url);
+    domain = urlObj.hostname;
+    folderDepth = urlObj.pathname.split('/').filter(p => p.length > 0).length;
+  } catch (e) {
+    domain = 'unknown-domain';
+    folderDepth = 0;
+  }
+
+  // Categorize the error type for better analysis
+  let crawlStatus = 'failed';
+  let analysisQuality = 'fallback';
+
+  if (errorReason.includes('404') || errorReason.includes('not found')) {
+    crawlStatus = 'not_found';
+    analysisQuality = 'error_page';
+  } else if (errorReason.includes('Cloudflare') || errorReason.includes('403')) {
+    crawlStatus = 'blocked';
+    analysisQuality = 'access_denied';
+  } else if (errorReason.includes('Skipped')) {
+    crawlStatus = 'skipped';
+    analysisQuality = 'intentionally_skipped';
+  }
+
   return {
     // Technical SEO
     technical_seo: {
@@ -203,9 +322,22 @@ export async function analyzeCitation(requestData) {
   );
 
   try {
-    const urlObj = new URL(citation_url);
+    // Validate URL format
+    let urlObj;
+    try {
+      urlObj = new URL(citation_url);
+    } catch (urlError) {
+      throw new Error(`Invalid URL format: ${citation_url}`);
+    }
+
     const domain = urlObj.hostname;
     const pageAnalysisId = domain.replace(/\./g, '_') + '_' + Date.now();
+
+    // Skip certain domains that commonly cause issues
+    const skipDomains = ['localhost', '127.0.0.1', 'example.com', 'test.com'];
+    if (skipDomains.some(skip => domain.includes(skip))) {
+      throw new Error(`Skipping analysis for test/local domain: ${domain}`);
+    }
 
     // Check if this is a client or competitor domain
     const isClientDomain = brand_domain && domain.includes(brand_domain.toLowerCase());
@@ -222,7 +354,7 @@ export async function analyzeCitation(requestData) {
     try {
       const html = await crawlPage(citation_url);
       pageInfo = extractPageInfo(html, citation_url);
-      
+
       // Update analysis with actual data
       analysisData.on_page_seo = {
         ...analysisData.on_page_seo,
@@ -235,12 +367,15 @@ export async function analyzeCitation(requestData) {
         keyword_match: keyword ? [keyword] : [],
         content_type: pageInfo.wordCount > 500 ? 'Article' : 'Unknown'
       };
-      
+
       analysisData.technical_seo.is_crawlable = true;
       analysisData.technical_seo.meta_description_present = !!pageInfo.metaDescription;
     } catch (error) {
       crawlError = error.message;
       console.error(`Failed to crawl ${citation_url}:`, error.message);
+
+      // Generate error-aware default analysis
+      analysisData = getDefaultAnalysis(citation_url, error.message);
     }
 
     // Check for brand mentions

@@ -111,30 +111,80 @@ async function queryPerplexity(query) {
   };
 }
 
+// Clean and validate URL
+function cleanAndValidateUrl(rawUrl) {
+  if (!rawUrl) return null;
+
+  // Remove common trailing characters that break URLs
+  let cleanUrl = rawUrl.trim()
+    .replace(/[.,;!?\])}]+$/, '') // Remove trailing punctuation
+    .replace(/\s+$/, '') // Remove trailing whitespace
+    .replace(/[<>"`']+/g, ''); // Remove quotes and brackets
+
+  // Ensure URL has protocol
+  if (!cleanUrl.match(/^https?:\/\//)) {
+    if (cleanUrl.startsWith('www.') || cleanUrl.includes('.')) {
+      cleanUrl = 'https://' + cleanUrl;
+    } else {
+      return null; // Not a valid URL format
+    }
+  }
+
+  try {
+    const urlObj = new URL(cleanUrl);
+
+    // Basic validation checks
+    if (!urlObj.hostname || urlObj.hostname.length < 3) {
+      return null;
+    }
+
+    // Skip obviously invalid domains
+    const invalidPatterns = [
+      'localhost',
+      '127.0.0.1',
+      'example.com',
+      'test.com',
+      '.local'
+    ];
+
+    if (invalidPatterns.some(pattern => urlObj.hostname.includes(pattern))) {
+      return null;
+    }
+
+    return {
+      url: cleanUrl,
+      domain: urlObj.hostname
+    };
+  } catch (e) {
+    console.warn('Invalid URL after cleaning:', cleanUrl, e.message);
+    return null;
+  }
+}
+
 // Extract citations from ChatGPT response
 function extractChatGPTCitations(content) {
   const citations = [];
-  
+
   console.log('Extracting citations from ChatGPT content');
-  
+
   // Pattern 1: [1] with URL immediately after or at end
-  const citationWithUrlPattern = /\[(\d+)\](?:.*?)(https?:\/\/[^\s\]]+)/g;
+  const citationWithUrlPattern = /\[(\d+)\](?:.*?)(https?:\/\/[^\s\]<>"`']+)/g;
   let matches = [...content.matchAll(citationWithUrlPattern)];
-  
+
   for (const match of matches) {
     const citationNumber = parseInt(match[1]);
-    const url = match[2];
-    
-    try {
-      const domain = new URL(url).hostname;
+    const rawUrl = match[2];
+
+    const urlData = cleanAndValidateUrl(rawUrl);
+    if (urlData) {
       citations.push({
         citation: `[${citationNumber}]`,
         citation_number: citationNumber,
-        url: url,
-        domain: domain
+        url: urlData.url,
+        domain: urlData.domain
       });
-    } catch (e) {
-      console.error('Error parsing URL:', url, e);
+    } else {
+      console.warn('Skipping invalid URL from ChatGPT citation:', rawUrl);
     }
   }
   
@@ -149,23 +199,22 @@ function extractChatGPTCitations(content) {
     
     for (const match of refMatches) {
       const citationNumber = parseInt(match[1]);
-      const url = match[2];
-      
-      try {
-        const domain = new URL(url).hostname;
-        
+      const rawUrl = match[2];
+
+      const urlData = cleanAndValidateUrl(rawUrl);
+      if (urlData) {
         // Check if we already have this citation
         const exists = citations.some(c => c.citation_number === citationNumber);
         if (!exists) {
           citations.push({
             citation: `[${citationNumber}]`,
             citation_number: citationNumber,
-            url: url,
-            domain: domain
+            url: urlData.url,
+            domain: urlData.domain
           });
         }
-      } catch (e) {
-        console.error('Error parsing reference URL:', url, e);
+      } else {
+        console.warn('Skipping invalid reference URL:', rawUrl);
       }
     }
   }
@@ -173,21 +222,21 @@ function extractChatGPTCitations(content) {
   // Pattern 3: Just look for any URLs if no citations found
   if (citations.length === 0) {
     console.log('No bracketed citations found, looking for plain URLs');
-    const urlPattern = /https?:\/\/[^\s\]<>]+/g;
+    const urlPattern = /https?:\/\/[^\s\]<>"`']+/g;
     const urls = content.match(urlPattern) || [];
-    
+
     for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-      try {
-        const domain = new URL(url).hostname;
+      const rawUrl = urls[i];
+      const urlData = cleanAndValidateUrl(rawUrl);
+      if (urlData) {
         citations.push({
           citation: `[${i + 1}]`,
           citation_number: i + 1,
-          url: url,
-          domain: domain
+          url: urlData.url,
+          domain: urlData.domain
         });
-      } catch (e) {
-        console.error('Error parsing plain URL:', url, e);
+      } else {
+        console.warn('Skipping invalid plain URL:', rawUrl);
       }
     }
   }
@@ -203,50 +252,118 @@ function extractPerplexityCitations(content) {
   console.log('Extracting citations from Perplexity content');
   
   // Perplexity often uses [1], [2] format with URLs
-  const citationPattern = /\[(\d+)\](?:.*?)(https?:\/\/[^\s\]]+)/g;
+  const citationPattern = /\[(\d+)\](?:.*?)(https?:\/\/[^\s\]<>"`']+)/g;
   const matches = [...content.matchAll(citationPattern)];
-  
+
   for (const match of matches) {
     const citationNumber = parseInt(match[1]);
-    const url = match[2];
-    
-    try {
-      const domain = new URL(url).hostname;
+    const rawUrl = match[2];
+
+    const urlData = cleanAndValidateUrl(rawUrl);
+    if (urlData) {
       citations.push({
         citation: `[${citationNumber}]`,
         citation_number: citationNumber,
-        url: url,
-        domain: domain
+        url: urlData.url,
+        domain: urlData.domain
       });
-    } catch (e) {
-      console.error('Error parsing Perplexity URL:', url, e);
+    } else {
+      console.warn('Skipping invalid Perplexity URL:', rawUrl);
     }
   }
-  
+
   // If no bracketed citations, look for URLs
   if (citations.length === 0) {
     console.log('No bracketed citations found in Perplexity, looking for plain URLs');
-    const urlPattern = /https?:\/\/[^\s\]<>]+/g;
+    const urlPattern = /https?:\/\/[^\s\]<>"`']+/g;
     const urls = content.match(urlPattern) || [];
-    
+
     for (let i = 0; i < urls.length; i++) {
-      const url = urls[i];
-      try {
-        const domain = new URL(url).hostname;
+      const rawUrl = urls[i];
+      const urlData = cleanAndValidateUrl(rawUrl);
+      if (urlData) {
         citations.push({
           citation: `[${i + 1}]`,
           citation_number: i + 1,
-          url: url,
-          domain: domain
+          url: urlData.url,
+          domain: urlData.domain
         });
-      } catch (e) {
-        console.error('Error parsing Perplexity plain URL:', url, e);
+      } else {
+        console.warn('Skipping invalid Perplexity plain URL:', rawUrl);
       }
     }
   }
   
   console.log(`Extracted ${citations.length} citations from Perplexity content`);
   return citations;
+}
+
+// AI-powered brand mention and competitor context analysis
+async function analyzeBrandMentionContext(response, brandName, competitors) {
+  if (!process.env.OPENAI_API_KEY) {
+    return { brand_mention_type: 'secondary', competitor_context: 'none' };
+  }
+
+  try {
+    const competitorNames = competitors.map(c => c.name).join(', ');
+    const prompt = `
+Analyze how "${brandName}" is mentioned in this LLM response. Consider the context and positioning.
+
+Response: "${response.substring(0, 1500)}"
+Brand: "${brandName}"
+Competitors mentioned: ${competitorNames || 'None'}
+
+Return JSON with these exact fields:
+{
+  "brand_mention_type": Choose ONE: "primary", "secondary", "implicit", "featured", "none"
+  "competitor_context": Choose ONE: "comparative", "listed", "exclusive", "alternative", "leader", "follower", "none"
+}
+
+Definitions:
+- primary: Brand is the main subject of response
+- secondary: Brand mentioned among others but not focus
+- implicit: Brand concepts mentioned without explicit naming
+- featured: Brand highlighted or given prominence
+- none: No brand mention detected
+
+- comparative: Directly compared to competitors
+- listed: Mentioned in list with competitors without comparison
+- exclusive: Mentioned without any competitors in context
+- alternative: Mentioned as alternative to another solution
+- leader: Positioned as market leader or best-in-class
+- follower: Positioned as secondary to competitor solutions
+- none: No competitive context established`;
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const aiResponse = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a brand positioning analyst. Return only valid JSON with exact field names and values from the provided options.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.3,
+      max_tokens: 100,
+      response_format: { type: 'json_object' }
+    });
+
+    const result = JSON.parse(aiResponse.choices[0].message.content);
+    return {
+      brand_mention_type: result.brand_mention_type || 'secondary',
+      competitor_context: result.competitor_context || 'none'
+    };
+  } catch (error) {
+    console.error('Error in AI brand mention analysis:', error);
+    return { brand_mention_type: 'secondary', competitor_context: 'none' };
+  }
 }
 
 // Analyze competitor mentions
@@ -298,24 +415,37 @@ async function analyzeCompetitorMentions(response, brandName, brandDomain, compe
   const brandMatches = response.match(brandRegex) || [];
   const brandMentionCount = brandMatches.length;
 
-  // Determine brand mention type
-  let brandMentionType = 'none';
+  // Use AI-powered analysis for brand mention type and competitor context
+  let aiAnalysis = { brand_mention_type: 'none', competitor_context: 'none' };
+
   if (brandMentionCount > 0 || brandInCitations) {
-    // Check for specific mention types
-    if (responseLower.includes(`recommend ${brandLower}`) ||
-        responseLower.includes(`${brandLower} is the best`) ||
-        responseLower.includes(`best ${brandLower}`)) {
-      brandMentionType = 'recommendation';
-    } else if (responseLower.includes(`${brandLower} is`) ||
-               responseLower.includes(`${brandLower} offers`) ||
-               responseLower.includes(`${brandLower} provides`)) {
-      brandMentionType = 'featured';
-    } else if (brandInCitations) {
-      brandMentionType = 'citation';
-    } else {
-      brandMentionType = 'mentioned';
+    // Get AI analysis for more sophisticated classification
+    aiAnalysis = await analyzeBrandMentionContext(response, brandName, competitorsList);
+
+    // Fall back to rule-based analysis if AI fails
+    if (!aiAnalysis.brand_mention_type || aiAnalysis.brand_mention_type === 'none') {
+      if (responseLower.includes(`${brandLower} is the best`) ||
+          responseLower.includes(`${brandLower} is a leading`) ||
+          (brandMentionCount >= 3 && mentionedCompetitors.size === 0)) {
+        aiAnalysis.brand_mention_type = 'primary';
+      } else if (responseLower.includes(`recommend ${brandLower}`) ||
+                 responseLower.includes(`${brandLower} stands out`)) {
+        aiAnalysis.brand_mention_type = 'featured';
+      } else if (brandInCitations && brandMentionCount === 0) {
+        aiAnalysis.brand_mention_type = 'implicit';
+      } else {
+        aiAnalysis.brand_mention_type = 'secondary';
+      }
+    }
+
+    // Ensure competitor context is set appropriately
+    if (mentionedCompetitors.size === 0 && aiAnalysis.brand_mention_type !== 'none') {
+      aiAnalysis.competitor_context = 'exclusive';
     }
   }
+
+  const brandMentionType = aiAnalysis.brand_mention_type;
+  const competitorContext = aiAnalysis.competitor_context;
 
   // Analyze each competitor
   for (const comp of competitorsList) {
@@ -354,6 +484,7 @@ async function analyzeCompetitorMentions(response, brandName, brandDomain, compe
   return {
     brand_mention_type: brandMentionType,
     brand_mention_count: brandMentionCount,
+    competitor_context: competitorContext,
     competitors_mentioned: competitorAnalysis,
     competitor_names: Array.from(mentionedCompetitors),
     total_competitor_mentions: competitorAnalysis.reduce((sum, comp) => sum + comp.mentions, 0),
@@ -381,13 +512,13 @@ Required JSON structure:
 {
   "query_category": Choose ONE: "general", "product", "service", "comparison", "troubleshooting", "educational", "pricing", "features"
   "query_topic": Main topic in 2-4 words (e.g., "workforce management", "construction software", "email tools")
-  "query_type": Choose ONE: "informational", "navigational", "transactional", "commercial"
+  "query_type": Choose ONE: "question", "command", "research", "conversational", "comparison", "definition", "how_to", "example"
   "funnel_stage": Choose ONE: "awareness", "consideration", "decision", "retention"
   "query_complexity": Choose ONE: "simple", "moderate", "complex"
   "response_match": Choose ONE: "direct", "partial", "tangential"
   "response_outcome": Choose ONE: "answer", "recommendation", "comparison", "explanation"
-  "action_orientation": Choose ONE: "high", "medium", "low", "none"
-  "query_competition": Choose ONE: "high", "moderate", "low", "opportunity"
+  "action_orientation": Choose ONE: "passive", "suggestive", "directive", "interactive", "transactional", "referral", "educational"
+  "query_competition": Choose ONE: "defending", "opportunity", "competitive", "competitor_advantage"
 }
 
 IMPORTANT: Return ONLY valid JSON with these exact fields.`;
@@ -468,12 +599,22 @@ function getDefaultMetadata(query, intent) {
   else if (queryLower.includes('marketing')) topic = 'marketing tools';
   else if (queryLower.includes('project')) topic = 'project management';
   
-  // Detect query type
-  let queryType = 'informational';
-  if (queryLower.includes('buy') || queryLower.includes('purchase') || queryLower.includes('pricing')) {
-    queryType = 'transactional';
-  } else if (queryLower.includes('review') || queryLower.includes('compare')) {
-    queryType = 'commercial';
+  // Detect query type using fixed list
+  let queryType = 'question'; // Default
+  if (queryLower.includes('how to') || queryLower.includes('how do i') || queryLower.includes('how can i')) {
+    queryType = 'how_to';
+  } else if (queryLower.includes('what is') || queryLower.includes('define') || queryLower.includes('definition')) {
+    queryType = 'definition';
+  } else if (queryLower.includes('compare') || queryLower.includes('vs') || queryLower.includes('versus')) {
+    queryType = 'comparison';
+  } else if (queryLower.includes('example') || queryLower.includes('examples') || queryLower.includes('show me')) {
+    queryType = 'example';
+  } else if (queryLower.includes('research') || queryLower.includes('study') || queryLower.includes('analysis')) {
+    queryType = 'research';
+  } else if (queryLower.includes('please') || queryLower.includes('can you') || queryLower.includes('help me')) {
+    queryType = 'command';
+  } else if (queryLower.includes('i want') || queryLower.includes('i need') || queryLower.includes('looking for')) {
+    queryType = 'conversational';
   }
   
   // Detect funnel stage
@@ -492,9 +633,25 @@ function getDefaultMetadata(query, intent) {
     query_complexity: wordCount > 15 ? 'complex' : wordCount > 8 ? 'moderate' : 'simple',
     response_match: 'direct',
     response_outcome: 'answer',
-    action_orientation: queryType === 'transactional' ? 'high' : 'medium',
+    action_orientation: queryType === 'command' ? 'directive' : queryType === 'how_to' ? 'educational' : 'passive',
     query_competition: 'opportunity'
   };
+}
+
+// Determine query competition based on brand and competitor mentions
+function determineQueryCompetition(brandMentionType, competitorNames, competitorContext) {
+  const hasBrand = brandMentionType && brandMentionType !== 'none';
+  const hasCompetitors = competitorNames && competitorNames.length > 0;
+
+  if (hasBrand && hasCompetitors) {
+    return 'competitive'; // Both brand and competitors mentioned
+  } else if (hasBrand && !hasCompetitors) {
+    return 'defending'; // Brand cited, no competitors
+  } else if (!hasBrand && hasCompetitors) {
+    return 'competitor_advantage'; // Competitors cited but brand is not
+  } else {
+    return 'opportunity'; // Neither brand nor competitors mentioned
+  }
 }
 
 // Analyze brand sentiment
@@ -585,6 +742,13 @@ export async function executeQuery(requestData) {
   console.log('Starting brand sentiment analysis...');
   const brandSentiment = await analyzeBrandSentiment(response, brand_name);
 
+  // Determine query competition based on brand and competitor presence
+  const queryCompetition = determineQueryCompetition(
+    competitorAnalysis.brand_mention_type,
+    competitorAnalysis.competitor_names,
+    competitorAnalysis.competitor_context
+  );
+
   // Create comprehensive result object with all fields at the top level
   const result = {
     query_text,
@@ -621,14 +785,15 @@ export async function executeQuery(requestData) {
     // Response metadata
     response_match: metadata.response_match || 'direct',
     response_outcome: metadata.response_outcome || 'answer',
-    action_orientation: metadata.action_orientation || 'medium',
-    query_competition: metadata.query_competition || 'opportunity',
+    action_orientation: metadata.action_orientation || 'passive',
+    query_competition: queryCompetition, // Use calculated competition instead of metadata
 
     // Keep metadata object for backward compatibility
     metadata: {
       ...metadata,
       ...competitorAnalysis,
-      brand_sentiment: brandSentiment
+      brand_sentiment: brandSentiment,
+      query_competition: queryCompetition // Include calculated competition
     },
 
     timestamp: new Date().toISOString()
