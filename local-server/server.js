@@ -180,7 +180,7 @@ async function processQueueItem(item) {
       query_text: query_data.query_text,
       query_keyword: query_data.keyword || null,
       query_intent: query_data.intent || null,
-      data_source: query_data.platform === 'both' ? 'chatgpt' : query_data.platform,
+      data_source: query_data.platform,
       status: 'pending'
     })
     .select()
@@ -195,7 +195,7 @@ async function processQueueItem(item) {
     query_text: query_data.query_text,
     keyword: query_data.keyword || '',
     query_intent: query_data.intent || '',
-    platform: query_data.platform === 'both' ? 'chatgpt' : query_data.platform,
+    platform: query_data.platform,
     brand_name: query_data.client?.name || '',
     brand_domain: query_data.client?.domain || '',
     competitors: Array.isArray(query_data.client?.competitors) ? query_data.client.competitors : []
@@ -406,7 +406,7 @@ app.listen(PORT, () => {
   console.log(`🌐 Frontend should connect to: http://localhost:${PORT}/status`);
   
   // Start polling for queue items
-  const pollInterval = parseInt(process.env.POLL_INTERVAL) || 5000;
+  const pollInterval = parseInt(process.env.POLL_INTERVAL) || 3600000; // 1 hour default
   
   setInterval(() => {
     if (!isProcessing) {

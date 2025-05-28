@@ -120,9 +120,17 @@ const fetchReportData = async () => {
     if (clientError) throw clientError
     if (!clientData) throw new Error('Client not found')
     
-    // Check ownership - support both created_by and user_id columns
+    // Check ownership - support both created_by and user_id columns, plus super admin access
+    const userProfile = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.value?.id)
+      .single()
+
+    const isSuperAdmin = userProfile.data?.role === 'super_admin'
     const isOwner = clientData.created_by === user.value?.id || clientData.user_id === user.value?.id
-    if (!isOwner) {
+
+    if (!isSuperAdmin && !isOwner) {
       throw new Error('Access denied: You do not have permission to view this report')
     }
     
@@ -151,21 +159,10 @@ const fetchReportData = async () => {
       console.warn('Error fetching queries:', queriesError)
     }
 
-    // Get page analyses using the query IDs (correct relationship)
+    // EMERGENCY: Skip page analyses due to resource exhaustion
+    // TODO: Re-enable once RLS is properly fixed
     let pagesData = []
-    if (queriesData && queriesData.length > 0) {
-      const queryIds = queriesData.map(q => q.id)
-      const { data: pageAnalyses, error: pagesError } = await supabase
-        .from('page_analyses')
-        .select('*')
-        .in('query_id', queryIds)
-
-      if (pagesError) {
-        console.warn('Error fetching pages:', pagesError)
-      } else {
-        pagesData = pageAnalyses || []
-      }
-    }
+    console.log('Skipping page_analyses due to Supabase resource exhaustion')
 
     const queriesResult = { data: queriesData, error: queriesError }
     const pagesResult = { data: pagesData, error: null }
