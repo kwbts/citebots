@@ -22,7 +22,7 @@
     </div>
     
     <!-- Admin Tools Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
       <!-- User Profile Card -->
       <NuxtLink
         to="/dashboard/admin/profile"
@@ -76,6 +76,35 @@
           <div class="flex items-baseline">
             <span class="bg-citebots-orange/10 dark:bg-citebots-orange/15 text-citebots-orange px-3 py-2 rounded-lg text-sm font-medium border border-citebots-orange/20 dark:border-citebots-orange/30">
               Manage Requests
+            </span>
+          </div>
+        </div>
+      </NuxtLink>
+
+      <!-- User Management Card -->
+      <NuxtLink
+        to="/dashboard/admin/users"
+        class="group focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900 rounded-lg"
+      >
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700/60 p-8 group-hover:shadow-lg group-hover:border-gray-300 dark:group-hover:border-gray-600 group-hover:scale-[0.98] group-active:scale-[0.96] transition-all duration-150 ease-out">
+          <div class="mb-6">
+            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg inline-flex group-hover:bg-purple-100 dark:group-hover:bg-purple-900/30 transition-colors duration-150 group-hover:shadow-sm">
+              <svg class="w-7 h-7 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m-2.006-2.006a3 3 0 00-3.997 0" />
+              </svg>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="text-xs font-semibold text-purple-600/80 dark:text-purple-400/90 uppercase tracking-wider mb-2">MULTI-TENANCY</div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">User Management</h3>
+            <p class="text-gray-600 dark:text-gray-300 text-base leading-relaxed">Create and manage client users with account assignments</p>
+          </div>
+
+          <div class="flex items-baseline">
+            <span class="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 px-3 py-2 rounded-lg text-sm font-medium border border-purple-200 dark:border-purple-800/50">
+              Manage Users
             </span>
           </div>
         </div>
