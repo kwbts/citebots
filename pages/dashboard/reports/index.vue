@@ -69,7 +69,6 @@
                 {{ reports[0]?.client_name || 'Your Client' }}
               </div>
             </div>
-            </div>
 
             <!-- Status Filter -->
             <div class="min-w-0 flex-1 sm:max-w-xs">
