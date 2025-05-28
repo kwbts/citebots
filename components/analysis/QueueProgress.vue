@@ -185,14 +185,29 @@ async function fetchStatus() {
 
     // Get queue status if queue processing
     if (runData.processing_method === 'queue') {
-      const { data: queueData, error: queueError } = await supabase
-        .from('queue_status')
-        .select('*')
+      // Skip queue_status table entirely and use analysis_queue directly to avoid 404 errors
+      const { data: queueItems, error: queueItemsError } = await supabase
+        .from('analysis_queue')
+        .select('status')
         .eq('analysis_run_id', props.analysisRunId)
-        .single()
 
-      if (!queueError) {
-        queueStatus.value = queueData
+      if (!queueItemsError && queueItems) {
+        const pending = queueItems.filter(item => item.status === 'pending').length
+        const processing = queueItems.filter(item => item.status === 'processing').length
+        const completed = queueItems.filter(item => item.status === 'completed').length
+        const failed = queueItems.filter(item => item.status === 'failed').length
+
+        queueStatus.value = {
+          analysis_run_id: props.analysisRunId,
+          pending_count: pending,
+          processing_count: processing,
+          completed_count: completed,
+          failed_count: failed,
+          queries_total: queueItems.length,
+          progress_percentage: queueItems.length > 0 ? (completed / queueItems.length) * 100 : 0
+        }
+      } else {
+        console.warn('Failed to fetch queue items for analysis run:', props.analysisRunId, queueItemsError)
       }
 
       // Check for stuck items - if we haven't seen progress in 30 seconds and still have pending items
