@@ -350,12 +350,12 @@ const fetchAnalysisData = async () => {
     
     client.value = clientData
     
-    // Fetch queries with page analyses
+    // EMERGENCY: Skip page_analyses JOIN due to resource exhaustion
+    // TODO: Re-enable once RLS is properly fixed
     const { data: queryData, error: queryError } = await supabase
       .from('analysis_queries')
       .select(`
         *,
-        page_analyses(*),
         associated_pages
       `)
       .eq('analysis_run_id', route.params.id)
