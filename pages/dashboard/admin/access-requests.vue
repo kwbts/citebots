@@ -65,6 +65,38 @@
               required
             />
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Role</label>
+            <select
+              v-model="newRequest.role"
+              class="w-full px-4 py-3 border border-gray-200/50 dark:border-gray-600/50 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-orange-200 dark:focus:ring-orange-500/30 focus:border-orange-300 dark:focus:border-orange-500/50 transition-all duration-200"
+              required
+            >
+              <option value="">Select Role</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="client">Client (View Only)</option>
+            </select>
+          </div>
+          <div v-if="newRequest.role === 'client'" class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Assign to Client</label>
+            <select
+              v-model="newRequest.clientId"
+              class="w-full px-4 py-3 border border-gray-200/50 dark:border-gray-600/50 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-4 focus:ring-orange-200 dark:focus:ring-orange-500/30 focus:border-orange-300 dark:focus:border-orange-500/50 transition-all duration-200"
+              required
+            >
+              <option value="">Select Client</option>
+              <option v-for="client in clients" :key="client.id" :value="client.id">
+                {{ client.name }} ({{ client.domain }})
+                <span v-if="client.analysis_count > 0"> - {{ client.analysis_count }} reports</span>
+              </option>
+            </select>
+            <p class="mt-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 rounded-lg p-3">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <strong>Tip:</strong> Make sure to run analysis reports for this client first so the user has data to view when they log in.
+            </p>
+          </div>
           <div class="md:col-span-2">
             <button
               type="submit"
@@ -124,6 +156,8 @@
               <tr class="border-b border-gray-200/50 dark:border-gray-700/50">
                 <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
                 <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Company</th>
+                <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Client</th>
                 <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                 <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Requested</th>
                 <th class="px-8 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Password</th>
@@ -142,6 +176,15 @@
                 </td>
                 <td class="px-8 py-6 whitespace-nowrap text-gray-900 dark:text-white">
                   {{ request.company }}
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap">
+                  <span :class="getRoleBadgeClass(request.role)" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border">
+                    {{ request.role || 'client' }}
+                  </span>
+                </td>
+                <td class="px-8 py-6 whitespace-nowrap text-gray-900 dark:text-white">
+                  <span v-if="request.client_name" class="text-sm">{{ request.client_name }}</span>
+                  <span v-else class="text-gray-400 text-sm">-</span>
                 </td>
                 <td class="px-8 py-6 whitespace-nowrap">
                   <span :class="getStatusBadgeClass(request.status)" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border">
@@ -211,7 +254,7 @@ import { ref, onMounted, watch } from 'vue'
 
 // Middleware to check super admin access
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 
@@ -224,13 +267,18 @@ const loading = ref(true)
 const isSubmitting = ref(false)
 const message = ref('')
 const messageType = ref('')
+const clientsLoading = ref(false)
 
 const newRequest = ref({
   firstName: '',
   lastName: '',
   email: '',
-  company: ''
+  company: '',
+  role: '',
+  clientId: ''
 })
+
+const clients = ref([])
 
 // Check if user is super admin
 const checkSuperAdmin = async () => {
@@ -261,17 +309,53 @@ const loadAccessRequests = async () => {
     loading.value = true
     const { data, error } = await supabase
       .from('access_requests')
-      .select('*')
+      .select(`
+        *,
+        client_name:clients(name)
+      `)
       .order('requested_at', { ascending: false })
-    
+
     if (error) throw error
-    accessRequests.value = data || []
+
+    // Format data to flatten client_name
+    accessRequests.value = (data || []).map(request => ({
+      ...request,
+      client_name: request.client_name?.name || null
+    }))
   } catch (error) {
     console.error('Error loading access requests:', error)
     message.value = 'Failed to load access requests'
     messageType.value = 'error'
   } finally {
     loading.value = false
+  }
+}
+
+// Load clients for dropdown
+const loadClients = async () => {
+  try {
+    clientsLoading.value = true
+    const { data, error } = await supabase
+      .from('clients')
+      .select(`
+        id,
+        name,
+        domain,
+        analysis_runs!inner(id)
+      `)
+      .order('name')
+
+    if (error) throw error
+
+    // Format data to include analysis count
+    clients.value = (data || []).map(client => ({
+      ...client,
+      analysis_count: client.analysis_runs?.length || 0
+    }))
+  } catch (error) {
+    console.error('Error loading clients:', error)
+  } finally {
+    clientsLoading.value = false
   }
 }
 
@@ -282,9 +366,14 @@ const createAccessRequest = async () => {
     message.value = ''
 
     // Basic validation
-    if (!newRequest.value.firstName || !newRequest.value.lastName || 
-        !newRequest.value.email || !newRequest.value.company) {
+    if (!newRequest.value.firstName || !newRequest.value.lastName ||
+        !newRequest.value.email || !newRequest.value.company || !newRequest.value.role) {
       throw new Error('Please fill in all fields')
+    }
+
+    // Validate client assignment for client role
+    if (newRequest.value.role === 'client' && !newRequest.value.clientId) {
+      throw new Error('Please select a client for client role users')
     }
 
     // Check if email is jon@knowbots.ca for auto-provision
@@ -310,16 +399,24 @@ const createAccessRequest = async () => {
       }
     } else {
       // Create regular access request
+      const insertData = {
+        email: newRequest.value.email,
+        first_name: newRequest.value.firstName,
+        last_name: newRequest.value.lastName,
+        company: newRequest.value.company,
+        role: newRequest.value.role,
+        status: 'pending',
+        requested_at: new Date().toISOString()
+      }
+
+      // Add client_id if role is client
+      if (newRequest.value.role === 'client') {
+        insertData.client_id = newRequest.value.clientId
+      }
+
       const { error } = await supabase
         .from('access_requests')
-        .insert([{
-          email: newRequest.value.email,
-          first_name: newRequest.value.firstName,
-          last_name: newRequest.value.lastName,
-          company: newRequest.value.company,
-          status: 'pending',
-          requested_at: new Date().toISOString()
-        }])
+        .insert([insertData])
 
       if (error) throw error
 
@@ -332,7 +429,9 @@ const createAccessRequest = async () => {
       firstName: '',
       lastName: '',
       email: '',
-      company: ''
+      company: '',
+      role: '',
+      clientId: ''
     }
 
     // Reload requests
@@ -361,7 +460,8 @@ const approveRequest = async (request) => {
         lastName: request.last_name,
         email: request.email,
         company: request.company,
-        role: 'client'
+        role: request.role || 'client',
+        clientId: request.client_id
       }
     })
 
@@ -441,6 +541,17 @@ const getStatusBadgeClass = (status) => {
   }
 }
 
+const getRoleBadgeClass = (role) => {
+  switch (role) {
+    case 'super_admin':
+      return 'bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-200/50 dark:border-purple-500/20'
+    case 'client':
+      return 'bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-200/50 dark:border-blue-500/20'
+    default:
+      return 'bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border-gray-200/50 dark:border-gray-500/20'
+  }
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return '-'
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -464,6 +575,6 @@ watch(message, (newMessage) => {
 // Initialize
 onMounted(async () => {
   await checkSuperAdmin()
-  await loadAccessRequests()
+  await Promise.all([loadAccessRequests(), loadClients()])
 })
 </script>

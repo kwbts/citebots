@@ -158,7 +158,7 @@ import { ref, onMounted } from 'vue'
 
 // Middleware to check super admin access
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

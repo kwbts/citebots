@@ -43,7 +43,7 @@ import FullScreenDashboard from '~/components/reports/FullScreenDashboard.vue'
 const { isDark } = useDarkMode()
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth'],
   layout: 'dashboard'
 })
 

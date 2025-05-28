@@ -289,7 +289,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { navigateTo } from '#app'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

@@ -1,12 +1,31 @@
 <template>
   <div class="max-w-7xl mx-auto">
+    <!-- Client Welcome Message -->
+    <div v-if="isClient" class="mb-8">
+      <div class="bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-2xl p-8">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-500/20 border border-blue-200/50 dark:border-blue-500/30 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-blue-900 dark:text-blue-100 mb-2">Welcome to Your Reports Dashboard</h1>
+            <p class="text-blue-700 dark:text-blue-300">View and analyze citation performance data for your organization.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Page Header -->
     <div class="mb-8">
       <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">All Reports</h1>
-            <p class="text-gray-600 dark:text-gray-300 text-base">View and manage all your analysis reports</p>
+            <h1 v-if="!isClient" class="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">All Reports</h1>
+            <h1 v-else class="text-3xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">Your Reports</h1>
+            <p v-if="!isClient" class="text-gray-600 dark:text-gray-300 text-base">View and manage all your analysis reports</p>
+            <p v-else class="text-gray-600 dark:text-gray-300 text-base">View your latest citation analysis reports and performance metrics</p>
           </div>
         </div>
       </div>
@@ -18,13 +37,14 @@
         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div class="flex flex-col sm:flex-row gap-4 flex-1">
             <!-- Client Filter -->
-            <div class="min-w-0 flex-1 sm:max-w-xs">
+            <!-- Client Filter - Only shown for super admins -->
+            <div v-if="!isClient" class="min-w-0 flex-1 sm:max-w-xs">
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Filter by Client
               </label>
               <div class="relative">
-                <select 
-                  v-model="selectedClientFilter" 
+                <select
+                  v-model="selectedClientFilter"
                   class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none"
                 >
                   <option value="">All Clients</option>
@@ -38,6 +58,17 @@
                   </svg>
                 </div>
               </div>
+            </div>
+
+            <!-- Client Display - For client users -->
+            <div v-if="isClient && reports.length > 0" class="min-w-0 flex-1">
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Your Client
+              </label>
+              <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-4 py-3 border border-blue-200 dark:border-blue-800/50 rounded-lg font-medium">
+                {{ reports[0]?.client_name || 'Your Client' }}
+              </div>
+            </div>
             </div>
 
             <!-- Status Filter -->
@@ -76,6 +107,7 @@
             </button>
             
             <NuxtLink
+              v-if="!isClient"
               to="/dashboard/analysis"
               class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-4 py-3 font-medium text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out inline-flex items-center"
             >
@@ -201,24 +233,33 @@
           You haven't created any analysis reports yet. Run your first analysis to get started.
         </p>
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <NuxtLink 
-            to="/dashboard/clients" 
-            class="bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-150 ease-out inline-flex items-center justify-center"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-            </svg>
-            Manage Clients
-          </NuxtLink>
-          <NuxtLink 
-            to="/dashboard/analysis" 
-            class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out inline-flex items-center justify-center"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Run First Analysis
-          </NuxtLink>
+          <div v-if="!isClient">
+            <NuxtLink
+              to="/dashboard/clients"
+              class="bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-150 ease-out inline-flex items-center justify-center"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+              Manage Clients
+            </NuxtLink>
+          </div>
+          <div v-if="!isClient">
+            <NuxtLink
+              to="/dashboard/analysis"
+              class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-6 py-3 font-semibold text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out inline-flex items-center justify-center"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              Run First Analysis
+            </NuxtLink>
+          </div>
+          <div v-if="isClient">
+            <p class="text-gray-500 dark:text-gray-400 text-sm italic">
+              Contact your administrator to request new analysis runs.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -229,7 +270,7 @@
 import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth'],
   layout: 'dashboard'
 })
 
@@ -241,6 +282,7 @@ const reports = ref([])
 const loading = ref(true)
 const selectedClientFilter = ref('')
 const selectedStatusFilter = ref('')
+const isClient = ref(false)
 
 // Computed
 const uniqueClients = computed(() => {
@@ -270,21 +312,67 @@ const filteredReports = computed(() => {
   return filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 })
 
+// Check user role and get client assignment if any
+const checkUserRole = async () => {
+  try {
+    if (!user.value) return
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, account_type, client_account_id')
+      .eq('id', user.value.id)
+      .single()
+
+    // Check both role and account_type for backwards compatibility
+    isClient.value = profile?.role === 'client' || profile?.account_type === 'client'
+
+    // If client user, automatically set the client filter
+    if (isClient.value && profile?.client_account_id) {
+      selectedClientFilter.value = profile.client_account_id
+      console.log('Auto-selected client filter:', selectedClientFilter.value)
+    }
+  } catch (error) {
+    console.error('Error checking user role:', error)
+  }
+}
+
 // Methods
 const fetchAllReports = async () => {
   try {
     loading.value = true
 
-    // First, let's try fetching analysis_runs and clients separately to debug
-    const { data: analysisRuns, error: runsError } = await supabase
-      .from('analysis_runs')
-      .select('*')
-      .eq('created_by', user.value.id)
-      .order('created_at', { ascending: false })
+    let analysisRuns = []
 
-    if (runsError) {
-      console.error('Error fetching analysis runs:', runsError)
-      throw runsError
+    if (isClient.value) {
+      // For client users, get reports for their assigned client
+      // Get user profile to check client_account_id
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('client_account_id')
+        .eq('id', user.value.id)
+        .single()
+
+      if (profile?.client_account_id) {
+        console.log('Fetching reports for client ID:', profile.client_account_id)
+
+        const { data: runsData, error: runsError } = await supabase
+          .from('analysis_runs')
+          .select('*')
+          .eq('client_id', profile.client_account_id)
+          .order('created_at', { ascending: false })
+
+        if (runsError) throw runsError
+        analysisRuns = runsData || []
+      }
+    } else {
+      // For super admin users, get all reports
+      const { data: runsData, error: runsError } = await supabase
+        .from('analysis_runs')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (runsError) throw runsError
+      analysisRuns = runsData || []
     }
 
     console.log('Analysis runs fetched:', analysisRuns?.length || 0)
@@ -366,6 +454,7 @@ const formatDate = (dateString) => {
 }
 
 onMounted(async () => {
+  await checkUserRole()
   await fetchAllReports()
 })
 </script>

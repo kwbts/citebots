@@ -398,7 +398,7 @@ import { useAIEnhancement } from '~/composables/useAIEnhancement'
 import TagInput from '~/components/TagInput.vue'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

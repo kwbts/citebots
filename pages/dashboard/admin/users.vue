@@ -148,7 +148,7 @@
 
 <script setup>
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

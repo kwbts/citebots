@@ -210,7 +210,7 @@ import { onMounted, ref, computed } from 'vue'
 
 // Apply auth middleware and dashboard layout
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

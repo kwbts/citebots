@@ -319,6 +319,6 @@ onMounted(() => {
 // Define page metadata
 definePageMeta({
   layout: 'dashboard',
-  middleware: 'auth'
+  middleware: ['auth', 'client-access']
 })
 </script>

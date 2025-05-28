@@ -280,7 +280,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { navigateTo } from '#app'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

@@ -96,7 +96,7 @@ import { navigateTo } from '#app'
 import { useAIEnhancement } from '~/composables/useAIEnhancement'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

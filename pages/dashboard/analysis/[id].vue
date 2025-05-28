@@ -301,7 +301,7 @@ import QueueProgress from '~/components/analysis/QueueProgress.vue'
 
 // Ensure dashboard layout is used
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 
