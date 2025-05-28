@@ -316,14 +316,24 @@ const checkUserRole = async () => {
   try {
     if (!user.value) return
 
-    const { data: profile } = await supabase
+    console.log('Checking user role for ID:', user.value.id)
+
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role, account_type, client_account_id')
       .eq('id', user.value.id)
       .single()
 
+    if (profileError) {
+      console.error('Error fetching profile:', profileError)
+      return
+    }
+
+    console.log('User profile:', profile)
+
     // Check both role and account_type for backwards compatibility
     isClient.value = profile?.role === 'client' || profile?.account_type === 'client'
+    console.log('Is client user:', isClient.value)
 
     // If client user, automatically set the client filter
     if (isClient.value && profile?.client_account_id) {
@@ -339,17 +349,26 @@ const checkUserRole = async () => {
 const fetchAllReports = async () => {
   try {
     loading.value = true
+    console.log('Fetching reports, isClient:', isClient.value)
 
     let analysisRuns = []
 
     if (isClient.value) {
       // For client users, get reports for their assigned client
+      console.log('Client user detected, fetching client-specific reports')
+
       // Get user profile to check client_account_id
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('client_account_id')
         .eq('id', user.value.id)
         .single()
+
+      if (profileError) {
+        console.error('Error fetching profile for client_account_id:', profileError)
+      }
+
+      console.log('Client user profile for reports:', profile)
 
       if (profile?.client_account_id) {
         console.log('Fetching reports for client ID:', profile.client_account_id)
@@ -360,17 +379,31 @@ const fetchAllReports = async () => {
           .eq('client_id', profile.client_account_id)
           .order('created_at', { ascending: false })
 
-        if (runsError) throw runsError
+        if (runsError) {
+          console.error('Error fetching client reports:', runsError)
+          throw runsError
+        }
+
+        console.log('Client reports fetched:', runsData?.length || 0)
         analysisRuns = runsData || []
+      } else {
+        console.warn('Client user has no client_account_id assigned!')
       }
     } else {
       // For super admin users, get all reports
+      console.log('Admin user detected, fetching all reports')
+
       const { data: runsData, error: runsError } = await supabase
         .from('analysis_runs')
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (runsError) throw runsError
+      if (runsError) {
+        console.error('Error fetching all reports:', runsError)
+        throw runsError
+      }
+
+      console.log('All reports fetched:', runsData?.length || 0)
       analysisRuns = runsData || []
     }
 
