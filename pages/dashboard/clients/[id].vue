@@ -344,7 +344,7 @@ const deleteClient = async () => {
     // Navigate back to manage page after successful deletion
     navigateTo('/dashboard/clients/manage')
   } catch (err) {
-    console.error('Error deleting client:', err)
+    // Error handling for client deletion
     alert(`Error deleting client: ${err.message}`)
   }
 }

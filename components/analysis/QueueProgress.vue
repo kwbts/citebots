@@ -207,7 +207,7 @@ async function fetchStatus() {
           progress_percentage: queueItems.length > 0 ? (completed / queueItems.length) * 100 : 0
         }
       } else {
-        console.warn('Failed to fetch queue items for analysis run:', props.analysisRunId, queueItemsError)
+        // Failed to fetch queue items
       }
 
       // Check for stuck items - if we haven't seen progress in 30 seconds and still have pending items
@@ -222,7 +222,7 @@ async function fetchStatus() {
           .eq('status', 'pending');
 
         if (pendingCount > 0) {
-          console.log(`Detected ${pendingCount} pending items with no progress for 30+ seconds, triggering more workers`);
+          // Detected stuck queue items, triggering more workers
           // Trigger additional workers to process remaining items
           for (let i = 0; i < 2; i++) {
             fetch(`${config.public.supabase.url}/functions/v1/process-queue-worker`, {
@@ -232,7 +232,7 @@ async function fetchStatus() {
                 'Authorization': `Bearer ${session.value?.access_token}`
               },
               body: JSON.stringify({ batch_size: 10 })
-            }).catch(err => console.error('Error triggering additional worker:', err));
+            }).catch(err => { /* Silent error handling */ });
           }
         }
       }
@@ -248,12 +248,12 @@ async function fetchStatus() {
     const elapsedTime = (currentTime - startTime.value) / 1000
     if (elapsedTime > 30 && runData.queries_completed > 0 && !hasEmittedProgress.value) {
       hasEmittedProgress.value = true
-      console.log('Emitting partial progress completion')
+      // Emit partial progress completion event
       emit('complete', runData)
     }
 
   } catch (error) {
-    console.error('Error fetching status:', error)
+    // Error handling for status fetch
   }
 }
 
@@ -301,7 +301,7 @@ async function retryFailed() {
     }
 
     await Promise.all(workerPromises);
-    console.log('Multiple queue workers triggered for retry');
+    // Multiple queue workers triggered for retry
 
     // Schedule a follow-up check after 30 seconds to trigger more workers if needed
     setTimeout(async () => {
@@ -312,7 +312,7 @@ async function retryFailed() {
         .eq('status', 'pending');
 
       if (pendingCount > 0) {
-        console.log(`Still have ${pendingCount} pending items, triggering more workers`);
+        // Still have pending items, triggering more workers
         fetch(`${config.public.supabase.url}/functions/v1/process-queue-worker`, {
           method: 'POST',
           headers: {
@@ -328,7 +328,7 @@ async function retryFailed() {
     startPolling()
 
   } catch (error) {
-    console.error('Error retrying failed queries:', error)
+    // Error handling for retry operation
   }
 }
 

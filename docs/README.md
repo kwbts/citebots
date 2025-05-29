@@ -10,6 +10,10 @@ Welcome to the Citebots documentation. This directory contains comprehensive doc
 - [Authentication & Security](/docs/architecture/auth-and-security.md) - Security patterns and auth flow
 - [System Design](/docs/architecture/system-design.md) - Overall system architecture
 - [Multi-tenant Philosophy](/docs/architecture/multi-tenant-philosophy.md) - Future multi-tenancy approach
+- [Multi-tenancy Performance Guidelines](/docs/architecture/multi-tenancy-performance-guidelines.md) - RLS policy best practices
+
+### Incidents
+- [RLS Policy Cascade (May 28, 2025)](/docs/incidents/rls-policy-cascade-incident-2025-05-28.md) - Database resource exhaustion incident
 
 ### API Reference
 - [Edge Functions](/docs/api/edge-functions.md) - Complete edge function API documentation
@@ -54,27 +58,31 @@ Welcome to the Citebots documentation. This directory contains comprehensive doc
 ### Archive
 - [MVP Sprint Docs](/docs/archive/mvp-sprint/) - Historical MVP development documentation
 
-## 🚀 Latest Updates (January 18, 2025)
+## 🚀 Latest Updates (May 28, 2025)
 
-### Documentation Updates
-- ✅ Created comprehensive edge function API documentation
-- ✅ Added Supabase CLI development guide
-- ✅ Documented current architecture and data model
-- ✅ Created quick reference guide for developers
-- ✅ Updated authentication and security documentation
-- ✅ Archived outdated MVP sprint documentation
+### Critical Incident Resolution
+- ✅ Fixed RLS policy cascade incident causing database resource exhaustion
+- ✅ Implemented direct client_id column on page_analyses table
+- ✅ Replaced complex multi-table JOIN RLS policies with simple direct lookups
+- ✅ Restored frontend queries with optimized RLS approach
+- ✅ Documented incident root cause and mitigation in new incidents folder
 
-### System Improvements
-- ✅ Fixed page analysis data flow
-- ✅ Enhanced edge function error handling
-- ✅ Added defensive programming patterns
-- ✅ Resolved citation processing issues
+### Performance Improvements
+- ✅ Added proper indexes for RLS policies
+- ✅ Established guidelines for future RLS policy development
+- ✅ Reduced query complexity in key dashboard pages
+- ✅ Removed console.log statements from frontend code
 
-### Fixes Applied Today
+### Multi-Tenant Architecture
+- Created performance-focused multi-tenant RLS strategy
+- Implemented efficient client data access patterns
+- Added database resource monitoring recommendations
+
+### Previous Updates (January 18, 2025)
 - Added `associated_pages` column to store page analysis results
 - Fixed edge function API key configuration
 - Enhanced error handling in all edge functions
-- Cleaned up test files and backups
+- Documented architecture and development workflows
 
 ## 📖 Quick Start
 
@@ -117,19 +125,21 @@ Documentation should be updated when:
 docs/
 ├── api/                    # API documentation
 ├── architecture/           # System architecture
-├── deployment/            # Deployment guides
-├── development/           # Development guides
-├── features/              # Feature documentation
-├── integrations/          # External integrations
-├── project/               # Project overview
-├── user-docs/             # User guides
-├── validation/            # Validation milestones
-├── workflows/             # User workflows
-├── changelog/             # Version history
-└── archive/               # Historical docs
-    └── mvp-sprint/        # MVP sprint docs
+├── deployment/             # Deployment guides
+├── development/            # Development guides
+├── features/               # Feature documentation
+├── incidents/              # Incident reports and postmortems
+├── integrations/           # External integrations
+├── fixes/                  # Bug fix documentation
+├── project/                # Project overview
+├── user-docs/              # User guides
+├── validation/             # Validation milestones
+├── workflows/              # User workflows
+├── changelog/              # Version history
+└── archive/                # Historical docs
+    └── mvp-sprint/         # MVP sprint docs
 ```
 
 ---
 
-Last updated: January 18, 2025
+Last updated: May 28, 2025

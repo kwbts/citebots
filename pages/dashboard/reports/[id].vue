@@ -127,8 +127,6 @@ const fetchReportData = async () => {
       .eq('id', user.value?.id)
       .single()
 
-    console.log('User profile for report access:', userProfile.data)
-
     // Check if user is super admin
     const isSuperAdmin = userProfile.data?.role === 'super_admin' || userProfile.data?.account_type === 'super_admin'
 
@@ -138,8 +136,6 @@ const fetchReportData = async () => {
     // Check if user is a client user assigned to this client
     const isAssignedClient = (userProfile.data?.role === 'client' || userProfile.data?.account_type === 'client') &&
                              userProfile.data?.client_account_id === clientData.id
-
-    console.log('Access checks:', { isSuperAdmin, isOwner, isAssignedClient, clientId: clientData.id })
 
     if (!isSuperAdmin && !isOwner && !isAssignedClient) {
       throw new Error('Access denied: You do not have permission to view this report')
@@ -153,50 +149,32 @@ const fetchReportData = async () => {
       .select('*')
       .eq('client_id', clientData.id)
     
-    if (competitorError) {
-      console.warn('Error fetching competitors:', competitorError)
-      competitors.value = []
-    } else {
-      competitors.value = competitorData || []
-    }
+    // Handle competitor data
+    competitors.value = competitorError ? [] : (competitorData || [])
     
-    // Get analysis queries first
+    // Get analysis queries
     const { data: queriesData, error: queriesError } = await supabase
       .from('analysis_queries')
       .select('*')
       .eq('analysis_run_id', analysisRunId)
 
-    if (queriesError) {
-      console.warn('Error fetching queries:', queriesError)
-    }
+    // Get page analyses for this run
+    const { data: pagesData, error: pagesError } = await supabase
+      .from('page_analyses')
+      .select('*')
+      .in('query_id', queriesData.map(q => q.id))
 
-    // EMERGENCY: Skip page analyses due to resource exhaustion
-    // TODO: Re-enable once RLS is properly fixed
-    let pagesData = []
-    console.log('Skipping page_analyses due to Supabase resource exhaustion')
-
-    const queriesResult = { data: queriesData, error: queriesError }
-    const pagesResult = { data: pagesData, error: null }
-    
-    if (queriesResult.error) {
-      console.warn('Error fetching queries:', queriesResult.error)
-    }
-    
-    if (pagesResult.error) {
-      console.warn('Error fetching pages:', pagesResult.error)
-    }
-    
     // Compile report data
     reportData.value = {
       analysis_run: analysisRunData,
-      analysis_queries: queriesResult.data || [],
-      page_analyses: pagesResult.data || [],
+      analysis_queries: queriesData || [],
+      page_analyses: pagesData || [],
       client: clientData,
       competitors: competitors.value
     }
     
   } catch (err) {
-    console.error('Error fetching report data:', err)
+    // Set error message for user display
     error.value = err.message || 'Failed to load report data'
   } finally {
     loading.value = false

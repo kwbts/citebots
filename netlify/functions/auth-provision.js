@@ -49,6 +49,15 @@ exports.handler = async (event) => {
       }
     }
 
+    // Validate environment variables
+    if (!process.env.NUXT_PUBLIC_SUPABASE_URL) {
+      throw new Error('Missing NUXT_PUBLIC_SUPABASE_URL environment variable')
+    }
+
+    if (!process.env.SUPABASE_SERVICE_KEY) {
+      throw new Error('Missing SUPABASE_SERVICE_KEY environment variable')
+    }
+
     // Create Supabase admin client
     const supabaseAdmin = createClient(
       process.env.NUXT_PUBLIC_SUPABASE_URL,

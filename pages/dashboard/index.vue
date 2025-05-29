@@ -172,6 +172,28 @@ definePageMeta({
 const client = useSupabaseClient()
 const user = useSupabaseUser()
 
+// Check user role and redirect if client
+const checkUserRole = async () => {
+  try {
+    if (!user.value) return
+
+    const { data: profile } = await client
+      .from('profiles')
+      .select('role, account_type')
+      .eq('id', user.value.id)
+      .single()
+
+    // If user is client role, redirect to reports page
+    if (profile && (profile.role === 'client' || profile.account_type === 'client')) {
+      // Client user detected, redirecting to reports page
+      await navigateTo('/dashboard/reports')
+      return
+    }
+  } catch (error) {
+    // Error handling for user role check
+  }
+}
+
 // Reactive data
 const clientsCount = ref(0)
 const totalReportsCount = ref(0)
@@ -271,11 +293,12 @@ const fetchDashboardData = async () => {
     }
 
   } catch (error) {
-    console.error('Error fetching dashboard data:', error)
+    // Error handling for dashboard data fetch
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await checkUserRole()
   fetchDashboardData()
 })
 </script>

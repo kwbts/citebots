@@ -350,13 +350,13 @@ const fetchAnalysisData = async () => {
     
     client.value = clientData
     
-    // EMERGENCY: Skip page_analyses JOIN due to resource exhaustion
-    // TODO: Re-enable once RLS is properly fixed
+    // Get analysis queries with page_analyses
     const { data: queryData, error: queryError } = await supabase
       .from('analysis_queries')
       .select(`
         *,
-        associated_pages
+        associated_pages,
+        page_analyses(*)
       `)
       .eq('analysis_run_id', route.params.id)
       .order('created_at')
@@ -407,7 +407,6 @@ const formatDate = (dateString) => {
 
 // Refresh analysis data after queue completion
 const refreshAnalysisData = () => {
-  console.log('Refreshing analysis data after queue completion')
   // Allow a small delay before fetching to ensure all database writes have completed
   setTimeout(() => {
     fetchAnalysisData()

@@ -1,79 +1,69 @@
 {
-  "id": "0660dbc9-a5e2-43fd-ae1c-ed0e2ef07a11",
-  "analysis_run_id": "431fd23d-d38c-4581-b2d0-e8f67475ed77",
-  "query_id": "q_a903c2b5dae34d96962390812726c572",
-  "query_text": "Are there any scalable email creation tools that don't require any coding knowledge?",
-  "query_keyword": "No Code Email",
-  "query_category": "product",
-  "query_topic": "email tools",
+  "id": "3bb94cc5-ad49-43f0-b366-fccc60cf79e6",
+  "analysis_run_id": "f306798d-a2fc-4acf-af0f-beb52957ff06",
+  "query_id": "q_963dfe5062124f25b30318e81ed75027",
+  "query_text": "What are some alternatives to Knak for email marketing?",
+  "query_keyword": "Knak Alternatives",
+  "query_category": "comparison",
+  "query_topic": "email marketing",
   "query_type": "informational",
-  "query_intent": "recommendation_request",
+  "query_intent": "informational",
   "funnel_stage": "consideration",
   "query_complexity": "moderate",
-  "data_source": "perplexity",
-  "model_response": "Yes, there are several scalable email creation tools that do not require any coding knowledge. These platforms are designed to make building professional, responsive emails accessible to marketers, business owners, and non-technical users.\n\n## No-Code Email Creation Tools Overview\n\n**Bubble.io**\n- **Type:** Visual no-code platform\n- **Features:** Allows users to build custom email marketing tools with drag-and-drop interfaces. Offers customizable email templates, automated sequences, and detailed analytics. Suitable for those wanting to create bespoke solutions without writing code.\n- **Scalability:** Can be used to build complex, scalable workflows and integrations.\n\n**Beefree**\n- **Type:** Drag-and-drop HTML email builder\n- **Features:** Enables quick creation of responsive emails. Integrates with major email service providers (ESPs). Free to use for basic needs[1].\n- **Scalability:** Suitable for small to medium teams; integrates with larger marketing platforms for scaling needs.\n\n**Stripo**\n- **Type:** Dedicated email template builder\n- **Features:** Offers over 1,500 ready-made templates, AMP for Email support, AI content improvement, and robust customization. Integrates with 70+ ESPs, including ActiveCampaign and Brevo[2][5].\n- **Scalability:** Used by businesses of all sizes, with flexible pricing and enterprise features.\n\n**Knak**\n- **Type:** No-code email and landing page builder\n- **Features:** Designed for marketing teams in enterprises. Provides codeless campaign creation with advanced collaboration features[3].\n- **Scalability:** Focused on large teams and enterprise-level scalability.\n\n**MailModo**\n- **Type:** No-code, drag-and-drop builder\n- **Features:** Supports AMP and HTML emails, customer journey mapping, and in-email interactivity (quizzes, coupons, calculators). Content personalization and detailed instructions for easy use[5].\n- **Scalability:** Suitable for growing businesses, with robust automation and analytics.\n\n**Other Notable Tools**\n- **HubSpot, Mailchimp, Mailjet, Unlayer, Designmodo:** All offer no-code email builders with drag-and-drop editors, template libraries, and integrations for scaling up campaigns[4][5].\n  - **HubSpot:** Advanced automation, CRM integration, and analytics.\n  - **Mailchimp:** User-friendly, widely used for campaigns and automation.\n  - **Mailjet:** API integrations and marketing automation.\n  - **Unlayer & Designmodo:** Focus on design flexibility and ease of use.\n\n## Comparison Table\n\n| Tool         | No-Code Editor | Scalability       | Key Features                          | Integrations     |\n|--------------|----------------|-------------------|---------------------------------------|------------------|\n| Bubble.io    | Yes            | High (custom)     | Custom workflows, analytics           | Many (custom)    |\n| Beefree      | Yes            | Medium            | Drag-and-drop, responsive emails      | Major ESPs       |\n| Stripo       | Yes            | High              | 1,500+ templates, AMP, AI             | 70+ ESPs         |\n| Knak         | Yes            | Enterprise        | Campaign creation, collaboration      | Enterprise tools |\n| MailModo     | Yes            | High              | AMP, interactivity, journey mapping   | Many ESPs        |\n| HubSpot      | Yes            | High              | Automation, CRM, analytics            | Wide range       |\n| Mailchimp    | Yes            | High              | Campaigns, automation                 | Wide range       |\n| Mailjet      | Yes            | High              | API, automation                       | Wide range       |\n\n## Summary\n\nYou can confidently choose from a variety of scalable, no-code email creation tools that do not require any coding knowledge. These platforms provide advanced features such as drag-and-drop editors, responsive templates, automation, and integration with major marketing platforms, making them suitable for businesses of all sizes[2][5].",
-  "citation_count": 5,
+  "data_source": "chatgpt",
+  "model_response": "Knak is a platform that provides tools for creating email and landing page designs without the need for coding. If you're looking for alternatives, here are a few other email marketing software options that you might consider:\n\n1. Mailchimp: Mailchimp is one of the most popular email marketing services. It offers a drag-and-drop email builder, autoresponders, segmenting contacts into groups, and simple tracking for analytics. It also allows you to setup delivery times based on user's timezones, and setup segmenting based on geolocation[1].\n   \n2. Constant Contact: This platform offers a wide range of responsive templates for your emails, with the option to customize or even build your own. It also provides real-time tracking tools, free image library, list segmentation, social media sharing tools, and a community support forum[2].\n\n3. SendinBlue: SendinBlue provides a comprehensive suite of email marketing tools including SMS messages, landing pages, sign up forms, CRM, and more. It also offers a free plan which is quite generous compared to others in the market[3].\n\n4. GetResponse: GetResponse is an email marketing platform that offers a suite of email marketing features such as a drag-and-drop editor, A/B testing, autoresponders, segmentation, and comprehensive analytics[4].\n\n5. ActiveCampaign: ActiveCampaign comes with a beautiful email template editor and mobile friendly signup forms. It allows you to segment contacts based on their actions, location, behavior, and social data. It can also fetch additional data about your contacts using only their email address[5].\n\n6. HubSpot Email Marketing: HubSpot’s email tool allows you to create and personalize emails without needing a designer or IT. It has a variety of ready-to-use email templates, but you can also create your own from scratch without any coding knowledge[6].\n\nPlease note that it's important to consider your specific needs and budget when choosing an email marketing platform.\n\nSources:\n1. https://mailchimp.com/\n2. https://www.constantcontact.com/\n3. https://www.sendinblue.com/\n4. https://www.getresponse.com/\n5. https://www.activecampaign.com/\n6. https://www.hubspot.com/products/marketing/email",
+  "citation_count": 6,
   "brand_mentioned": true,
-  "brand_sentiment": 0.8,
-  "competitor_mentioned_names": [
-    "Brevo"
-  ],
-  "competitor_count": 1,
-  "associated_pages_count": 5,
+  "brand_sentiment": 0.5,
+  "competitor_mentioned_names": [],
+  "competitor_count": 0,
+  "associated_pages_count": 6,
   "response_match": "direct",
   "response_outcome": "recommendation",
-  "brand_mention_type": "citation",
+  "brand_mention_type": "featured",
   "competitor_context": "none",
   "action_orientation": "medium",
-  "query_competition": "moderate",
+  "query_competition": "high",
   "status": "completed",
-  "created_at": "2025-05-22T22:57:24.689706+00:00",
-  "completed_at": "2025-05-22T22:57:37.721+00:00",
+  "created_at": "2025-05-27T14:44:39.185357+00:00",
+  "completed_at": "2025-05-27T14:45:05.096+00:00",
   "error_message": null,
-  "brand_mention_count": 2,
+  "brand_mention_count": 1,
   "competitor_analysis": {
-    "competitor_names": [
-      "Brevo"
-    ],
-    "brand_mention_type": "citation",
-    "brand_mention_count": 2,
-    "competitive_landscape": "competitive",
-    "competitors_mentioned": [
-      {
-        "name": "Brevo",
-        "type": "mentioned",
-        "mentions": 1
-      }
-    ],
-    "total_competitor_mentions": 1
+    "competitor_names": [],
+    "brand_mention_type": "featured",
+    "brand_mention_count": 1,
+    "competitive_landscape": "uncontested",
+    "competitors_mentioned": [],
+    "total_competitor_mentions": 0
   },
   "brand_positioning": "none",
-  "total_competitor_mentions": 1,
+  "total_competitor_mentions": 0,
   "associated_pages": [
     {
-      "id": "987d5fba-cbad-4ef5-9519-f9cd0f207abf",
-      "query_id": "0660dbc9-a5e2-43fd-ae1c-ed0e2ef07a11",
-      "created_at": "2025-05-22T22:57:39.451967+00:00",
-      "page_title": "Page at beefree.io",
-      "query_text": "Are there any scalable email creation tools that don't require any coding knowledge?",
+      "id": "5207ee10-10c8-48e2-a94c-6c11194fcc4f",
+      "query_id": "3bb94cc5-ad49-43f0-b366-fccc60cf79e6",
+      "created_at": "2025-05-27T14:45:07.618+00:00",
+      "page_title": "Marketing, Automation &amp; Email Platform | Mailchimp",
+      "query_text": "What are some alternatives to Knak for email marketing?",
       "crawl_error": null,
-      "domain_name": "beefree.io",
+      "domain_name": "mailchimp.com",
       "on_page_seo": {
         "has_table": false,
-        "page_title": "Page at beefree.io",
-        "word_count": 0,
-        "image_count": 0,
-        "content_type": "Unknown",
-        "folder_depth": 1,
-        "heading_count": 0,
+        "page_title": "Marketing, Automation &amp; Email Platform | Mailchimp",
+        "word_count": 58791,
+        "image_count": 70,
+        "content_type": "Article",
+        "folder_depth": 0,
+        "heading_count": 71,
         "keyword_match": [
-          "No Code Email"
+          "Knak Alternatives"
         ],
         "video_present": false,
         "has_table_count": 0,
         "authorship_clear": false,
         "has_ordered_list": false,
-        "meta_description": "",
+        "meta_description": "Use real-time behavior data and AI to convert more customers with Mailchimp&#039;s marketing, automation &amp; email marketing platform. Easy to use - start for free!",
         "has_unordered_list": false,
         "heading_count_type": {
           "h1": 0,
@@ -83,11 +73,11 @@
           "h5": 0,
           "h6": 0
         },
-        "internal_link_count": 0,
+        "internal_link_count": 247,
         "has_ordered_list_count": 0,
         "has_unordered_list_count": 0
       },
-      "citation_url": "https://beefree.io",
+      "citation_url": "https://mailchimp.com/",
       "mention_type": [
         "citation"
       ],
@@ -105,12 +95,12 @@
         "call_to_action_strength": "none",
         "user_experience_quality": "average"
       },
-      "query_keyword": "No Code Email",
+      "query_keyword": "Knak Alternatives",
       "technical_seo": {
         "is_valid": true,
         "cdn_usage": false,
         "date_created": null,
-        "is_crawlable": false,
+        "is_crawlable": true,
         "schema_types": [],
         "date_modified": null,
         "mobile_friendly": true,
@@ -122,9 +112,9 @@
         "html_structure_score": 3,
         "schema_markup_present": false,
         "social_graphs_present": false,
-        "meta_description_present": false
+        "meta_description_present": true
       },
-      "analysis_notes": "Default analysis used due to crawl or AI error",
+      "analysis_notes": "Analysis completed",
       "brand_in_title": false,
       "brand_mentioned": false,
       "content_quality": {
@@ -148,7 +138,7 @@
       "competitor_names": [],
       "domain_authority": {
         "spam_score": 2,
-        "domain_name": "beefree.io",
+        "domain_name": "mailchimp.com",
         "backlink_count": 100,
         "page_authority": 20,
         "link_propensity": 0.5,
@@ -156,7 +146,7 @@
         "referring_domains": 50
       },
       "is_client_domain": false,
-      "page_analysis_id": "beefree_io_1747954659416",
+      "page_analysis_id": "mailchimp_com_1748357105324",
       "page_performance": {
         "page_speed_score": 50,
         "totalBlockingTime": 100,
@@ -174,24 +164,22 @@
       "content_quality_score": 3
     },
     {
-      "id": "bd48ea6d-f6d8-4a5b-b7f7-0d8572a0d967",
-      "query_id": "0660dbc9-a5e2-43fd-ae1c-ed0e2ef07a11",
-      "created_at": "2025-05-22T22:57:39.14991+00:00",
-      "page_title": "Page at www.emailtooltester.com",
-      "query_text": "Are there any scalable email creation tools that don't require any coding knowledge?",
-      "crawl_error": null,
-      "domain_name": "www.emailtooltester.com",
+      "id": "1658b70f-24be-438b-8a31-5243ea82ff67",
+      "query_id": "3bb94cc5-ad49-43f0-b366-fccc60cf79e6",
+      "created_at": "2025-05-27T14:45:15.425+00:00",
+      "page_title": "Page at www.constantcontact.com",
+      "query_text": "What are some alternatives to Knak for email marketing?",
+      "crawl_error": "ScrapingBee error: 500 INTERNAL SERVER ERROR",
+      "domain_name": "www.constantcontact.com",
       "on_page_seo": {
         "has_table": false,
-        "page_title": "Page at www.emailtooltester.com",
+        "page_title": "Page at www.constantcontact.com",
         "word_count": 0,
         "image_count": 0,
         "content_type": "Unknown",
-        "folder_depth": 1,
+        "folder_depth": 0,
         "heading_count": 0,
-        "keyword_match": [
-          "No Code Email"
-        ],
+        "keyword_match": [],
         "video_present": false,
         "has_table_count": 0,
         "authorship_clear": false,
@@ -210,7 +198,7 @@
         "has_ordered_list_count": 0,
         "has_unordered_list_count": 0
       },
-      "citation_url": "https://www.emailtooltester.com/en/blog/email-template-builders/",
+      "citation_url": "https://www.constantcontact.com/",
       "mention_type": [
         "citation"
       ],
@@ -228,7 +216,7 @@
         "call_to_action_strength": "none",
         "user_experience_quality": "average"
       },
-      "query_keyword": "No Code Email",
+      "query_keyword": "Knak Alternatives",
       "technical_seo": {
         "is_valid": true,
         "cdn_usage": false,
@@ -271,7 +259,7 @@
       "competitor_names": [],
       "domain_authority": {
         "spam_score": 2,
-        "domain_name": "www.emailtooltester.com",
+        "domain_name": "www.constantcontact.com",
         "backlink_count": 100,
         "page_authority": 20,
         "link_propensity": 0.5,
@@ -279,7 +267,7 @@
         "referring_domains": 50
       },
       "is_client_domain": false,
-      "page_analysis_id": "www_emailtooltester_com_1747954659108",
+      "page_analysis_id": "www_constantcontact_com_1748357108716",
       "page_performance": {
         "page_speed_score": 50,
         "totalBlockingTime": 100,
@@ -297,29 +285,29 @@
       "content_quality_score": 3
     },
     {
-      "id": "4049f58f-e608-472b-9502-35c50ef1ab35",
-      "query_id": "0660dbc9-a5e2-43fd-ae1c-ed0e2ef07a11",
-      "created_at": "2025-05-22T22:57:39.111861+00:00",
-      "page_title": "Page at knak.com",
-      "query_text": "Are there any scalable email creation tools that don't require any coding knowledge?",
+      "id": "e7632d52-a726-4b8c-a970-1a7cadda136a",
+      "query_id": "3bb94cc5-ad49-43f0-b366-fccc60cf79e6",
+      "created_at": "2025-05-27T14:45:21.978+00:00",
+      "page_title": "Brevo | Email Marketing Software, Automation &amp; CRM",
+      "query_text": "What are some alternatives to Knak for email marketing?",
       "crawl_error": null,
-      "domain_name": "knak.com",
+      "domain_name": "www.sendinblue.com",
       "on_page_seo": {
         "has_table": false,
-        "page_title": "Page at knak.com",
-        "word_count": 0,
-        "image_count": 0,
-        "content_type": "Unknown",
-        "folder_depth": 1,
-        "heading_count": 0,
+        "page_title": "Brevo | Email Marketing Software, Automation &amp; CRM",
+        "word_count": 36268,
+        "image_count": 91,
+        "content_type": "Article",
+        "folder_depth": 0,
+        "heading_count": 21,
         "keyword_match": [
-          "No Code Email"
+          "Knak Alternatives"
         ],
         "video_present": false,
         "has_table_count": 0,
         "authorship_clear": false,
         "has_ordered_list": false,
-        "meta_description": "",
+        "meta_description": "Grow your business with Brevo, the Email Marketing Platform that goes beyond emails with SMS, chat, and more.",
         "has_unordered_list": false,
         "heading_count_type": {
           "h1": 0,
@@ -333,7 +321,7 @@
         "has_ordered_list_count": 0,
         "has_unordered_list_count": 0
       },
-      "citation_url": "https://knak.com",
+      "citation_url": "https://www.sendinblue.com/",
       "mention_type": [
         "citation"
       ],
@@ -351,12 +339,12 @@
         "call_to_action_strength": "none",
         "user_experience_quality": "average"
       },
-      "query_keyword": "No Code Email",
+      "query_keyword": "Knak Alternatives",
       "technical_seo": {
         "is_valid": true,
         "cdn_usage": false,
         "date_created": null,
-        "is_crawlable": false,
+        "is_crawlable": true,
         "schema_types": [],
         "date_modified": null,
         "mobile_friendly": true,
@@ -368,11 +356,11 @@
         "html_structure_score": 3,
         "schema_markup_present": false,
         "social_graphs_present": false,
-        "meta_description_present": false
+        "meta_description_present": true
       },
-      "analysis_notes": "Default analysis used due to crawl or AI error",
-      "brand_in_title": true,
-      "brand_mentioned": true,
+      "analysis_notes": "Analysis completed",
+      "brand_in_title": false,
+      "brand_mentioned": false,
       "content_quality": {
         "eeat_score": 3,
         "has_quotes": false,
@@ -394,15 +382,15 @@
       "competitor_names": [],
       "domain_authority": {
         "spam_score": 2,
-        "domain_name": "knak.com",
+        "domain_name": "www.sendinblue.com",
         "backlink_count": 100,
         "page_authority": 20,
         "link_propensity": 0.5,
         "domain_authority": 30,
         "referring_domains": 50
       },
-      "is_client_domain": true,
-      "page_analysis_id": "knak_com_1747954659069",
+      "is_client_domain": false,
+      "page_analysis_id": "www_sendinblue_com_1748357116589",
       "page_performance": {
         "page_speed_score": 50,
         "totalBlockingTime": 100,
@@ -420,29 +408,29 @@
       "content_quality_score": 3
     },
     {
-      "id": "66222b86-0076-4d61-9305-006aa6331757",
-      "query_id": "0660dbc9-a5e2-43fd-ae1c-ed0e2ef07a11",
-      "created_at": "2025-05-22T22:57:39.200551+00:00",
-      "page_title": "Page at selzy.com",
-      "query_text": "Are there any scalable email creation tools that don't require any coding knowledge?",
+      "id": "eb585413-d601-4217-a9aa-7a3752b2c82b",
+      "query_id": "3bb94cc5-ad49-43f0-b366-fccc60cf79e6",
+      "created_at": "2025-05-27T14:45:24.43+00:00",
+      "page_title": "Automation, Landing Pages and Email Marketing Platform",
+      "query_text": "What are some alternatives to Knak for email marketing?",
       "crawl_error": null,
-      "domain_name": "selzy.com",
+      "domain_name": "www.getresponse.com",
       "on_page_seo": {
         "has_table": false,
-        "page_title": "Page at selzy.com",
-        "word_count": 0,
-        "image_count": 0,
-        "content_type": "Unknown",
-        "folder_depth": 1,
-        "heading_count": 0,
+        "page_title": "Automation, Landing Pages and Email Marketing Platform",
+        "word_count": 22698,
+        "image_count": 21,
+        "content_type": "Article",
+        "folder_depth": 0,
+        "heading_count": 23,
         "keyword_match": [
-          "No Code Email"
+          "Knak Alternatives"
         ],
         "video_present": false,
         "has_table_count": 0,
         "authorship_clear": false,
         "has_ordered_list": false,
-        "meta_description": "",
+        "meta_description": "Unlock your revenue potential with GetResponse&#x27;s marketing software. Automate sales, track revenue, and convert leads into loyal customers with ease.",
         "has_unordered_list": false,
         "heading_count_type": {
           "h1": 0,
@@ -452,11 +440,11 @@
           "h5": 0,
           "h6": 0
         },
-        "internal_link_count": 0,
+        "internal_link_count": 95,
         "has_ordered_list_count": 0,
         "has_unordered_list_count": 0
       },
-      "citation_url": "https://selzy.com/en/blog/best-no-code-email-builders/",
+      "citation_url": "https://www.getresponse.com/",
       "mention_type": [
         "citation"
       ],
@@ -474,12 +462,12 @@
         "call_to_action_strength": "none",
         "user_experience_quality": "average"
       },
-      "query_keyword": "No Code Email",
+      "query_keyword": "Knak Alternatives",
       "technical_seo": {
         "is_valid": true,
         "cdn_usage": false,
         "date_created": null,
-        "is_crawlable": false,
+        "is_crawlable": true,
         "schema_types": [],
         "date_modified": null,
         "mobile_friendly": true,
@@ -491,9 +479,9 @@
         "html_structure_score": 3,
         "schema_markup_present": false,
         "social_graphs_present": false,
-        "meta_description_present": false
+        "meta_description_present": true
       },
-      "analysis_notes": "Default analysis used due to crawl or AI error",
+      "analysis_notes": "Analysis completed",
       "brand_in_title": false,
       "brand_mentioned": false,
       "content_quality": {
@@ -517,7 +505,7 @@
       "competitor_names": [],
       "domain_authority": {
         "spam_score": 2,
-        "domain_name": "selzy.com",
+        "domain_name": "www.getresponse.com",
         "backlink_count": 100,
         "page_authority": 20,
         "link_propensity": 0.5,
@@ -525,7 +513,7 @@
         "referring_domains": 50
       },
       "is_client_domain": false,
-      "page_analysis_id": "selzy_com_1747954659164",
+      "page_analysis_id": "www_getresponse_com_1748357123120",
       "page_performance": {
         "page_speed_score": 50,
         "totalBlockingTime": 100,
@@ -543,29 +531,29 @@
       "content_quality_score": 3
     },
     {
-      "id": "545f5ed6-0e00-463f-bc50-cdcd3905d244",
-      "query_id": "0660dbc9-a5e2-43fd-ae1c-ed0e2ef07a11",
-      "created_at": "2025-05-22T22:57:39.146204+00:00",
-      "page_title": "Page at mailcon.com",
-      "query_text": "Are there any scalable email creation tools that don't require any coding knowledge?",
+      "id": "3eeb1c09-6c95-4eae-85aa-20d23dd8cc88",
+      "query_id": "3bb94cc5-ad49-43f0-b366-fccc60cf79e6",
+      "created_at": "2025-05-27T14:45:27.352+00:00",
+      "page_title": "Marketing automation for any business | ActiveCampaign",
+      "query_text": "What are some alternatives to Knak for email marketing?",
       "crawl_error": null,
-      "domain_name": "mailcon.com",
+      "domain_name": "www.activecampaign.com",
       "on_page_seo": {
         "has_table": false,
-        "page_title": "Page at mailcon.com",
-        "word_count": 0,
-        "image_count": 0,
-        "content_type": "Unknown",
-        "folder_depth": 1,
-        "heading_count": 0,
+        "page_title": "Marketing automation for any business | ActiveCampaign",
+        "word_count": 91585,
+        "image_count": 22,
+        "content_type": "Article",
+        "folder_depth": 0,
+        "heading_count": 42,
         "keyword_match": [
-          "No Code Email"
+          "Knak Alternatives"
         ],
         "video_present": false,
         "has_table_count": 0,
         "authorship_clear": false,
         "has_ordered_list": false,
-        "meta_description": "",
+        "meta_description": "Your solution for personalized email marketing, automation, and sales engagement. Automate across your entire marketing stack with 900+ integrations.",
         "has_unordered_list": false,
         "heading_count_type": {
           "h1": 0,
@@ -575,11 +563,11 @@
           "h5": 0,
           "h6": 0
         },
-        "internal_link_count": 0,
+        "internal_link_count": 133,
         "has_ordered_list_count": 0,
         "has_unordered_list_count": 0
       },
-      "citation_url": "https://mailcon.com/8-best-no-code-tools-for-email-design/",
+      "citation_url": "https://www.activecampaign.com/",
       "mention_type": [
         "citation"
       ],
@@ -597,12 +585,12 @@
         "call_to_action_strength": "none",
         "user_experience_quality": "average"
       },
-      "query_keyword": "No Code Email",
+      "query_keyword": "Knak Alternatives",
       "technical_seo": {
         "is_valid": true,
         "cdn_usage": false,
         "date_created": null,
-        "is_crawlable": false,
+        "is_crawlable": true,
         "schema_types": [],
         "date_modified": null,
         "mobile_friendly": true,
@@ -614,9 +602,9 @@
         "html_structure_score": 3,
         "schema_markup_present": false,
         "social_graphs_present": false,
-        "meta_description_present": false
+        "meta_description_present": true
       },
-      "analysis_notes": "Default analysis used due to crawl or AI error",
+      "analysis_notes": "Analysis completed",
       "brand_in_title": false,
       "brand_mentioned": false,
       "content_quality": {
@@ -640,7 +628,7 @@
       "competitor_names": [],
       "domain_authority": {
         "spam_score": 2,
-        "domain_name": "mailcon.com",
+        "domain_name": "www.activecampaign.com",
         "backlink_count": 100,
         "page_authority": 20,
         "link_propensity": 0.5,
@@ -648,7 +636,7 @@
         "referring_domains": 50
       },
       "is_client_domain": false,
-      "page_analysis_id": "mailcon_com_1747954659106",
+      "page_analysis_id": "www_activecampaign_com_1748357125528",
       "page_performance": {
         "page_speed_score": 50,
         "totalBlockingTime": 100,
@@ -658,6 +646,129 @@
         "largestContentfulPaint": 2500
       },
       "citation_position": 5,
+      "competitor_context": "",
+      "brand_mention_count": 0,
+      "competitor_analysis": {},
+      "competitor_mentioned": false,
+      "is_competitor_domain": false,
+      "content_quality_score": 3
+    },
+    {
+      "id": "f61335f5-b04a-4cdd-a321-7d8a824d8438",
+      "query_id": "3bb94cc5-ad49-43f0-b366-fccc60cf79e6",
+      "created_at": "2025-05-27T14:45:35.01+00:00",
+      "page_title": "Email Marketing Software &amp; Free Campaign Tools | HubSpot",
+      "query_text": "What are some alternatives to Knak for email marketing?",
+      "crawl_error": null,
+      "domain_name": "www.hubspot.com",
+      "on_page_seo": {
+        "has_table": false,
+        "page_title": "Email Marketing Software &amp; Free Campaign Tools | HubSpot",
+        "word_count": 120007,
+        "image_count": 42,
+        "content_type": "Article",
+        "folder_depth": 3,
+        "heading_count": 102,
+        "keyword_match": [
+          "Knak Alternatives"
+        ],
+        "video_present": false,
+        "has_table_count": 0,
+        "authorship_clear": false,
+        "has_ordered_list": false,
+        "meta_description": "Create effective email campaigns with HubSpot’s free email marketing software. Design, personalize, and optimize campaigns with ease. ",
+        "has_unordered_list": false,
+        "heading_count_type": {
+          "h1": 0,
+          "h2": 0,
+          "h3": 0,
+          "h4": 0,
+          "h5": 0,
+          "h6": 0
+        },
+        "internal_link_count": 214,
+        "has_ordered_list_count": 0,
+        "has_unordered_list_count": 0
+      },
+      "citation_url": "https://www.hubspot.com/products/marketing/email",
+      "mention_type": [
+        "citation"
+      ],
+      "brand_context": "",
+      "page_analysis": {
+        "eeat_signals": "weak",
+        "content_depth": "shallow",
+        "content_format": "article",
+        "content_recency": "undated",
+        "brand_positioning": "absent",
+        "content_structure": "linear",
+        "competitor_presence": "none",
+        "page_relevance_type": "partial",
+        "page_intent_alignment": "moderate",
+        "call_to_action_strength": "none",
+        "user_experience_quality": "average"
+      },
+      "query_keyword": "Knak Alternatives",
+      "technical_seo": {
+        "is_valid": true,
+        "cdn_usage": false,
+        "date_created": null,
+        "is_crawlable": true,
+        "schema_types": [],
+        "date_modified": null,
+        "mobile_friendly": true,
+        "aria_labels_types": [],
+        "http_response_code": 0,
+        "aria_labels_present": false,
+        "semantic_html_usage": false,
+        "hreflang_declaration": false,
+        "html_structure_score": 3,
+        "schema_markup_present": false,
+        "social_graphs_present": false,
+        "meta_description_present": true
+      },
+      "analysis_notes": "Analysis completed",
+      "brand_in_title": false,
+      "brand_mentioned": false,
+      "content_quality": {
+        "eeat_score": 3,
+        "has_quotes": false,
+        "has_research": false,
+        "has_citations": false,
+        "analysis_score": 3,
+        "has_statistics": false,
+        "sentiment_score": 0,
+        "topical_cluster": "General",
+        "readability_score": 3,
+        "content_uniqueness": 3,
+        "content_depth_score": 3,
+        "rock_paper_scissors": "Rock",
+        "ai_content_detection": 3,
+        "citation_match_quality": 3,
+        "content_optimization_score": 3
+      },
+      "relevance_score": 0.6,
+      "competitor_names": [],
+      "domain_authority": {
+        "spam_score": 2,
+        "domain_name": "www.hubspot.com",
+        "backlink_count": 100,
+        "page_authority": 20,
+        "link_propensity": 0.5,
+        "domain_authority": 30,
+        "referring_domains": 50
+      },
+      "is_client_domain": false,
+      "page_analysis_id": "www_hubspot_com_1748357128439",
+      "page_performance": {
+        "page_speed_score": 50,
+        "totalBlockingTime": 100,
+        "accessibility_score": 3,
+        "firstContentfulPaint": 1000,
+        "cumulativeLayoutShift": 0.1,
+        "largestContentfulPaint": 2500
+      },
+      "citation_position": 6,
       "competitor_context": "",
       "brand_mention_count": 0,
       "competitor_analysis": {},

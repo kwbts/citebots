@@ -413,6 +413,6 @@ ALTER TABLE table_name ENABLE ROW LEVEL SECURITY;
 4. Plan multi-tenancy implementation with these guidelines
 
 **Related Documents:**
-- [RLS Policy Cascade Incident Report](../fixes/rls-policy-cascade-incident-2025-05-28.md)
+- [RLS Policy Cascade Incident Report](../incidents/rls-policy-cascade-incident-2025-05-28.md)
 - [Multi-Tenant Philosophy](multi-tenant-philosophy.md)
 - [Current Architecture](current-architecture.md)

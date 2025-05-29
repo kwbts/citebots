@@ -42,7 +42,7 @@ const route = useRoute()
 const activeSection = computed(() => {
   const path = route.path
   if (path.startsWith('/dashboard/clients')) return 'clients'
-  if (path.startsWith('/dashboard/analysis')) return 'reports'  // Analysis now shows under reports
+  if (path.startsWith('/dashboard/analysis')) return 'analysis'
   if (path.startsWith('/dashboard/reports')) return 'reports'
   if (path.startsWith('/dashboard/admin')) return 'admin'
   return 'dashboard'

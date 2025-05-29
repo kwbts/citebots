@@ -257,7 +257,7 @@ async function fetchClients() {
     if (error) throw error
     clients.value = data || []
   } catch (error) {
-    console.error('Error fetching clients:', error)
+    // Error handling for client fetch
     statusMessage.value = 'Error loading clients. Please refresh the page.'
     statusClass.value = 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
   }

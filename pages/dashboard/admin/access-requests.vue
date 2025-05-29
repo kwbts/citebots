@@ -323,7 +323,7 @@ const loadAccessRequests = async () => {
       client_name: request.client_name?.name || null
     }))
   } catch (error) {
-    console.error('Error loading access requests:', error)
+    // Error handling for loading access requests
     message.value = 'Failed to load access requests'
     messageType.value = 'error'
   } finally {
@@ -353,7 +353,7 @@ const loadClients = async () => {
       analysis_count: client.analysis_runs?.length || 0
     }))
   } catch (error) {
-    console.error('Error loading clients:', error)
+    // Error handling for loading clients
   } finally {
     clientsLoading.value = false
   }
@@ -438,7 +438,7 @@ const createAccessRequest = async () => {
     await loadAccessRequests()
 
   } catch (error) {
-    console.error('Error creating access request:', error)
+    // Error handling for creating access request
     message.value = error.message || 'Failed to create access request'
     messageType.value = 'error'
   } finally {
@@ -489,7 +489,7 @@ const approveRequest = async (request) => {
     }
 
   } catch (error) {
-    console.error('Error approving request:', error)
+    // Error handling for approving request
     message.value = error.message || 'Failed to approve request'
     messageType.value = 'error'
   } finally {
@@ -521,7 +521,7 @@ const deleteRequest = async (requestId) => {
     await loadAccessRequests()
 
   } catch (error) {
-    console.error('Error deleting request:', error)
+    // Error handling for deleting request
     message.value = error.message || 'Failed to delete request'
     messageType.value = 'error'
   } finally {

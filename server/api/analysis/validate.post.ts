@@ -34,11 +34,13 @@ export default defineEventHandler(async (event) => {
       
     if (runError) throw runError
     
-    // EMERGENCY: Skip page_analyses JOIN due to resource exhaustion
-    // TODO: Re-enable once RLS is properly fixed
+    // Get queries with page analyses
     const { data: queries, error: queryError } = await supabase
       .from('analysis_queries')
-      .select('*')
+      .select(`
+        *,
+        page_analyses(*)
+      `)
       .eq('analysis_run_id', analysis_run_id)
       .order('created_at')
       

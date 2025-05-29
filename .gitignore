@@ -53,3 +53,16 @@ dist/
 .env
 .env.local
 local-server/.env
+# Emergency scripts and local files (contain sensitive data or are temporary)
+emergency-fix.js
+confirm-emergency-fixes.js
+scripts/add-client-access-table.sql
+scripts/update-rls-policies-client-access.sql
+scripts/emergency-revert-rls.sql
+scripts/fix-rls-performance-issues.sql
+scripts/quick-rls-fix.sql
+scripts/restore-simple-policies.sql
+scripts/add-simple-policies.sql
+scripts/update-scrapingbee-secret.sql
+local-server/test-scrapingbee.js
+local-server/quick-scrapingbee-test.js

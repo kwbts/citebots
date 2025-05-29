@@ -94,22 +94,22 @@
         </div>
 
         <!-- Brand Performance Dashboard -->
-        <BrandPerformanceDashboard v-else-if="activeTab === 'brand-performance'" :data="filteredData" />
+        <BrandPerformanceDashboard v-else-if="activeTab === 'brand-performance'" :data="filteredData" :client="client" :competitors="competitors" />
 
         <!-- Query Analysis Dashboard -->
-        <QueryAnalysisDashboard v-else-if="activeTab === 'query-analysis'" :data="filteredData" />
+        <QueryAnalysisDashboard v-else-if="activeTab === 'query-analysis'" :data="filteredData" :client="client" />
 
         <!-- Technical SEO Dashboard -->
-        <OnPageSEODashboard v-else-if="activeTab === 'technical-seo'" :data="filteredData" />
+        <OnPageSEODashboard v-else-if="activeTab === 'technical-seo'" :data="filteredData" :client="client" />
 
         <!-- Page Analytics Dashboard -->
-        <PageAnalyticsDashboard v-else-if="activeTab === 'page-analytics'" :data="filteredData" />
+        <PageAnalyticsDashboard v-else-if="activeTab === 'page-analytics'" :data="filteredData" :client="client" />
 
         <!-- Competitor Comparison Dashboard -->
-        <CompetitorComparisonDashboard v-else-if="activeTab === 'competitors'" :data="filteredData" />
+        <CompetitorComparisonDashboard v-else-if="activeTab === 'competitors'" :data="filteredData" :client="client" :competitors="competitors" />
 
         <!-- Raw Data View -->
-        <RawDataView v-else-if="activeTab === 'raw-data'" :data="filteredData" />
+        <RawDataView v-else-if="activeTab === 'raw-data'" :data="filteredData" :client="client" />
         </div>
       </div>
     </div>
@@ -130,6 +130,9 @@ const props = defineProps({
   data: { type: Object, required: true },
   client: { type: Object, required: true }
 })
+
+// Extract competitors from data prop
+const competitors = computed(() => props.data?.competitors || [])
 
 defineEmits(['close'])
 
@@ -166,18 +169,27 @@ const platforms = [
   { label: 'Perplexity', value: 'perplexity' }
 ]
 
+// Initialize component
+onMounted(() => {
+  // Perform any necessary initialization
+})
+
 // Data filtering
 const filteredData = computed(() => {
-  if (!props.data) return null
-  
+  if (!props.data) {
+    return null
+  }
+
   if (activePlatforms.value.includes('all')) {
     return props.data
   }
-  
-  const filteredQueries = props.data.analysis_queries?.filter(query => 
+
+  const filteredQueries = props.data.analysis_queries?.filter(query =>
     activePlatforms.value.includes(query.data_source)
   ) || []
-  
+
+  console.log('FullScreenDashboard - Filtered queries:', filteredQueries.length)
+
   return {
     ...props.data,
     analysis_queries: filteredQueries

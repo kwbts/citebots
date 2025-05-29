@@ -199,7 +199,8 @@
 
         <!-- Navigation Links (when NOT viewing a specific report) -->
         <template v-else>
-          <div class="mb-6">
+          <!-- Only show analysis options for non-client users -->
+          <div v-if="!isClient" class="mb-6">
             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">ANALYSIS</h3>
             <NuxtLink to="/dashboard/analysis" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis' }">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,7 +235,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const props = defineProps({
   activeSection: {
@@ -244,6 +245,33 @@ const props = defineProps({
 })
 
 const route = useRoute()
+const client = useSupabaseClient()
+const user = useSupabaseUser()
+
+// User role state
+const isClient = ref(false)
+
+// Check user role
+const checkUserRole = async () => {
+  if (!user.value) return
+
+  try {
+    const { data: profile } = await client
+      .from('profiles')
+      .select('role, account_type')
+      .eq('id', user.value.id)
+      .single()
+
+    isClient.value = profile?.role === 'client' || profile?.account_type === 'client'
+  } catch (error) {
+    isClient.value = false
+  }
+}
+
+// Initialize user role on mount
+onMounted(() => {
+  checkUserRole()
+})
 
 // Dashboard navigation state (for reports pages)
 const activeTab = ref('overview')

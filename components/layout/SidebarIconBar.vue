@@ -9,8 +9,9 @@
       <!-- Navigation Icons -->
       <nav class="flex-1 flex flex-col pt-4 pb-6 px-3">
         <div class="space-y-2">
-          <!-- Dashboard -->
+          <!-- Dashboard (Hidden for client users) -->
           <button
+            v-if="!isClient"
             @click="setActiveSection('dashboard')"
             :class="[
               'rounded-lg flex items-center h-12 justify-center transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
@@ -26,8 +27,9 @@
             </svg>
           </button>
 
-          <!-- Clients -->
+          <!-- Clients (Hidden for client users) -->
           <button
+            v-if="!isClient"
             @click="setActiveSection('clients')"
             :class="[
               'rounded-lg flex items-center h-12 justify-center transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
@@ -40,6 +42,23 @@
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round"
                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </button>
+
+          <!-- Analysis (Hidden for client users) -->
+          <button
+            v-if="!isClient"
+            @click="setActiveSection('analysis')"
+            :class="[
+              'rounded-lg flex items-center h-12 justify-center transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+              'w-10',
+              activeSection === 'analysis'
+                ? 'bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
+            ]"
+          >
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
 
@@ -138,8 +157,9 @@
       <!-- Navigation with expanded buttons -->
       <nav class="flex-1 flex flex-col pt-4 pb-6 px-3">
         <div class="space-y-2">
-          <!-- Dashboard -->
+          <!-- Dashboard (Hidden for client users) -->
           <button
+            v-if="!isClient"
             @click="setActiveSection('dashboard')"
             :class="[
               'rounded-lg flex items-center h-12 justify-start transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
@@ -158,8 +178,9 @@
             </span>
           </button>
 
-          <!-- Clients -->
+          <!-- Clients (Hidden for client users) -->
           <button
+            v-if="!isClient"
             @click="setActiveSection('clients')"
             :class="[
               'rounded-lg flex items-center h-12 justify-start transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
@@ -175,6 +196,26 @@
             </svg>
             <span class="ml-3 whitespace-nowrap font-semibold text-sm tracking-tight">
               Clients
+            </span>
+          </button>
+
+          <!-- Analysis (Hidden for client users) -->
+          <button
+            v-if="!isClient"
+            @click="setActiveSection('analysis')"
+            :class="[
+              'rounded-lg flex items-center h-12 justify-start transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+              'w-full px-3',
+              activeSection === 'analysis'
+                ? 'bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
+            ]"
+          >
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span class="ml-3 whitespace-nowrap font-semibold text-sm tracking-tight">
+              Analysis
             </span>
           </button>
 
@@ -259,31 +300,34 @@ const router = useRouter()
 const isExpanded = ref(false)
 const settingsMenuOpen = ref(false)
 const isSuperAdmin = ref(false)
+const isClient = ref(false)
 
-// Check if user is super admin
-const checkSuperAdmin = async () => {
+// Check user role
+const checkUserRole = async () => {
   if (!user.value) return
 
   try {
     const { data: profile } = await client
       .from('profiles')
-      .select('role')
+      .select('role, account_type')
       .eq('id', user.value.id)
       .single()
 
-    isSuperAdmin.value = profile?.role === 'super_admin'
+    isSuperAdmin.value = profile?.role === 'super_admin' || profile?.account_type === 'super_admin'
+    isClient.value = profile?.role === 'client' || profile?.account_type === 'client'
   } catch (error) {
-    console.error('Error checking super admin status:', error)
     isSuperAdmin.value = false
+    isClient.value = false
   }
 }
 
 // Watch for user changes
 watch(user, () => {
   if (user.value) {
-    checkSuperAdmin()
+    checkUserRole()
   } else {
     isSuperAdmin.value = false
+    isClient.value = false
   }
 }, { immediate: true })
 
@@ -296,7 +340,7 @@ const signOut = async () => {
     await client.auth.signOut()
     await router.push('/')
   } catch (error) {
-    console.error('Error signing out:', error)
+    // Handle error silently
   }
   settingsMenuOpen.value = false
 }

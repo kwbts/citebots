@@ -31,14 +31,13 @@
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="mb-8">
+    <!-- Filters - Only shown for non-client users -->
+    <div v-if="!isClient" class="mb-8">
       <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200">
         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div class="flex flex-col sm:flex-row gap-4 flex-1">
-            <!-- Client Filter -->
             <!-- Client Filter - Only shown for super admins -->
-            <div v-if="!isClient" class="min-w-0 flex-1 sm:max-w-xs">
+            <div class="min-w-0 flex-1 sm:max-w-xs">
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Filter by Client
               </label>
@@ -60,24 +59,14 @@
               </div>
             </div>
 
-            <!-- Client Display - For client users -->
-            <div v-if="isClient && reports.length > 0" class="min-w-0 flex-1">
-              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Your Client
-              </label>
-              <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-4 py-3 border border-blue-200 dark:border-blue-800/50 rounded-lg font-medium">
-                {{ reports[0]?.client_name || 'Your Client' }}
-              </div>
-            </div>
-
             <!-- Status Filter -->
             <div class="min-w-0 flex-1 sm:max-w-xs">
               <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 Filter by Status
               </label>
               <div class="relative">
-                <select 
-                  v-model="selectedStatusFilter" 
+                <select
+                  v-model="selectedStatusFilter"
                   class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none"
                 >
                   <option value="">All Statuses</option>
@@ -97,16 +86,15 @@
 
           <!-- Clear Filters & Actions -->
           <div class="flex gap-3">
-            <button 
+            <button
               v-if="selectedClientFilter || selectedStatusFilter"
               @click="clearFilters"
               class="bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 font-medium text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-150 ease-out"
             >
               Clear Filters
             </button>
-            
+
             <NuxtLink
-              v-if="!isClient"
               to="/dashboard/analysis"
               class="bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30 rounded-lg px-4 py-3 font-medium text-sm hover:bg-citebots-orange/20 transition-all duration-150 ease-out inline-flex items-center"
             >
