@@ -120,17 +120,28 @@ const fetchReportData = async () => {
     if (clientError) throw clientError
     if (!clientData) throw new Error('Client not found')
     
-    // Check ownership - support both created_by and user_id columns, plus super admin access
+    // Check ownership - support super admin, client creator, and client user assigned to client
     const userProfile = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, account_type, client_account_id')
       .eq('id', user.value?.id)
       .single()
 
-    const isSuperAdmin = userProfile.data?.role === 'super_admin'
+    console.log('User profile for report access:', userProfile.data)
+
+    // Check if user is super admin
+    const isSuperAdmin = userProfile.data?.role === 'super_admin' || userProfile.data?.account_type === 'super_admin'
+
+    // Check if user created the client
     const isOwner = clientData.created_by === user.value?.id || clientData.user_id === user.value?.id
 
-    if (!isSuperAdmin && !isOwner) {
+    // Check if user is a client user assigned to this client
+    const isAssignedClient = (userProfile.data?.role === 'client' || userProfile.data?.account_type === 'client') &&
+                             userProfile.data?.client_account_id === clientData.id
+
+    console.log('Access checks:', { isSuperAdmin, isOwner, isAssignedClient, clientId: clientData.id })
+
+    if (!isSuperAdmin && !isOwner && !isAssignedClient) {
       throw new Error('Access denied: You do not have permission to view this report')
     }
     
