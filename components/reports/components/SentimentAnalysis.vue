@@ -53,22 +53,6 @@
       </div>
     </div>
 
-    <!-- Insights -->
-    <div class="mt-6 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-xl p-4">
-      <div class="flex items-start gap-3">
-        <div class="w-6 h-6 bg-green-100 dark:bg-green-500/20 border border-green-200/50 dark:border-green-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-          <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div>
-          <h5 class="font-medium text-green-800 dark:text-green-300 mb-1">Sentiment Insight</h5>
-          <p class="text-sm text-green-700 dark:text-green-400 leading-relaxed">
-            {{ getSentimentInsight() }}
-          </p>
-        </div>
-      </div>
-    </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -132,24 +116,7 @@ const getSentimentBgColor = (color) => {
   return colorMap[color] || 'bg-gray-500'
 }
 
-const getSentimentInsight = () => {
-  const avg = props.data.averageSentiment || 0
-  const total = props.data.totalQueries || 0
-  
-  if (total === 0) {
-    return 'No sentiment data available for analysis.'
-  }
-  
-  if (avg > 0.5) {
-    return `Excellent! Your brand maintains strong positive sentiment (${formatSentiment(avg)}) across analyzed queries, indicating favorable market perception.`
-  } else if (avg > 0.2) {
-    return `Good positive sentiment (${formatSentiment(avg)}) suggests your brand is generally well-regarded in LLM responses.`
-  } else if (avg > -0.2) {
-    return `Neutral sentiment (${formatSentiment(avg)}) indicates balanced brand perception with opportunities for improvement.`
-  } else {
-    return `Negative sentiment (${formatSentiment(avg)}) suggests areas for brand perception improvement and content optimization.`
-  }
-}
+// Function removed as insight box is no longer displayed
 </script>
 
 <style scoped>

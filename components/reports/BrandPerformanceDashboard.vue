@@ -1,70 +1,57 @@
 <template>
   <div class="brand-performance-dashboard">
     <!-- Top Section: Filters -->
-    <DashboardFilters
-      v-model:filters="filters"
-      @update:filters="handleFiltersUpdate"
-      :loading="loading"
-    />
-
-    <!-- Key Metrics Section -->
-    <div class="metrics-grid">
-      <BrandMentionRateCard
-        :data="brandMentionData"
-        :loading="loading"
-        :trend="brandMentionTrend"
-        :platform-breakdown="platformBreakdown"
-      />
-
-      <NoCitationMentionsCard
-        :data="noCitationData"
-        :loading="loading"
-        :trend="noCitationTrend"
-        :opportunity-data="noCitationOpportunities"
-      />
-    </div>
-
-    <!-- Middle Section: Query Analysis -->
-    <div class="analysis-section">
-      <QueryExplorerComponent
-        :queries="displayQueries"
-        :loading="loading"
-        @query-select="handleQuerySelect"
-      />
-
-      <div class="breakdown-charts">
-        <BrandMentionBreakdown
-          :data="breakdownData"
-          :loading="loading"
-          @filter-change="handleBreakdownFilter"
-        />
-        
-        <SentimentAnalysis
-          :data="sentimentData"
-          :loading="loading"
-        />
+    <div class="mb-4 flex flex-wrap justify-between items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">Brand Performance</h2>
+      <div class="flex space-x-4 items-center">
+        <!-- Platform filter -->
+        <div class="relative">
+          <select
+            v-model="platformFilter"
+            class="block px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none text-sm"
+          >
+            <option value="all">All Platforms</option>
+            <option value="chatgpt">ChatGPT</option>
+            <option value="perplexity">Perplexity</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Bottom Section: Competitive Analysis -->
-    <div class="competitive-section">
-      <BrandVsCompetitors
-        :client-data="clientData"
-        :competitor-data="competitorData"
-        :selected-competitor="selectedCompetitor"
+    <!-- Primary Metrics Section - Full Width -->
+    <div class="mb-4">
+      <BrandQueryPerformanceCard
+        :data="{
+          queries: displayQueries,
+          competitors: competitorData || []
+        }"
         :loading="loading"
-        @competitor-select="handleCompetitorSelect"
+        :percentDisplay="true"
       />
+    </div>
 
-      <CompetitorSpotlight
-        :competitor="selectedCompetitor"
-        :competitor-metrics="competitorMetrics"
+    <!-- Secondary Metrics Section - Two Column Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <SentimentAnalysis
+        :data="sentimentData"
         :loading="loading"
       />
-
-      <ResponseOutcomeAnalysis
-        :outcome-data="outcomeData"
+      <BrandMentionBreakdown
+        :data="breakdownData"
         :loading="loading"
+        @filter-change="handleBreakdownFilter"
+      />
+    </div>
+
+    <!-- Query Data Table Section -->
+    <div class="data-table-section">
+      <QueryPerformanceTable
+        :queries="displayQueries"
       />
     </div>
   </div>
@@ -72,28 +59,18 @@
 
 <script>
 import { ref, computed } from 'vue'
-import DashboardFilters from './components/DashboardFilters.vue'
-import BrandMentionRateCard from './components/BrandMentionRateCard.vue'
-import NoCitationMentionsCard from './components/NoCitationMentionsCard.vue'
-import QueryExplorerComponent from './components/QueryExplorerComponent.vue'
-import BrandMentionBreakdown from './components/BrandMentionBreakdown.vue'
+import BrandQueryPerformanceCard from './components/BrandQueryPerformanceCard.vue'
 import SentimentAnalysis from './components/SentimentAnalysis.vue'
-import BrandVsCompetitors from './components/BrandVsCompetitors.vue'
-import CompetitorSpotlight from './components/CompetitorSpotlight.vue'
-import ResponseOutcomeAnalysis from './components/ResponseOutcomeAnalysis.vue'
+import BrandMentionBreakdown from './components/BrandMentionBreakdown.vue'
+import QueryPerformanceTable from './components/QueryPerformanceTable.vue'
 
 export default {
   name: 'BrandPerformanceDashboard',
   components: {
-    DashboardFilters,
-    BrandMentionRateCard,
-    NoCitationMentionsCard,
-    QueryExplorerComponent,
-    BrandMentionBreakdown,
+    BrandQueryPerformanceCard,
     SentimentAnalysis,
-    BrandVsCompetitors,
-    CompetitorSpotlight,
-    ResponseOutcomeAnalysis
+    BrandMentionBreakdown,
+    QueryPerformanceTable
   },
   props: {
     data: {
@@ -113,12 +90,7 @@ export default {
     // Reactive state
     const loading = ref(false)
     const selectedCompetitor = ref(null)
-    
-    // Default filters for future enhancements
-    const filters = ref({
-      platforms: ['chatgpt', 'perplexity'],
-      brandedQueries: 'all'
-    })
+    const platformFilter = ref('all')
 
     // Helper functions
     const getPlatformLabel = (platform) => {
@@ -142,15 +114,21 @@ export default {
       return labels[intent?.toLowerCase()] || intent || 'Unknown'
     }
 
-    const getTypeLabel = (type) => {
+    const getCategoryLabel = (category) => {
       const labels = {
-        question: 'Question',
-        command: 'Command',
+        product: 'Product',
+        service: 'Service',
+        technology: 'Technology',
+        feature: 'Feature',
+        tool: 'Tool',
+        platform: 'Platform',
+        solution: 'Solution',
+        review: 'Review',
         comparison: 'Comparison',
-        howto: 'How-to',
-        definition: 'Definition'
+        guide: 'Guide',
+        unknown: 'Unknown'
       }
-      return labels[type?.toLowerCase()] || type || 'Unknown'
+      return labels[category?.toLowerCase()] || category || 'Unknown'
     }
 
     const getFunnelLabel = (stage) => {
@@ -174,10 +152,21 @@ export default {
       return labels[outcome?.toLowerCase()] || outcome || 'Unknown'
     }
 
-    // Computed data from props (matching existing pattern)
+    // Computed data from props with platform filtering
     const displayQueries = computed(() => {
       if (!props.data?.analysis_queries) return []
-      return props.data.analysis_queries
+
+      let queries = props.data.analysis_queries
+
+      // Filter by platform if not set to 'all'
+      if (platformFilter.value !== 'all') {
+        queries = queries.filter(q => {
+          // Match against data_source field
+          return q.data_source?.toLowerCase() === platformFilter.value.toLowerCase()
+        })
+      }
+
+      return queries
     })
 
     const clientData = computed(() => {
@@ -274,10 +263,10 @@ export default {
 
     // Enhanced computed values based on actual data
     const breakdownData = computed(() => {
-      if (!props.data?.analysis_queries) return { byIntent: [], byType: [], byFunnelStage: [] }
-      
+      if (!props.data?.analysis_queries) return { byIntent: [], byCategory: [], byFunnelStage: [] }
+
       const queries = props.data.analysis_queries
-      
+
       // By Intent
       const intentStats = {}
       queries.forEach(query => {
@@ -290,7 +279,7 @@ export default {
           intentStats[intent].mentioned++
         }
       })
-      
+
       const byIntent = Object.entries(intentStats).map(([intent, stats]) => ({
         intent,
         label: getIntentLabel(intent),
@@ -299,22 +288,22 @@ export default {
         mentionRate: stats.total > 0 ? (stats.mentioned / stats.total) * 100 : 0
       })).sort((a, b) => b.mentionRate - a.mentionRate)
 
-      // By Type
-      const typeStats = {}
+      // By Category
+      const categoryStats = {}
       queries.forEach(query => {
-        const type = query.query_type || 'Unknown'
-        if (!typeStats[type]) {
-          typeStats[type] = { total: 0, mentioned: 0 }
+        const category = query.query_category || 'Unknown'
+        if (!categoryStats[category]) {
+          categoryStats[category] = { total: 0, mentioned: 0 }
         }
-        typeStats[type].total++
+        categoryStats[category].total++
         if (query.brand_mentioned) {
-          typeStats[type].mentioned++
+          categoryStats[category].mentioned++
         }
       })
-      
-      const byType = Object.entries(typeStats).map(([type, stats]) => ({
-        type,
-        label: getTypeLabel(type),
+
+      const byCategory = Object.entries(categoryStats).map(([category, stats]) => ({
+        category,
+        label: getCategoryLabel(category),
         total: stats.total,
         mentioned: stats.mentioned,
         mentionRate: stats.total > 0 ? (stats.mentioned / stats.total) * 100 : 0
@@ -332,7 +321,7 @@ export default {
           funnelStats[stage].mentioned++
         }
       })
-      
+
       const byFunnelStage = Object.entries(funnelStats).map(([stage, stats]) => ({
         stage,
         label: getFunnelLabel(stage),
@@ -340,8 +329,8 @@ export default {
         mentioned: stats.mentioned,
         mentionRate: stats.total > 0 ? (stats.mentioned / stats.total) * 100 : 0
       })).sort((a, b) => b.mentionRate - a.mentionRate)
-      
-      return { byIntent, byType, byFunnelStage }
+
+      return { byIntent, byCategory, byFunnelStage }
     })
 
     const sentimentData = computed(() => {
@@ -439,10 +428,6 @@ export default {
     const competitorMetrics = computed(() => ({}))
 
     // Methods
-    const handleFiltersUpdate = (newFilters) => {
-      filters.value = { ...filters.value, ...newFilters }
-      // In the future, this could trigger data filtering
-    }
 
     const handleQuerySelect = (query) => {
       // Handle individual query selection - could open a modal or navigate to detail view
@@ -463,7 +448,7 @@ export default {
 
     return {
       loading,
-      filters,
+      platformFilter,
       selectedCompetitor,
       displayQueries,
       clientData,
@@ -479,7 +464,6 @@ export default {
       sentimentData,
       competitorMetrics,
       outcomeData,
-      handleFiltersUpdate,
       handleQuerySelect,
       handleBreakdownFilter,
       handleCompetitorSelect
@@ -490,48 +474,18 @@ export default {
 
 <style scoped>
 .brand-performance-dashboard {
-  padding: 1.5rem;
+  padding: 0;
   max-width: 1400px;
   margin: 0 auto;
 }
 
-.metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  margin: 2rem 0;
-}
-
-.analysis-section {
-  margin: 3rem 0;
-}
-
-.breakdown-charts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-}
-
-.competitive-section {
-  margin: 3rem 0;
-  display: grid;
-  gap: 2rem;
+.data-table-section {
+  margin: 1.5rem 0;
 }
 
 @media (max-width: 768px) {
   .brand-performance-dashboard {
     padding: 1rem;
-  }
-  
-  .metrics-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .breakdown-charts {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
 }
 </style>

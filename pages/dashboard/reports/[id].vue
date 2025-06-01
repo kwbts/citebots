@@ -25,19 +25,48 @@
 
     <!-- Dashboard Content -->
     <div v-else-if="reportData && client" class="h-full">
-      <FullScreenDashboard
-        :data="reportData"
-        :client="client"
-        @close="handleClose"
-      />
+      <!-- Show different dashboard components based on activeTab -->
+      <div v-if="activeTab === 'overview'" class="h-full">
+        <FullScreenDashboard
+          :data="reportData"
+          :client="client"
+          @close="handleClose"
+        />
+      </div>
+
+      <!-- Brand Performance Dashboard -->
+      <div v-else-if="activeTab === 'brand-performance'" class="h-full px-6 pt-2 pb-6">
+        <BrandPerformanceDashboard
+          :data="reportData"
+          :client="client"
+          :competitors="reportData?.competitors || []"
+        />
+      </div>
+
+      <!-- Testing Dashboard -->
+      <div v-else-if="activeTab === 'testing'" class="h-full p-6">
+        <TestingDashboard :reportData="reportData" />
+      </div>
+
+      <!-- Other dashboard tabs use FullScreenDashboard with the activeTab prop -->
+      <div v-else class="h-full">
+        <FullScreenDashboard
+          :data="reportData"
+          :client="client"
+          :activeTab="activeTab"
+          @close="handleClose"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FullScreenDashboard from '~/components/reports/FullScreenDashboard.vue'
+import TestingDashboard from '~/components/reports/TestingDashboard.vue'
+import BrandPerformanceDashboard from '~/components/reports/BrandPerformanceDashboard.vue'
 
 // Initialize dark mode support
 const { isDark } = useDarkMode()
@@ -59,9 +88,30 @@ const client = ref(null)
 const competitors = ref([])
 const loading = ref(true)
 const error = ref(null)
+const activeTab = ref('overview') // Default tab is overview
+
+// Watch for tab changes in URL
+onMounted(() => {
+  // Check for tab parameter in URL
+  if (route.query.tab) {
+    activeTab.value = route.query.tab
+  }
+})
+
+// Update active tab when route changes
+watch(() => route.query.tab, (newTab) => {
+  if (newTab) {
+    activeTab.value = newTab
+  }
+})
 
 // Computed
 const clientName = computed(() => client.value?.name || 'Loading...')
+
+// Check if we have a dedicated component for this tab
+const hasCustomComponent = computed(() => {
+  return ['overview', 'brand-performance', 'testing'].includes(activeTab.value)
+})
 
 // Format analysis run title
 const formatAnalysisRunTitle = (run) => {
@@ -181,8 +231,31 @@ const fetchReportData = async () => {
   }
 }
 
+// Handle tab change events from SidebarContextPanel
+const handleDashboardTabChange = (e) => {
+  const tab = e.detail.tab
+  activeTab.value = tab
+
+  // Update URL with tab parameter
+  router.replace({
+    path: route.path,
+    query: {
+      ...route.query,
+      tab
+    }
+  })
+}
+
 // Initialize
 onMounted(() => {
   fetchReportData()
+
+  // Listen for dashboard tab changes
+  window.addEventListener('dashboard-tab-changed', handleDashboardTabChange)
+})
+
+// Clean up event listeners
+onUnmounted(() => {
+  window.removeEventListener('dashboard-tab-changed', handleDashboardTabChange)
 })
 </script>

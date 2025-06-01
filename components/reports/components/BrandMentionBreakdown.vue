@@ -65,13 +65,13 @@
         </div>
       </div>
 
-      <!-- Type Breakdown -->
-      <div v-if="activeTab === 'type'" class="space-y-3">
-        <div 
-          v-for="item in data.byType" 
-          :key="item.type"
+      <!-- Category Breakdown -->
+      <div v-if="activeTab === 'category'" class="space-y-3">
+        <div
+          v-for="item in data.byCategory"
+          :key="item.category"
           class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/30 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/30 transition-colors cursor-pointer"
-          @click="$emit('filter-change', 'type', item.type)"
+          @click="$emit('filter-change', 'category', item.category)"
         >
           <div class="flex items-center gap-3">
             <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
@@ -94,8 +94,8 @@
             </div>
           </div>
         </div>
-        <div v-if="data.byType.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-          No type data available
+        <div v-if="data.byCategory.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+          No category data available
         </div>
       </div>
 
@@ -134,22 +134,6 @@
       </div>
     </div>
 
-    <!-- Insights -->
-    <div class="mt-6 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 rounded-xl p-4">
-      <div class="flex items-start gap-3">
-        <div class="w-6 h-6 bg-purple-100 dark:bg-purple-500/20 border border-purple-200/50 dark:border-purple-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-          <svg class="w-3 h-3 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div>
-          <h5 class="font-medium text-purple-800 dark:text-purple-300 mb-1">Performance Insight</h5>
-          <p class="text-sm text-purple-700 dark:text-purple-400 leading-relaxed">
-            {{ getInsights() }}
-          </p>
-        </div>
-      </div>
-    </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -186,30 +170,11 @@ const activeTab = ref('intent')
 
 const chartTabs = [
   { key: 'intent', label: 'By Intent' },
-  { key: 'type', label: 'By Type' },
+  { key: 'category', label: 'By Category' },
   { key: 'funnel', label: 'By Funnel Stage' }
 ]
 
-const getInsights = () => {
-  const currentData = props.data[`by${activeTab.value.charAt(0).toUpperCase() + activeTab.value.slice(1)}`] || []
-  
-  if (currentData.length === 0) {
-    return `No ${activeTab.value} data available for analysis.`
-  }
-  
-  const topPerformer = currentData[0]
-  if (!topPerformer) {
-    return `Insufficient ${activeTab.value} data for insights.`
-  }
-  
-  const tabLabels = {
-    intent: 'query intent',
-    type: 'query type', 
-    funnel: 'funnel stage'
-  }
-  
-  return `Your brand performs best in ${topPerformer.label} ${tabLabels[activeTab.value]} with ${formatPercentage(topPerformer.mentionRate)} mention rate across ${topPerformer.total} queries.`
-}
+// Function removed as insight box is no longer displayed
 
 const formatPercentage = (value) => {
   return Math.round(value || 0) + '%'

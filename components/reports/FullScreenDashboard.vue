@@ -117,7 +117,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import MetricCard from './MetricCard.vue'
 import BrandPerformanceDashboard from './BrandPerformanceDashboard.vue'
 import QueryAnalysisDashboard from './QueryAnalysisDashboard.vue'
@@ -128,7 +128,8 @@ import RawDataView from './RawDataView.vue'
 
 const props = defineProps({
   data: { type: Object, required: true },
-  client: { type: Object, required: true }
+  client: { type: Object, required: true },
+  activeTab: { type: String, default: 'overview' }
 })
 
 // Extract competitors from data prop
@@ -136,9 +137,16 @@ const competitors = computed(() => props.data?.competitors || [])
 
 defineEmits(['close'])
 
-// Dashboard state
-const activeTab = ref('overview')
+// Dashboard state - initialize from props if provided
+const activeTab = ref(props.activeTab || 'overview')
 const activePlatforms = ref(['all', 'chatgpt', 'perplexity'])
+
+// Watch for prop changes
+watch(() => props.activeTab, (newTab) => {
+  if (newTab && newTab !== activeTab.value) {
+    activeTab.value = newTab
+  }
+})
 
 // Listen for navigation events from SidebarContextPanel
 onMounted(() => {
