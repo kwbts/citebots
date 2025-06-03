@@ -9,6 +9,7 @@ Local queue processing server that replaces unreliable Supabase Edge Functions w
 - **API Integrations**: ChatGPT, Perplexity, and ScrapingBee for page analysis
 - **Status Monitoring**: Web endpoints to check server status and trigger processing
 - **Error Handling**: Retry logic and proper error tracking
+- **Enhanced Diagnostics**: Detailed logging throughout the process
 
 ## Setup
 
@@ -33,6 +34,11 @@ Local queue processing server that replaces unreliable Supabase Edge Functions w
    SCRAPINGBEE_API_KEY=your_scrapingbee_key_here
    ```
 
+4. **Optional API Keys**
+   ```env
+   PAGESPEED_API_KEY=your_google_pagespeed_key_here
+   ```
+
 ## Usage
 
 ### Start the Server
@@ -40,6 +46,15 @@ Local queue processing server that replaces unreliable Supabase Edge Functions w
 npm start
 # or for development
 npm run dev
+```
+
+### Test Individual Components
+```bash
+# Test web crawling with detailed logging
+node test-crawl-page.js https://example.com
+
+# Test complete citation analysis
+node test-citation-analysis.js https://example.com --save
 ```
 
 ### Server Endpoints
@@ -52,6 +67,10 @@ npm run dev
 
 - **Health Check**: `GET http://localhost:3002/health`
   - Simple health check endpoint
+
+- **Page Analysis**: `POST http://localhost:3002/analyze-page`
+  - Analyze a single page without creating a queue item
+  - Request body: `{ "url": "https://example.com", "query": "Example query", "keyword": "example" }`
 
 ### How It Works
 
@@ -79,6 +98,31 @@ This approach:
 - ✅ Maintains all existing analysis logic and data structures
 - ✅ Easy to scale up when needed
 
+## Diagnostic Logging
+
+The enhanced logging system helps troubleshoot issues in the following components:
+
+### Web Crawling (`crawlPage.js`)
+
+- URL validation and pre-checks
+- ScrapingBee API request parameters
+- Response headers and timing metrics
+- HTML content validation
+- Error details for API failures
+- Automatic fallback between basic and premium modes
+
+### Citation Analysis (`analyzeCitation.js`)
+
+- Supabase connection status
+- Analysis request parameters
+- Comprehensive results summary
+- Detailed error tracing with stack traces
+
+### Testing Scripts
+
+- `test-crawl-page.js`: Test just the web crawling component
+- `test-citation-analysis.js`: Test the full citation analysis without affecting database
+
 ## Frontend Integration
 
 The frontend can check if the server is online:
@@ -99,11 +143,13 @@ async function checkServerStatus() {
 
 To validate everything is working:
 
-1. ✅ Go to `/dashboard/analysis` and generate keywords
-2. ✅ Create an analysis run (items should appear in `analysis_queue`)
-3. ✅ Server should pick up and process items automatically
-4. ✅ Results should appear in dashboard with same data structure
-5. ✅ Check server status at `http://localhost:3002/status`
+1. ✅ Test individual crawling: `node test-crawl-page.js https://knak.com/blog/email-template-builders-scale-personalization/`
+2. ✅ Test citation analysis: `node test-citation-analysis.js https://knak.com/blog/email-template-builders-scale-personalization/ --save`
+3. ✅ Go to `/dashboard/analysis` and generate keywords
+4. ✅ Create an analysis run (items should appear in `analysis_queue`)
+5. ✅ Server should pick up and process items automatically
+6. ✅ Results should appear in dashboard with same data structure
+7. ✅ Check server status at `http://localhost:3002/status`
 
 ## Development
 
@@ -120,3 +166,26 @@ Check server logs for processing status:
 - `✅ Processed item {id}`
 - `❌ Error processing item {id}`
 - `🏁 Queue processing completed`
+
+## Troubleshooting
+
+Common issues and their solutions:
+
+1. **ScrapingBee API errors**
+   - Check your API key in the `.env` file
+   - Look for detailed error messages in the logs
+   - Verify URL format and accessibility
+
+2. **OpenAI API errors**
+   - Check API key and quota limits
+   - Review prompt in the logs to ensure it's properly formatted
+
+3. **Supabase connection issues**
+   - Verify SUPABASE_URL and SUPABASE_SERVICE_KEY
+   - Check for proper table permissions
+   - Look for detailed error messages in the logs
+
+4. **Analysis not appearing in dashboard**
+   - Check server logs for any processing errors
+   - Verify that citation URLs are valid and accessible
+   - Ensure all required environment variables are set

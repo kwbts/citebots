@@ -1,0 +1,141 @@
+{
+  "citation_url": "https://knak.com/blog/dedicated-ip-address/",
+  "citation_position": 1,
+  "domain_name": "knak.com",
+  "is_client_domain": true,
+  "is_competitor_domain": false,
+  "mention_type": [
+    "citation"
+  ],
+  "analysis_notes": "Analysis completed",
+  "technical_seo": {
+    "is_valid": true,
+    "is_crawlable": true,
+    "http_response_code": 200,
+    "schema_markup_present": true,
+    "schema_types": [
+      "SiteNavigationElement"
+    ],
+    "html_structure_score": 7,
+    "semantic_html_usage": true,
+    "mobile_friendly": true,
+    "hreflang_declaration": true,
+    "date_created": null,
+    "date_modified": null,
+    "cdn_usage": true,
+    "meta_description_present": true,
+    "aria_labels_present": true,
+    "aria_labels_types": [
+      "label",
+      "hidden",
+      "expanded",
+      "controls",
+      "labelledby"
+    ],
+    "social_graphs_present": true
+  },
+  "on_page_seo": {
+    "page_title": "Dedicated IP Addresses for Email Marketing | Knak",
+    "content_type": "Blog Post",
+    "meta_description": "Does your email marketing need a dedicated IP? Learn the benefits, myths, and how it impacts your deliverability and sender reputation.",
+    "word_count": 64210,
+    "image_count": 62,
+    "video_present": true,
+    "has_table": true,
+    "has_table_count": 6,
+    "has_unordered_list": true,
+    "has_unordered_list_count": 18,
+    "has_ordered_list": true,
+    "has_ordered_list_count": 1,
+    "internal_link_count": 104,
+    "folder_depth": 2,
+    "authorship_clear": true,
+    "heading_count": 65,
+    "heading_count_type": {
+      "h1": 1,
+      "h2": 29,
+      "h3": 32,
+      "h4": 3,
+      "h5": 0,
+      "h6": 0
+    },
+    "keyword_match": []
+  },
+  "content_quality": {
+    "content_depth_score": 4,
+    "readability_score": 3,
+    "sentiment_score": 1,
+    "content_uniqueness": 3,
+    "content_optimization_score": 4,
+    "has_statistics": true,
+    "has_quotes": false,
+    "has_citations": false,
+    "has_research": true,
+    "analysis_score": 4,
+    "rock_paper_scissors": "Paper",
+    "citation_match_quality": 5,
+    "eeat_score": 4,
+    "ai_content_detection": 4,
+    "topical_cluster": "Email Marketing"
+  },
+  "page_performance": {
+    "page_speed_score": 50,
+    "firstContentfulPaint": 1000,
+    "largestContentfulPaint": 2500,
+    "totalBlockingTime": 100,
+    "cumulativeLayoutShift": 0.1,
+    "accessibility_score": 3
+  },
+  "domain_authority": {
+    "domain_name": "knak.com",
+    "domain_authority": 30,
+    "page_authority": 20,
+    "backlink_count": 100,
+    "referring_domains": 50,
+    "link_propensity": 0.5,
+    "spam_score": 2
+  },
+  "page_analysis": {
+    "page_relevance_type": "direct",
+    "page_intent_alignment": "high",
+    "content_format": "blog",
+    "content_depth": "comprehensive",
+    "brand_positioning": "prominent",
+    "competitor_presence": "mentioned",
+    "call_to_action_strength": "strong",
+    "content_recency": "recent",
+    "eeat_signals": "strong",
+    "user_experience_quality": "good",
+    "content_structure": "hierarchical",
+    "analysis_notes": "This page effectively addresses the query about email template builders by discussing dedicated IP addresses in email marketing, providing valuable insights and guidance for marketers."
+  },
+  "brand_mentioned": true,
+  "brand_in_title": true,
+  "brand_mention_count": 543,
+  "brand_context": "citation",
+  "competitor_mentioned": true,
+  "competitor_names": [
+    "Bee",
+    "Mailchimp"
+  ],
+  "competitor_analysis": {
+    "Bee": {
+      "name": "Bee",
+      "mentions": 4,
+      "domain": "beefree.io"
+    },
+    "Mailchimp": {
+      "name": "Mailchimp",
+      "mentions": 3,
+      "domain": "mailchimp.com"
+    }
+  },
+  "competitor_context": "title_mention",
+  "query_text": "Example query about email template builders",
+  "query_keyword": "email template builders",
+  "page_title": "Dedicated IP Addresses for Email Marketing | Knak",
+  "relevance_score": 0.9,
+  "content_quality_score": 4,
+  "crawl_error": null,
+  "created_at": "2025-05-30T19:09:38.414Z"
+}

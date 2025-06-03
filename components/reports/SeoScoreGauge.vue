@@ -7,7 +7,7 @@
         cy="110"
         r="90"
         fill="none"
-        stroke="#374151"
+        stroke="#e5e7eb"
         stroke-width="16"
         class="gauge-bg dark:stroke-gray-700"
       />
@@ -56,8 +56,8 @@
         cx="110"
         cy="110"
         r="74"
-        fill="#1e293b"
-        class="gauge-inner-circle"
+        fill="#ffffff"
+        class="gauge-inner-circle dark:fill-[#1e293b]"
       />
       
       <!-- Score Value Display with Percentage Symbol -->
@@ -68,8 +68,8 @@
           text-anchor="middle"
           font-size="54"
           font-weight="bold"
-          fill="white"
-          class="score-text"
+          fill="#1f2937"
+          class="score-text dark:fill-white"
         >{{ displayScore }}%</text>
       </g>
     </svg>
@@ -137,7 +137,7 @@ const scoreColor = computed(() => {
 }
 
 .gauge-inner-circle {
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.05));
 }
 
 .progress-arc {

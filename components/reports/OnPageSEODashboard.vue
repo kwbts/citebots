@@ -13,12 +13,14 @@
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">Technical SEO Score</h3>
-          <p class="text-4xl font-bold text-gray-900 dark:text-white mb-3">{{ techSeoScore }}%</p>
-          <div class="flex items-center gap-2 text-sm" :class="getComparisonIndicator(techSeoScore, benchmarkAverages.avgTechSeoScore).color">
+          <div class="flex justify-center mb-2">
+            <SeoScoreGauge :score="techSeoScore / 10" />
+          </div>
+          <div class="flex items-center gap-2 text-sm justify-center" :class="getComparisonIndicator(techSeoScore, benchmarkAverages.avgTechSeoScore).color">
             <span>{{ getComparisonIndicator(techSeoScore, benchmarkAverages.avgTechSeoScore).icon }}</span>
             <span>other pages: {{ benchmarkAverages.avgTechSeoScore }}%</span>
           </div>
-          <div class="text-sm text-gray-500 dark:text-gray-400 mt-2">{{ totalBrandPages }}/{{ totalPages }} brand pages</div>
+          <div class="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">{{ totalBrandPages }}/{{ totalPages }} brand pages</div>
         </div>
       </div>
 
@@ -32,8 +34,10 @@
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">Content Quality Score</h3>
-          <p class="text-4xl font-bold text-gray-900 dark:text-white mb-3">{{ contentQualityScore }}%</p>
-          <div class="flex items-center gap-2 text-sm" :class="getComparisonIndicator(contentQualityScore, benchmarkAverages.avgContentQualityScore).color">
+          <div class="flex justify-center mb-2">
+            <SeoScoreGauge :score="contentQualityScore / 10" />
+          </div>
+          <div class="flex items-center gap-2 text-sm justify-center" :class="getComparisonIndicator(contentQualityScore, benchmarkAverages.avgContentQualityScore).color">
             <span>{{ getComparisonIndicator(contentQualityScore, benchmarkAverages.avgContentQualityScore).icon }}</span>
             <span>other pages: {{ benchmarkAverages.avgContentQualityScore }}%</span>
           </div>
@@ -50,8 +54,10 @@
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-600 dark:text-gray-300 mb-2">Page Performance Score</h3>
-          <p class="text-4xl font-bold text-gray-900 dark:text-white mb-3">{{ pagePerformanceScore }}%</p>
-          <div class="flex items-center gap-2 text-sm" :class="getComparisonIndicator(pagePerformanceScore, benchmarkAverages.avgPagePerformanceScore).color">
+          <div class="flex justify-center mb-2">
+            <SeoScoreGauge :score="pagePerformanceScore / 10" />
+          </div>
+          <div class="flex items-center gap-2 text-sm justify-center" :class="getComparisonIndicator(pagePerformanceScore, benchmarkAverages.avgPagePerformanceScore).color">
             <span>{{ getComparisonIndicator(pagePerformanceScore, benchmarkAverages.avgPagePerformanceScore).icon }}</span>
             <span>other pages: {{ benchmarkAverages.avgPagePerformanceScore }}%</span>
           </div>
@@ -315,6 +321,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import SeoScoreGauge from './SeoScoreGauge.vue'
 
 const props = defineProps({
   data: {

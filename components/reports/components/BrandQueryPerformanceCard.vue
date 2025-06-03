@@ -253,13 +253,13 @@ const getCompetitionBgColor = (level) => {
 }
 
 const getCompetitorColor = (rate) => {
-  if (rate >= mentionRate.value) return 'bg-red-500'
-  return 'bg-blue-500'
+  if (rate >= mentionRate.value) return 'bg-red-500 dark:bg-red-500'
+  return 'bg-blue-500 dark:bg-blue-500'
 }
 
 const getCompetitorBgColor = (rate) => {
-  if (rate >= mentionRate.value) return 'bg-red-500'
-  return 'bg-blue-500'
+  if (rate >= mentionRate.value) return 'bg-red-500 dark:bg-red-500'
+  return 'bg-blue-500 dark:bg-blue-500'
 }
 </script>
 

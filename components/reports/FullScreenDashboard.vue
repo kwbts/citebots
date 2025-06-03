@@ -1,95 +1,55 @@
 <template>
   <div class="h-full w-full bg-gray-50 dark:bg-gray-900 overflow-hidden">
     <!-- Main Dashboard Content -->
-    <div class="h-full flex flex-col">
-      <!-- Top Header Bar -->
-      <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 shadow-sm">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">{{ getCurrentTabName() }}</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ getFilterSummary() }}</p>
-          </div>
-          <div class="flex items-center space-x-4">
-            <!-- Quick Stats -->
-            <div class="flex items-center space-x-6">
-              <div class="text-center">
-                <div class="text-lg font-bold text-gray-900 dark:text-white">{{ totalQueries }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">Queries</div>
-              </div>
-              <div class="text-center">
-                <div class="text-lg font-bold text-green-600 dark:text-green-400">{{ brandMentionRate }}%</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">Brand Rate</div>
-              </div>
-              <div class="text-center">
-                <div class="text-lg font-bold text-purple-600 dark:text-purple-400">{{ avgCitations }}</div>
-                <div class="text-xs text-gray-500 dark:text-gray-400">Avg Citations</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div class="h-full flex flex-col overflow-y-auto">
       <!-- Dashboard Content -->
-      <div class="flex-1 p-6 overflow-y-auto">
+      <div class="flex-1 p-6">
         <div class="max-w-7xl mx-auto">
         <!-- Key Metrics Overview -->
-        <div v-if="activeTab === 'overview'" class="space-y-8">
-          <!-- Top Metrics Row -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <MetricCard
-              title="Total Queries"
-              :value="totalQueries"
-              icon="chart-bar"
-              color="blue"
-            />
-            <MetricCard
-              title="Brand Mention Rate"
-              :value="`${brandMentionRate}%`"
-              icon="trending-up"
-              color="green"
-            />
-            <MetricCard
-              title="Avg Citations"
-              :value="avgCitations"
-              icon="document-text"
-              color="purple"
-            />
-            <MetricCard
-              title="Content Quality"
-              :value="`${contentQualityScore}/10`"
-              icon="star"
-              color="orange"
+        <div v-if="activeTab === 'overview'" class="brand-dashboard">
+          <!-- Top Section: Title Only -->
+          <div class="mb-6">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Overview</h2>
+          </div>
+
+          <!-- Primary Analysis Component - Full Width -->
+          <div class="mb-6">
+            <QueryAnalysisComponent
+              :data="{
+                queries: filteredData?.analysis_queries || [],
+                competitors: competitors || [],
+                page_analyses: filteredData?.page_analyses || []
+              }"
+              :filter="'all'"
+              :loading="false"
             />
           </div>
 
-          <!-- Competitor Performance -->
-          <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
-            <div class="flex items-center gap-3 mb-8">
-              <div class="w-8 h-8 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-lg flex items-center justify-center">
-                <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Top Competitors</h3>
-            </div>
-            <div class="space-y-4" v-if="topCompetitors.length > 0">
-              <div v-for="competitor in topCompetitors" :key="competitor.name" class="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-gray-700/30 border border-gray-200/50 dark:border-gray-600/50 rounded-xl hover:bg-gray-100/50 dark:hover:bg-gray-600/30 transition-colors duration-200">
-                <span class="font-medium text-gray-900 dark:text-white">{{ competitor.name }}</span>
-                <div class="flex items-center gap-4">
-                  <span class="text-sm text-gray-600 dark:text-gray-400">{{ competitor.count }} mentions</span>
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-500/20">{{ competitor.percentage }}%</span>
-                </div>
-              </div>
-            </div>
-            <div v-else class="text-center py-8">
-              <div class="w-16 h-16 bg-gray-50 dark:bg-gray-700/50 border border-gray-200/50 dark:border-gray-600/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-              </div>
-              <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">No Competitor Data</h3>
-              <p class="text-gray-600 dark:text-gray-400">Competitor mentions will appear here once analysis is complete</p>
-            </div>
+          <!-- Competitor Analysis Components - Two Column Layout -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <CompetitorMentionRate
+              :brand-mention-rate="brandMentionRate"
+              :brand-domain="client?.domain || ''"
+              :competitors="competitorsWithMentionData"
+              :total-queries="totalQueries"
+              :loading="false"
+            />
+            <CompetitorCitationRate
+              :brand-citations="brandCitations"
+              :brand-citation-rate="brandCitationRate"
+              :brand-domain="client?.domain || ''"
+              :competitors="competitorsWithCitationData"
+              :total-citations="totalCitations"
+              :total-domains="totalDomains"
+              :loading="false"
+            />
+          </div>
+
+          <!-- Query Performance Table Section with Advanced Expandable Functionality -->
+          <div class="mb-6">
+            <QueryPerformanceTable
+              :queries="filteredQueryRows"
+            />
           </div>
         </div>
 
@@ -125,6 +85,10 @@ import OnPageSEODashboard from './OnPageSEODashboard.vue'
 import PageAnalyticsDashboard from './PageAnalyticsDashboard.vue'
 import CompetitorComparisonDashboard from './CompetitorComparisonDashboard.vue'
 import RawDataView from './RawDataView.vue'
+import QueryAnalysisComponent from './components/QueryAnalysisComponent.vue'
+import CompetitorMentionRate from './components/CompetitorMentionRate.vue'
+import CompetitorCitationRate from './components/CompetitorCitationRate.vue'
+import QueryPerformanceTable from './components/QueryPerformanceTable.vue'
 
 const props = defineProps({
   data: { type: Object, required: true },
@@ -140,11 +104,22 @@ defineEmits(['close'])
 // Dashboard state - initialize from props if provided
 const activeTab = ref(props.activeTab || 'overview')
 const activePlatforms = ref(['all', 'chatgpt', 'perplexity'])
+const activePlatformFilter = ref('all')
+const queryFilterType = ref('all')
 
 // Watch for prop changes
 watch(() => props.activeTab, (newTab) => {
   if (newTab && newTab !== activeTab.value) {
     activeTab.value = newTab
+  }
+})
+
+// Watch for platform filter changes
+watch(() => activePlatformFilter.value, (newFilter) => {
+  if (newFilter === 'all') {
+    activePlatforms.value = ['all', 'chatgpt', 'perplexity']
+  } else {
+    activePlatforms.value = [newFilter]
   }
 })
 
@@ -228,48 +203,53 @@ const getFilterSummary = () => {
   return `${platformNames} • ${totalQueries.value} queries`
 }
 
+// Access to filtered queries
+const filteredQueries = computed(() => {
+  return filteredData.value?.analysis_queries || []
+})
+
 // Computed metrics
 const totalQueries = computed(() => {
-  return filteredData.value?.analysis_queries?.length || 0
+  return filteredQueries.value?.length || 0
+})
+
+const brandMentions = computed(() => {
+  return filteredQueries.value.filter(q => q.brand_mentioned === true).length
 })
 
 const brandMentionRate = computed(() => {
-  const queries = filteredData.value?.analysis_queries || []
-  if (queries.length === 0) return 0
-  const brandMentions = queries.filter(q => q.brand_mentioned === true).length
-  return Math.round((brandMentions / queries.length) * 100)
+  if (filteredQueries.value.length === 0) return 0
+  return Math.round((brandMentions.value / filteredQueries.value.length) * 100)
 })
 
 const avgCitations = computed(() => {
-  const queries = filteredData.value?.analysis_queries || []
-  if (queries.length === 0) return 0
-  const totalCitations = queries.reduce((sum, q) => sum + (q.total_citations || 0), 0)
-  return Math.round((totalCitations / queries.length) * 10) / 10
+  if (filteredQueries.value.length === 0) return 0
+  const totalCitations = filteredQueries.value.reduce((sum, q) => sum + (q.total_citations || 0), 0)
+  return Math.round((totalCitations / filteredQueries.value.length) * 10) / 10
 })
 
 const contentQualityScore = computed(() => {
   const pages = filteredData.value?.page_analyses || []
   if (pages.length === 0) return 0
-  
+
   let totalScore = 0
   let scoreCount = 0
-  
+
   pages.forEach(page => {
     if (page.content_quality_score) {
       totalScore += parseFloat(page.content_quality_score)
       scoreCount++
     }
   })
-  
+
   return scoreCount > 0 ? Math.round((totalScore / scoreCount) * 10) / 10 : 0
 })
 
 const topCompetitors = computed(() => {
-  const queries = filteredData.value?.analysis_queries || []
   const competitorMentions = {}
 
   // Count mentions for each competitor
-  queries.forEach(query => {
+  filteredQueries.value.forEach(query => {
     if (query.competitor_mentioned_names && Array.isArray(query.competitor_mentioned_names)) {
       query.competitor_mentioned_names.forEach(competitor => {
         if (!competitorMentions[competitor]) competitorMentions[competitor] = 0
@@ -283,13 +263,175 @@ const topCompetitors = computed(() => {
     .map(([name, count]) => ({
       name,
       count,
-      percentage: queries.length > 0 ? Math.round((count / queries.length) * 100) : 0
+      percentage: filteredQueries.value.length > 0 ? Math.round((count / filteredQueries.value.length) * 100) : 0
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 4) // Top 4 competitors
 
   return competitors
 })
+
+// Total unique domains count
+const totalDomains = computed(() => {
+  const domains = new Set()
+  const pageAnalyses = filteredData.value?.page_analyses || []
+
+  pageAnalyses.forEach(page => {
+    if (page.domain_name) {
+      domains.add(page.domain_name)
+    }
+  })
+
+  return domains.size || 0
+})
+
+// Citation metrics
+const totalCitations = computed(() => {
+  return filteredData.value?.page_analyses?.length || 0
+})
+
+const brandCitations = computed(() => {
+  return filteredData.value?.page_analyses?.filter(page => page.is_client_domain)?.length || 0
+})
+
+const brandCitationRate = computed(() => {
+  if (!totalCitations.value) return 0
+  return Math.round((brandCitations.value / totalCitations.value) * 100)
+})
+
+// Filtered query rows for the table
+const filteredQueryRows = computed(() => {
+  const queries = filteredData.value?.analysis_queries || []
+
+  if (queryFilterType.value === 'all') {
+    return queries
+  } else if (queryFilterType.value === 'mentioned') {
+    return queries.filter(q => q.brand_mentioned === true)
+  } else if (queryFilterType.value === 'not-mentioned') {
+    return queries.filter(q => q.brand_mentioned === false || q.brand_mentioned === undefined)
+  }
+
+  return queries
+})
+
+// Competitor mention data for CompetitorMentionRate component
+const competitorsWithMentionData = computed(() => {
+  const competitors = props.data?.competitors || []
+
+  if (competitors.length === 0 || filteredQueries.value.length === 0) {
+    return []
+  }
+
+  return competitors.map(comp => {
+    // Calculate how many queries mention this competitor
+    const mentions = filteredQueries.value.filter(q => {
+      // Check if query mentions this competitor using the competitor_mentioned_names field
+      if (q.competitor_mentioned_names && Array.isArray(q.competitor_mentioned_names)) {
+        return q.competitor_mentioned_names.some(name => name.toLowerCase() === comp.name.toLowerCase())
+      }
+      return false
+    }).length
+
+    // Calculate mention rate
+    const mentionRate = (mentions / filteredQueries.value.length) * 100
+
+    // Add platform breakdown if available
+    const platformData = []
+    const platforms = ['chatgpt', 'perplexity']
+
+    platforms.forEach(platform => {
+      const platformQueries = filteredQueries.value.filter(q => q.data_source?.toLowerCase() === platform.toLowerCase())
+      if (platformQueries.length > 0) {
+        const platformMentions = platformQueries.filter(q => {
+          if (q.competitor_mentioned_names && Array.isArray(q.competitor_mentioned_names)) {
+            return q.competitor_mentioned_names.some(name => name.toLowerCase() === comp.name.toLowerCase())
+          }
+          return false
+        }).length
+
+        platformData.push({
+          platform,
+          rate: (platformMentions / platformQueries.length) * 100
+        })
+      }
+    })
+
+    return {
+      id: comp.id,
+      name: comp.name,
+      domain: comp.domain,
+      mentions,
+      mentionRate,
+      platformData
+    }
+  })
+})
+
+// Competitor citation data for CompetitorCitationRate component
+const competitorsWithCitationData = computed(() => {
+  const competitors = props.data?.competitors || []
+  const pageAnalyses = filteredData.value?.page_analyses || []
+
+  if (competitors.length === 0 || pageAnalyses.length === 0) {
+    return []
+  }
+
+  return competitors.map(comp => {
+    // Calculate how many citations reference this competitor
+    const citations = pageAnalyses.filter(page => {
+      // Method 1: Check if the domain matches the competitor domain
+      if (page.is_competitor_domain && page.domain_name) {
+        const pageDomain = page.domain_name.toLowerCase()
+        const compDomain = comp.domain?.toLowerCase() || ''
+
+        // Try to match domains (with or without www prefix)
+        if (pageDomain === compDomain ||
+            pageDomain === `www.${compDomain}` ||
+            `www.${pageDomain}` === compDomain ||
+            pageDomain.includes(compDomain) ||
+            compDomain.includes(pageDomain)) {
+          return true
+        }
+      }
+
+      // Method 2: Check if competitor name appears in competitor_names array
+      if (page.competitor_names && Array.isArray(page.competitor_names)) {
+        return page.competitor_names.some(name =>
+          name && comp.name && name.toLowerCase() === comp.name.toLowerCase()
+        )
+      }
+
+      return false
+    }).length
+
+    // Calculate citation rate
+    const citationRate = (citations / totalCitations.value) * 100
+
+    // Add quality score (example - adjust based on your data)
+    const qualityScore = Math.random() * 2 + 3 // Random score between 3-5 for demo
+
+    return {
+      id: comp.id,
+      name: comp.name,
+      domain: comp.domain,
+      citations,
+      citationRate,
+      qualityScore
+    }
+  })
+})
+
+// Helper function for platform colors
+const getPlatformColor = (platform) => {
+  const platformMap = {
+    chatgpt: 'bg-green-500 dark:bg-green-500',
+    perplexity: 'bg-blue-500 dark:bg-blue-500',
+    claude: 'bg-orange-500 dark:bg-orange-500',
+    bard: 'bg-purple-500 dark:bg-purple-500',
+    gemini: 'bg-red-500 dark:bg-red-500'
+  }
+  return platformMap[platform?.toLowerCase()] || 'bg-gray-500 dark:bg-gray-500'
+}
 
 // Action handlers
 const exportReport = () => {
@@ -302,3 +444,17 @@ const refreshData = () => {
   console.log('Refreshing data...')
 }
 </script>
+
+<style scoped>
+.brand-dashboard {
+  padding: 0;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .brand-dashboard {
+    padding: 1rem;
+  }
+}
+</style>

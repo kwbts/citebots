@@ -28,6 +28,9 @@
           >
             <option value="brand">Brand Performance</option>
             <option value="technical">Technical SEO</option>
+            <option value="query">Overview Test</option>
+            <option value="journey">Analysis Journey</option>
+            <option value="query-v2">Query Analysis V2</option>
           </select>
           <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,16 +169,75 @@
         </div>
       </div>
     </div>
+
+    <!-- Overview Test Dashboard -->
+    <div v-else-if="dashboardType === 'query'">
+      <!-- Overview Test Component - Full Width -->
+      <div class="mb-6">
+        <QueryAnalysisComponent
+          :data="{
+            queries: filteredQueries,
+            competitors: reportData?.competitors || [],
+            page_analyses: reportData?.page_analyses || []
+          }"
+          :filter="platformFilter"
+          :loading="false"
+        />
+      </div>
+
+      <!-- Competitor Analysis Components -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <CompetitorMentionRate
+          :brand-mention-rate="brandMentionRate"
+          :competitors="competitorsWithMentionData"
+          :total-queries="totalQueries"
+          :loading="false"
+        />
+        <CompetitorCitationRate
+          :brand-citations="brandCitations"
+          :brand-citation-rate="brandCitationRate"
+          :competitors="competitorsWithCitationData"
+          :total-citations="totalCitations"
+          :total-domains="totalDomains"
+          :loading="false"
+        />
+      </div>
+    </div>
+
+    <!-- Analysis Journey Dashboard -->
+    <div v-else-if="dashboardType === 'journey'">
+      <AnalysisJourney
+        title="Brand Visibility Journey"
+        subtitle="How your brand appears in AI responses across the search journey"
+        :data="analysisJourneyData"
+        :loading="isJourneyLoading"
+      />
+    </div>
+
+    <!-- Query Analysis V2 Dashboard -->
+    <div v-else-if="dashboardType === 'query-v2'">
+      <QueryAnalysisV2
+        :data="reportData"
+        :client="props.reportData?.client || {}"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useCompetitorMentionData, useCompetitorCitationData } from '~/composables/useCompetitorData'
 import TechnicalSeoScoreCard from '~/components/reports/components/TechnicalSeoScoreCard.vue'
 import BrandQueryPerformanceCard from '~/components/reports/components/BrandQueryPerformanceCard.vue'
 import QueryPerformanceTable from '~/components/reports/components/QueryPerformanceTable.vue'
 import SentimentAnalysis from '~/components/reports/components/SentimentAnalysis.vue'
 import BrandMentionBreakdown from '~/components/reports/components/BrandMentionBreakdown.vue'
+import BrandMetricCard from '~/components/reports/components/BrandMetricCard.vue'
+import QueryAnalysisComponent from '~/components/reports/components/QueryAnalysisComponent.vue'
+import CompetitorMentionRate from '~/components/reports/components/CompetitorMentionRate.vue'
+import CompetitorCitationRate from '~/components/reports/components/CompetitorCitationRate.vue'
+import AnalysisJourney from '~/components/reports/AnalysisJourney.vue'
+import QueryAnalysisV2 from '~/components/reports/components/QueryAnalysisV2.vue'
 
 const props = defineProps({
   reportData: {
@@ -190,6 +252,8 @@ const platformFilter = ref('all') // Default to all platforms
 
 // Data
 const scoreFilter = ref('all') // all, high, medium, low
+const isJourneyLoading = ref(true)
+const analysisJourneyData = ref({})
 
 // Get available data sources from queries
 const availableDataSources = computed(() => {
@@ -457,6 +521,316 @@ const filteredPages = computed(() => {
   }).slice(0, 10) // Limit to 10 entries
 })
 
+// Brand mention metrics from analysis_queries
+const brandMentions = computed(() => {
+  return filteredQueries.value.filter(q => q.brand_mentioned === true).length
+})
+
+const brandMentionRate = computed(() => {
+  if (filteredQueries.value.length === 0) return 0
+  return Math.round((brandMentions.value / filteredQueries.value.length) * 100)
+})
+
+// For displaying competitor metrics in the dashboard
+const totalDomains = computed(() => {
+  const domains = new Set()
+  const pageAnalyses = props.reportData?.page_analyses || []
+
+  pageAnalyses.forEach(page => {
+    if (page.domain_name) {
+      domains.add(page.domain_name)
+    }
+  })
+
+  return domains.size || 0
+})
+
+// Function to prepare analysis journey data from the current report
+// Competitor mention data
+const competitorsWithMentionData = computed(() => {
+  const competitors = props.reportData?.competitors || []
+  const queries = filteredQueries.value
+
+  if (competitors.length === 0 || queries.length === 0) {
+    return []
+  }
+
+  return competitors.map(comp => {
+    // Calculate how many queries mention this competitor
+    const mentions = queries.filter(q => {
+      // Check if query mentions this competitor using the competitor_mentioned_names field
+      if (q.competitor_mentioned_names && Array.isArray(q.competitor_mentioned_names)) {
+        return q.competitor_mentioned_names.some(name => name.toLowerCase() === comp.name.toLowerCase())
+      }
+      return false
+    }).length
+
+    // Calculate mention rate
+    const mentionRate = (mentions / queries.length) * 100
+
+    // Add platform breakdown if available
+    const platformData = []
+    const platforms = ['chatgpt', 'perplexity']
+
+    platforms.forEach(platform => {
+      const platformQueries = queries.filter(q => q.data_source?.toLowerCase() === platform.toLowerCase())
+      if (platformQueries.length > 0) {
+        const platformMentions = platformQueries.filter(q => {
+          if (q.competitor_mentioned_names && Array.isArray(q.competitor_mentioned_names)) {
+            return q.competitor_mentioned_names.some(name => name.toLowerCase() === comp.name.toLowerCase())
+          }
+          return false
+        }).length
+
+        platformData.push({
+          platform,
+          rate: (platformMentions / platformQueries.length) * 100
+        })
+      }
+    })
+
+    return {
+      id: comp.id,
+      name: comp.name,
+      domain: comp.domain,
+      mentions,
+      mentionRate,
+      platformData
+    }
+  })
+})
+
+// Competitor citation data
+const competitorsWithCitationData = computed(() => {
+  const competitors = props.reportData?.competitors || []
+  const pageAnalyses = props.reportData?.page_analyses || []
+
+  if (competitors.length === 0 || pageAnalyses.length === 0) {
+    return []
+  }
+
+  return competitors.map(comp => {
+    // Calculate how many citations reference this competitor
+    const citations = pageAnalyses.filter(page => {
+      // Method 1: Check if the domain matches the competitor domain
+      if (page.is_competitor_domain && page.domain_name) {
+        const pageDomain = page.domain_name.toLowerCase()
+        const compDomain = comp.domain?.toLowerCase() || ''
+
+        // Try to match domains (with or without www prefix)
+        if (pageDomain === compDomain ||
+            pageDomain === `www.${compDomain}` ||
+            `www.${pageDomain}` === compDomain ||
+            pageDomain.includes(compDomain) ||
+            compDomain.includes(pageDomain)) {
+          return true
+        }
+      }
+
+      // Method 2: Check if competitor name appears in competitor_names array
+      if (page.competitor_names && Array.isArray(page.competitor_names)) {
+        return page.competitor_names.some(name =>
+          name && comp.name && name.toLowerCase() === comp.name.toLowerCase()
+        )
+      }
+
+      return false
+    }).length
+
+    // Calculate citation rate
+    const citationRate = (citations / totalCitations.value) * 100
+
+    // Add quality score (example - adjust based on your data)
+    const qualityScore = Math.random() * 2 + 3 // Random score between 3-5 for demo
+
+    return {
+      id: comp.id,
+      name: comp.name,
+      domain: comp.domain,
+      citations,
+      citationRate,
+      qualityScore
+    }
+  })
+})
+
+// Citation metrics from page_analyses
+const totalCitations = computed(() => {
+  return props.reportData?.page_analyses?.length || 0
+})
+
+const brandCitations = computed(() => {
+  return props.reportData?.page_analyses?.filter(page => page.is_client_domain)?.length || 0
+})
+
+const brandCitationRate = computed(() => {
+  if (!totalCitations.value) return 0
+  return Math.round((brandCitations.value / totalCitations.value) * 100)
+})
+
+// We already have totalDomains defined above, so we're removing this duplicate
+
+const prepareAnalysisJourneyData = () => {
+  isJourneyLoading.value = true
+
+  try {
+    const queries = props.reportData?.analysis_queries || []
+    const pageAnalyses = props.reportData?.page_analyses || []
+
+    if (queries.length === 0) {
+      analysisJourneyData.value = {}
+      isJourneyLoading.value = false
+      return
+    }
+
+    // Process Keywords Section Data
+    const keywordMap = new Map()
+    const keywordCategoryMap = new Map()
+
+    queries.forEach(query => {
+      const keyword = query.query_keyword
+      const category = query.query_category || 'Uncategorized'
+
+      if (keyword) {
+        if (!keywordMap.has(keyword)) {
+          keywordMap.set(keyword, {
+            keyword,
+            category,
+            queries: 0,
+            brandMentions: 0,
+            source: query.data_source
+          })
+        }
+
+        const keywordData = keywordMap.get(keyword)
+        keywordData.queries++
+        if (query.brand_mentioned) keywordData.brandMentions++
+
+        // Add to category counts
+        if (!keywordCategoryMap.has(category)) {
+          keywordCategoryMap.set(category, { name: category, count: 0 })
+        }
+
+        const categoryData = keywordCategoryMap.get(category)
+        categoryData.count++
+      }
+    })
+
+    // Process query intent and type breakdowns
+    const intentMap = new Map()
+    const typeMap = new Map()
+
+    queries.forEach(query => {
+      const intent = query.query_intent || 'Unknown'
+      const type = query.query_type || 'Unknown'
+
+      if (!intentMap.has(intent)) {
+        intentMap.set(intent, { name: intent, count: 0 })
+      }
+      intentMap.get(intent).count++
+
+      if (!typeMap.has(type)) {
+        typeMap.set(type, { name: type, count: 0 })
+      }
+      typeMap.get(type).count++
+    })
+
+    // Calculate percentages for categories
+    const totalKeywords = keywordMap.size > 0 ? keywordMap.size : 1
+    const keywordCategories = Array.from(keywordCategoryMap.values()).map(category => {
+      return {
+        ...category,
+        percentage: Math.round((category.count / totalKeywords) * 100) || 0
+      }
+    })
+
+    // Calculate percentages for intents and types
+    const queryIntentBreakdown = Array.from(intentMap.values()).map(intent => {
+      return {
+        ...intent,
+        percentage: Math.round((intent.count / queries.length) * 100) || 0
+      }
+    })
+
+    const queryTypeBreakdown = Array.from(typeMap.values()).map(type => {
+      return {
+        ...type,
+        percentage: Math.round((type.count / queries.length) * 100) || 0
+      }
+    })
+
+    // Calculate citation metrics
+    const totalCitations = pageAnalyses?.length || 0
+    const brandCitations = pageAnalyses?.filter(page => page.is_client_domain)?.length || 0
+    const competitorCitations = pageAnalyses?.filter(page => page.is_competitor_domain)?.length || 0
+
+    // Process citation data
+    const citationMap = new Map()
+
+    pageAnalyses?.forEach(page => {
+      const url = page.citation_url
+      if (url && !citationMap.has(url)) {
+        citationMap.set(url, {
+          url,
+          domain: page.domain_name || new URL(url).hostname,
+          isBrand: page.is_client_domain || false,
+          isCompetitor: page.is_competitor_domain || false,
+          competitorName: page.competitor_names?.length > 0 ? page.competitor_names[0] : undefined,
+          relevance: page.relevance_score || 5.0,
+          queries: 1
+        })
+      } else if (url) {
+        citationMap.get(url).queries++
+      }
+    })
+
+    // Build the final data object
+    analysisJourneyData.value = {
+      // Keywords
+      keywordCount: keywordMap.size,
+      keywordCategories,
+      keywordData: Array.from(keywordMap.values()),
+
+      // Queries
+      totalQueries: queries.length,
+      queryIntentBreakdown,
+      queryTypeBreakdown,
+      queryData: queries.map(q => ({
+        query: q.query_text,
+        intent: q.query_intent || 'Unknown',
+        type: q.query_type || 'Unknown',
+        platform: q.data_source,
+        brandMentioned: q.brand_mentioned || false
+      })),
+
+      // Responses
+      totalResponses: queries.length,
+      brandMentions: queries.filter(q => q.brand_mentioned).length,
+      brandPagesCited: pageAnalyses?.filter(p => p.is_client_domain).length || 0,
+      responseData: queries.map(q => ({
+        query: q.query_text,
+        platform: q.data_source,
+        responseOutcome: q.response_outcome || 'Unknown',
+        brandMentionType: q.brand_mention_type,
+        sentiment: q.brand_sentiment > 0.2 ? 'Positive' : q.brand_sentiment < -0.2 ? 'Negative' : 'Neutral',
+        citationCount: q.citation_count || 0
+      })),
+
+      // Citations
+      totalCitations,
+      brandCitations,
+      competitorCitations,
+      citationData: Array.from(citationMap.values())
+    }
+
+  } catch (err) {
+    console.error('Error preparing analysis journey data:', err)
+    analysisJourneyData.value = {}
+  } finally {
+    isJourneyLoading.value = false
+  }
+}
+
 // Helper functions
 const truncateUrl = (url) => {
   if (!url) return ''
@@ -477,6 +851,21 @@ const getScoreClass = (score) => {
   if (score >= 4) return 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400 px-2 py-1 rounded-full text-xs font-medium'
   return 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 px-2 py-1 rounded-full text-xs font-medium'
 }
+
+// Watch for dashboard type changes to load Analysis Journey data
+watch(dashboardType, (newType) => {
+  if (newType === 'journey') {
+    isJourneyLoading.value = true
+    prepareAnalysisJourneyData()
+  }
+})
+
+// Initialize data when component mounts
+onMounted(() => {
+  if (dashboardType.value === 'journey') {
+    prepareAnalysisJourneyData()
+  }
+})
 </script>
 
 <style scoped>

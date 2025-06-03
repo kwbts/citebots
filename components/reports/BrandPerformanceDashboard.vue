@@ -48,12 +48,7 @@
       />
     </div>
 
-    <!-- Query Data Table Section -->
-    <div class="data-table-section">
-      <QueryPerformanceTable
-        :queries="displayQueries"
-      />
-    </div>
+    <!-- Query Data Table has been moved to Overview tab -->
   </div>
 </template>
 
