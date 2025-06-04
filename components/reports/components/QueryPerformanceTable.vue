@@ -1,21 +1,50 @@
 <template>
-  <div class="query-performance-table bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+  <div class="query-performance-table bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 relative">
+    <!-- Loading State -->
+    <div v-if="loading" class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
+      <div class="flex flex-col items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
+        <div class="w-7 h-7 border-3 border-citebots-orange border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Loading data...</span>
+      </div>
+    </div>
+
     <div class="flex justify-between items-center mb-6">
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Query Performance</h3>
-      <!-- Brand mention filter -->
-      <div class="relative">
-        <select
-          v-model="filterType"
-          class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-white py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-        >
-          <option value="all">All Queries</option>
-          <option value="mentioned">Brand Mentioned</option>
-          <option value="not-mentioned">Not Mentioned</option>
-        </select>
-        <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
+      <!-- Filters -->
+      <div class="flex items-center space-x-3">
+        <!-- Platform filter -->
+        <div class="relative">
+          <select
+            v-model="platformFilter"
+            class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-white py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+          >
+            <option value="all">All Platforms</option>
+            <option v-for="platform in availablePlatforms" :key="platform.value" :value="platform.value">
+              {{ platform.label }}
+            </option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Brand mention filter -->
+        <div class="relative">
+          <select
+            v-model="filterType"
+            class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-700 dark:text-white py-2 px-3 pr-8 appearance-none focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+          >
+            <option value="all">All Queries</option>
+            <option value="mentioned">Brand Mentioned</option>
+            <option value="not-mentioned">Not Mentioned</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
         </div>
       </div>
     </div>
@@ -31,6 +60,17 @@
               <div class="flex items-center">
                 Query
                 <svg v-if="sortColumn === 'query_text'" class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
+                </svg>
+              </div>
+            </th>
+            <th
+              @click="sortTable('data_source')"
+              class="p-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/25"
+            >
+              <div class="flex items-center">
+                Platform
+                <svg v-if="sortColumn === 'data_source'" class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7'" />
                 </svg>
               </div>
@@ -105,6 +145,14 @@
                 </div>
               </td>
               <td class="p-3 text-sm">
+                <span
+                  class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+                  :class="getPlatformBadgeClass(query.data_source)"
+                >
+                  {{ getPlatformLabel(query.data_source) }}
+                </span>
+              </td>
+              <td class="p-3 text-sm">
                 <div class="flex items-center gap-2">
                   <span v-if="query.brand_mentioned" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400">
                     {{ getBrandMentionTypeLabel(query.brand_mention_type) }}
@@ -138,7 +186,7 @@
 
             <!-- Expanded Content Row -->
             <tr v-if="expandedQueryIds.includes(query.id)" class="bg-gray-50 dark:bg-gray-800/50">
-              <td colspan="5" class="p-0">
+              <td colspan="6" class="p-0">
                 <div class="p-4 border-t border-gray-200 dark:border-gray-700 animate-slideDown">
                   <div class="space-y-4">
                     <!-- Query Details -->
@@ -231,7 +279,7 @@
 
           <!-- Empty State -->
           <tr v-if="filteredQueries.length === 0">
-            <td colspan="5" class="p-4 text-center text-gray-500 dark:text-gray-400">
+            <td colspan="6" class="p-4 text-center text-gray-500 dark:text-gray-400">
               No queries match the current filter.
             </td>
           </tr>
@@ -251,27 +299,17 @@ const props = defineProps({
   }
 })
 
-// Filter, sort, and expand state
+// Filter, sort, expand, and loading state
 const filterType = ref('all')
+const platformFilter = ref('all')
 const expandedQueryIds = ref([])
 const sortColumn = ref('query_text')
 const sortDirection = ref('asc')
+const loading = ref(false) // Add loading state for consistency
 
-// Debug query structure on mount
+// Initialize component
 onMounted(() => {
-  if (props.queries.length > 0) {
-    console.log('Query structure sample:', props.queries[0])
-    
-    // Check competitor data structure
-    const withCompetitors = props.queries.filter(q => 
-      q.competitor_mentioned === true || 
-      (q.competitor_mentioned_names && q.competitor_mentioned_names.length > 0)
-    )
-    
-    if (withCompetitors.length > 0) {
-      console.log('Sample with competitors:', withCompetitors[0])
-    }
-  }
+  // No initialization needed - component relies on reactive props
 })
 
 // Get competitor names from a query - handles various data structures
@@ -280,12 +318,12 @@ const getCompetitorNames = (query) => {
   if (query.competitor_mentioned_names && Array.isArray(query.competitor_mentioned_names) && query.competitor_mentioned_names.length > 0) {
     return query.competitor_mentioned_names
   }
-  
+
   // Then check for competitor_mentioned_name string field (singular)
   if (query.competitor_mentioned_name) {
     return [query.competitor_mentioned_name]
   }
-  
+
   // Check competitor_analysis JSON structure if present
   if (query.competitor_analysis && typeof query.competitor_analysis === 'object') {
     const names = []
@@ -298,11 +336,26 @@ const getCompetitorNames = (query) => {
       return names
     }
   }
-  
+
   // No competitor names found
   return []
 }
 
+// Compute the available platforms from the dataset
+const availablePlatforms = computed(() => {
+  const platforms = new Set()
+
+  props.queries.forEach(query => {
+    if (query.data_source) {
+      platforms.add(query.data_source.toLowerCase())
+    }
+  })
+
+  return Array.from(platforms).map(platform => ({
+    value: platform,
+    label: getPlatformLabel(platform)
+  })).sort((a, b) => a.label.localeCompare(b.label))
+})
 
 // Filtered and sorted queries based on selection
 const filteredQueries = computed(() => {
@@ -313,6 +366,13 @@ const filteredQueries = computed(() => {
     filtered = filtered.filter(q => q.brand_mentioned === true)
   } else if (filterType.value === 'not-mentioned') {
     filtered = filtered.filter(q => q.brand_mentioned !== true)
+  }
+
+  // Apply platform filter
+  if (platformFilter.value !== 'all') {
+    filtered = filtered.filter(q => {
+      return q.data_source && q.data_source.toLowerCase() === platformFilter.value.toLowerCase()
+    })
   }
 
   // Apply sorting

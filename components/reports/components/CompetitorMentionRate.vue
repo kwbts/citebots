@@ -3,14 +3,29 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-xl flex items-center justify-center">
-          <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-10 h-10 bg-blue-50 dark:bg-blue-600/15 border border-blue-200/50 dark:border-blue-500/30 rounded-xl flex items-center justify-center">
+          <svg class="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Competitor Mention Rate</h3>
           <p class="text-sm text-gray-500 dark:text-gray-400">Queries where competitors are mentioned</p>
+        </div>
+      </div>
+      <div class="relative group">
+        <button
+          class="flex items-center justify-center w-4 h-4 text-gray-500 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none"
+          aria-label="Help"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+          </svg>
+        </button>
+        <div class="absolute right-0 top-5 w-64 p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+          <p class="text-xs text-gray-600 dark:text-gray-300">
+            Percentage of AI queries that mention competitor brands. Calculated as (queries mentioning competitor / total queries) × 100 for each competitor.
+          </p>
         </div>
       </div>
     </div>
@@ -22,13 +37,13 @@
           <span class="font-medium text-sm text-gray-700 dark:text-gray-300">Your Brand</span>
           <span v-if="brandDomain" class="text-xs text-gray-500 dark:text-gray-400">({{ truncateDomain(brandDomain) }})</span>
         </div>
-        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-500/20">
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-600/20 text-orange-700 dark:text-orange-200 border border-orange-200/50 dark:border-orange-500/30 font-semibold">
           {{ formatPercentage(brandMentionRate) }}
         </span>
       </div>
-      <div class="relative h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+      <div class="relative h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
         <div
-          class="absolute top-0 left-0 h-full bg-orange-500 rounded-full transition-all duration-1000"
+          class="absolute top-0 left-0 h-full bg-orange-500 dark:bg-orange-400 rounded-full transition-all duration-1000"
           :style="`width: ${Math.min(brandMentionRate, 100)}%`"
         ></div>
       </div>
@@ -48,12 +63,12 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="text-xs text-gray-500 dark:text-gray-400">{{ competitor.mentions }} of {{ totalQueries }}</span>
-            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/20">
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-200 border border-gray-200/50 dark:border-gray-500/30 font-semibold">
               {{ formatPercentage(competitor.mentionRate) }}
             </span>
           </div>
         </div>
-        <div class="relative h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div class="relative h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
           <div
             class="absolute top-0 left-0 h-full rounded-full transition-all duration-1000"
             :class="getCompetitorColor(index)"
@@ -68,10 +83,10 @@
     <!-- Insights removed as requested -->
 
     <!-- Loading State -->
-    <div v-if="loading" class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-      <div class="flex items-center gap-2">
-        <div class="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <span class="text-sm text-gray-600 dark:text-gray-400">Loading...</span>
+    <div v-if="loading" class="absolute inset-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10">
+      <div class="flex flex-col items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
+        <div class="w-7 h-7 border-3 border-citebots-orange border-t-transparent rounded-full animate-spin"></div>
+        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Loading data...</span>
       </div>
     </div>
   </div>
@@ -203,16 +218,16 @@ const truncateDomain = (domain) => {
 
 const getCompetitorColor = (index) => {
   const colors = [
-    'bg-purple-500',
-    'bg-indigo-500',
-    'bg-blue-500',
-    'bg-cyan-500',
-    'bg-teal-500',
-    'bg-emerald-500',
-    'bg-lime-500',
-    'bg-amber-500',
-    'bg-orange-500',
-    'bg-pink-500',
+    'bg-purple-500 dark:bg-purple-400',
+    'bg-indigo-500 dark:bg-indigo-400',
+    'bg-blue-500 dark:bg-blue-400',
+    'bg-cyan-500 dark:bg-cyan-400',
+    'bg-teal-500 dark:bg-teal-400',
+    'bg-emerald-500 dark:bg-emerald-400',
+    'bg-lime-500 dark:bg-lime-400',
+    'bg-amber-500 dark:bg-amber-400',
+    'bg-orange-500 dark:bg-orange-400',
+    'bg-pink-500 dark:bg-pink-400',
   ]
   return colors[index % colors.length]
 }
