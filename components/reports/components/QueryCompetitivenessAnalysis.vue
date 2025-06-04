@@ -1,5 +1,5 @@
 <template>
-  <div class="query-competitiveness-analysis bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+  <div class="query-competitiveness-analysis bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6">
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
       <div class="flex items-center gap-3">
@@ -10,13 +10,27 @@
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Defensive Query Analysis</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Analyzing brand defense in competitive queries</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-if="defensiveQueryCount === 0" class="bg-gray-50 dark:bg-gray-800/50 border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-6 mb-6">
+      <div class="flex items-center justify-center py-6">
+        <div class="text-center">
+          <svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">No Defensive Queries Found</h3>
+          <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+            There are currently no queries marked with "query_competition" = "defending" in this dataset.
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Defensive Metrics -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <!-- Primary Metric: Defensive Mention Rate -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-xl p-4 hover:shadow-md transition-all">
         <h4 class="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Defensive Mention Rate</h4>
@@ -73,148 +87,97 @@
       </div>
     </div>
 
-    <!-- Breakdown Tabs -->
-    <div class="mb-6">
-      <div class="border-b border-gray-200 dark:border-gray-700">
-        <nav class="flex -mb-px space-x-8">
-          <button 
-            v-for="tab in tabs" 
-            :key="tab.id"
-            @click="activeTab = tab.id"
-            :class="[
-              activeTab === tab.id 
-                ? 'border-purple-500 text-purple-600 dark:text-purple-400' 
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:hover:text-gray-300',
-              'whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm'
-            ]"
-          >
-            {{ tab.name }}
-          </button>
-        </nav>
-      </div>
-    </div>
+    <!-- Brand Pages Table -->
+    <div v-if="defensiveQueryCount > 0" class="mt-6">
+      <h4 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Brand Pages Referenced in Defensive Queries</h4>
 
-    <!-- Tab Content -->
-    <div class="mt-6">
-      <!-- Query Type Tab -->
-      <div v-if="activeTab === 'query-type'" class="space-y-4">
-        <h4 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Defensive Queries by Query Type</h4>
-        
-        <div class="space-y-3">
-          <div v-for="(type, index) in queryTypeBreakdown" :key="index" class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3">
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ formatTypeName(type.name) }}</span>
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ type.count }} queries</span>
-                <span class="text-xs px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300">
-                  {{ type.percentage }}%
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead>
+            <tr>
+              <th @click="sortBy('title')" class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50">
+                <div class="flex items-center">
+                  <span>Page</span>
+                  <svg v-if="sortColumn === 'title'" class="ml-1 h-4 w-4" :class="{'rotate-180': !sortAscending}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </div>
+              </th>
+              <th @click="sortBy('keyword')" class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50">
+                <div class="flex items-center">
+                  <span>Keyword</span>
+                  <svg v-if="sortColumn === 'keyword'" class="ml-1 h-4 w-4" :class="{'rotate-180': !sortAscending}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </div>
+              </th>
+              <th @click="sortBy('topic')" class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50">
+                <div class="flex items-center">
+                  <span>Topic</span>
+                  <svg v-if="sortColumn === 'topic'" class="ml-1 h-4 w-4" :class="{'rotate-180': !sortAscending}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </div>
+              </th>
+              <th @click="sortBy('hasSchema')" class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50">
+                <div class="flex items-center">
+                  <span>Schema</span>
+                  <svg v-if="sortColumn === 'hasSchema'" class="ml-1 h-4 w-4" :class="{'rotate-180': !sortAscending}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </div>
+              </th>
+              <th @click="sortBy('eeatScore')" class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50">
+                <div class="flex items-center">
+                  <span>EEAT Score</span>
+                  <svg v-if="sortColumn === 'eeatScore'" class="ml-1 h-4 w-4" :class="{'rotate-180': !sortAscending}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </div>
+              </th>
+              <th @click="sortBy('contentFormat')" class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600/50">
+                <div class="flex items-center">
+                  <span>Format</span>
+                  <svg v-if="sortColumn === 'contentFormat'" class="ml-1 h-4 w-4" :class="{'rotate-180': !sortAscending}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+                  </svg>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
+            <tr v-for="(page, index) in sortedBrandPages" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+              <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300 max-w-xs truncate">
+                <a :href="page.url" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
+                  {{ getPageTitle(page) }}
+                </a>
+              </td>
+              <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
+                {{ page.keyword || 'N/A' }}
+              </td>
+              <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
+                {{ page.topic || 'N/A' }}
+              </td>
+              <td class="px-3 py-3 text-sm">
+                <span v-if="page.hasSchema" class="text-green-600 dark:text-green-400">✓</span>
+                <span v-else class="text-red-600 dark:text-red-400">✗</span>
+              </td>
+              <td class="px-3 py-3 text-sm">
+                <span :class="getQualityClass(page.eeatScore)">
+                  {{ page.eeatScore || 'N/A' }}
                 </span>
-              </div>
-            </div>
-            <div class="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-              <div class="absolute top-0 left-0 h-full bg-purple-500 dark:bg-purple-600 rounded-full" 
-                  :style="`width: ${type.percentage}%`"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Response Type Tab -->
-      <div v-if="activeTab === 'response-type'" class="space-y-4">
-        <h4 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Defensive Queries by Response Type</h4>
-        
-        <div class="space-y-3">
-          <div v-for="(type, index) in responseTypeBreakdown" :key="index" class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3">
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ formatTypeName(type.name) }}</span>
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ type.count }} responses</span>
-                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">
-                  {{ type.percentage }}%
-                </span>
-              </div>
-            </div>
-            <div class="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-              <div class="absolute top-0 left-0 h-full bg-blue-500 dark:bg-blue-600 rounded-full" 
-                  :style="`width: ${type.percentage}%`"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Funnel Stage Tab -->
-      <div v-if="activeTab === 'funnel-stage'" class="space-y-4">
-        <h4 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Defensive Queries by Funnel Stage</h4>
-        
-        <div class="space-y-3">
-          <div v-for="(stage, index) in funnelStageBreakdown" :key="index" class="bg-gray-50 dark:bg-gray-700/30 rounded-lg p-3">
-            <div class="flex justify-between items-center mb-2">
-              <span class="font-medium text-gray-700 dark:text-gray-300">{{ formatStageName(stage.name) }}</span>
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ stage.count }} queries</span>
-                <span class="text-xs px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300">
-                  {{ stage.percentage }}%
-                </span>
-              </div>
-            </div>
-            <div class="relative h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-              <div class="absolute top-0 left-0 h-full bg-green-500 dark:bg-green-600 rounded-full" 
-                  :style="`width: ${stage.percentage}%`"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Defensive Pages Tab -->
-      <div v-if="activeTab === 'pages'" class="space-y-4">
-        <h4 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-4">Pages in Defensive Queries</h4>
-        
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead>
-              <tr>
-                <th class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Page</th>
-                <th class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Schema</th>
-                <th class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Quality</th>
-                <th class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recency</th>
-                <th class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Format</th>
-                <th class="px-3 py-3 bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Depth</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-              <tr v-for="(page, index) in defensivePages" :key="index" class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300 max-w-xs truncate">
-                  <a :href="page.url" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
-                    {{ getPageTitle(page) }}
-                  </a>
-                </td>
-                <td class="px-3 py-3 text-sm">
-                  <span v-if="page.hasSchema" class="text-green-600 dark:text-green-400">✓</span>
-                  <span v-else class="text-red-600 dark:text-red-400">✗</span>
-                </td>
-                <td class="px-3 py-3 text-sm">
-                  <span :class="getQualityClass(page.contentQuality)">
-                    {{ page.contentQuality }}/5
-                  </span>
-                </td>
-                <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
-                  {{ page.contentRecency }}
-                </td>
-                <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
-                  {{ page.contentFormat }}
-                </td>
-                <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
-                  {{ page.contentDepth }}
-                </td>
-              </tr>
-              <tr v-if="defensivePages.length === 0">
-                <td colspan="6" class="px-3 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
-                  No defensive pages found.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+              </td>
+              <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-300">
+                {{ page.contentFormat || 'N/A' }}
+              </td>
+            </tr>
+            <tr v-if="brandPages.length === 0">
+              <td colspan="7" class="px-3 py-3 text-sm text-center text-gray-500 dark:text-gray-400">
+                No brand pages found in queries marked as 'defending'.
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -234,14 +197,23 @@ const props = defineProps({
   }
 })
 
-// Tab navigation
-const tabs = [
-  { id: 'query-type', name: 'Query Type' },
-  { id: 'response-type', name: 'Response Type' },
-  { id: 'funnel-stage', name: 'Funnel Stage' },
-  { id: 'pages', name: 'Defensive Pages' }
-]
-const activeTab = ref('query-type')
+// Sorting state
+const sortColumn = ref('title')
+const sortAscending = ref(true)
+
+// Sorting function
+const sortBy = (column) => {
+  if (sortColumn.value === column) {
+    // If we're already sorting by this column, toggle the direction
+    sortAscending.value = !sortAscending.value
+  } else {
+    // Otherwise, sort by the new column in ascending order
+    sortColumn.value = column
+    sortAscending.value = true
+  }
+}
+
+// No tabs needed anymore
 
 // Access queries data from the props
 const queries = computed(() => {
@@ -261,19 +233,19 @@ const defensiveMentionRate = computed(() => {
   return Math.round((defensiveQueryCount.value / totalBrandMentions.value) * 100)
 })
 
-// Competitive context breakdown
+// Competitive context breakdown - only for defensive queries
 const competitiveQueryCount = computed(() => {
-  return queries.value.filter(q => 
-    q.competitor_mentioned_names?.length > 0 || 
-    q.competitor_count > 0 || 
+  return defensiveQueries.value.filter(q =>
+    q.competitor_mentioned_names?.length > 0 ||
+    q.competitor_count > 0 ||
     q.competitor_context
   ).length
 })
 
 const competitiveContexts = computed(() => {
   const contexts = {}
-  
-  queries.value.forEach(query => {
+
+  defensiveQueries.value.forEach(query => {
     if (query.competitor_context) {
       const context = query.competitor_context
       contexts[context] = (contexts[context] || 0) + 1
@@ -287,11 +259,11 @@ const competitiveContexts = computed(() => {
   })).sort((a, b) => b.count - a.count)
 })
 
-// Top competitors
+// Top competitors - only for defensive queries
 const topCompetitors = computed(() => {
   const competitors = {}
-  
-  queries.value.forEach(query => {
+
+  defensiveQueries.value.forEach(query => {
     if (query.competitor_mentioned_names && Array.isArray(query.competitor_mentioned_names)) {
       query.competitor_mentioned_names.forEach(name => {
         competitors[name] = (competitors[name] || 0) + 1
@@ -306,82 +278,121 @@ const topCompetitors = computed(() => {
   })).sort((a, b) => b.count - a.count)
 })
 
-// Query type breakdown
-const queryTypeBreakdown = computed(() => {
-  const types = {}
-  
-  defensiveQueries.value.forEach(query => {
-    const type = query.query_type || 'unknown'
-    types[type] = (types[type] || 0) + 1
-  })
-  
-  return Object.entries(types).map(([name, count]) => ({
-    name,
-    count,
-    percentage: Math.round((count / defensiveQueryCount.value) * 100) || 0
-  })).sort((a, b) => b.count - a.count)
-})
+// No need for the breakdown computed properties, since we only show brand pages
 
-// Response type breakdown
-const responseTypeBreakdown = computed(() => {
-  const types = {}
-  
-  defensiveQueries.value.forEach(query => {
-    const type = query.response_outcome || 'unknown'
-    types[type] = (types[type] || 0) + 1
-  })
-  
-  return Object.entries(types).map(([name, count]) => ({
-    name,
-    count,
-    percentage: Math.round((count / defensiveQueryCount.value) * 100) || 0
-  })).sort((a, b) => b.count - a.count)
-})
-
-// Funnel stage breakdown
-const funnelStageBreakdown = computed(() => {
-  const stages = {}
-  
-  defensiveQueries.value.forEach(query => {
-    const stage = query.funnel_stage || 'unknown'
-    stages[stage] = (stages[stage] || 0) + 1
-  })
-  
-  return Object.entries(stages).map(([name, count]) => ({
-    name,
-    count,
-    percentage: Math.round((count / defensiveQueryCount.value) * 100) || 0
-  })).sort((a, b) => b.count - a.count)
-})
-
-// Pages in defensive queries
-const defensivePages = computed(() => {
+// Brand pages in defensive queries
+const brandPages = computed(() => {
   const pages = []
-  const pageUrls = new Set() // To track unique pages
-  
+  const pageUrlMap = new Map() // To track unique pages and their data
+  const clientDomain = props.client?.domain || ''
+
   defensiveQueries.value.forEach(query => {
+    // Extract query-level data that we'll need for pages
+    const queryKeyword = query.query_keyword || query.keyword || query.search_query || ''
+    const queryTopic = query.query_topic || query.topic || ''
+
     if (query.associated_pages && Array.isArray(query.associated_pages)) {
       query.associated_pages.forEach(page => {
-        // Only add each page once
-        if (page.citation_url && !pageUrls.has(page.citation_url)) {
-          pageUrls.add(page.citation_url)
-          
-          // Extract page data
-          pages.push({
-            url: page.citation_url,
-            title: page.page_title || extractDomainFromUrl(page.citation_url),
+        // Only add brand pages (client domain) once
+        if (page.citation_url &&
+            (page.is_client_domain === true ||
+             (page.citation_url && clientDomain && page.citation_url.includes(clientDomain)))) {
+
+          const url = page.citation_url
+
+          // If we've already seen this page, just update any missing data
+          if (pageUrlMap.has(url)) {
+            const existingPage = pageUrlMap.get(url)
+
+            // Only update keyword/topic if they're not already set
+            if (!existingPage.keyword && queryKeyword) {
+              existingPage.keyword = queryKeyword
+            }
+            if (!existingPage.topic && queryTopic) {
+              existingPage.topic = queryTopic
+            }
+
+            // Keep the higher EEAT score if available
+            const newEeatScore = page.eeat_score || page.page_analysis?.eeat_score
+            if (newEeatScore && (!existingPage.eeatScore || newEeatScore > existingPage.eeatScore)) {
+              existingPage.eeatScore = newEeatScore
+            }
+
+            return
+          }
+
+          // Extract page data for a new entry
+          const pageData = {
+            url: url,
+            title: page.page_title || extractDomainFromUrl(url),
             hasSchema: page.technical_seo?.schema_markup_present || false,
-            contentQuality: page.content_quality_score || 0,
             contentRecency: getContentRecency(page),
             contentFormat: getContentFormat(page),
-            contentDepth: getContentDepth(page)
-          })
+            // Add missing fields for table columns with better fallbacks
+            eeatScore: page.eeat_score || page.page_analysis?.eeat_score || null,
+            topic: page.topic || queryTopic || null,
+            keyword: queryKeyword || null
+          }
+
+          pages.push(pageData)
+          pageUrlMap.set(url, pageData)
         }
       })
     }
   })
-  
+
   return pages
+})
+
+// Sorted brand pages based on current sort column and direction
+const sortedBrandPages = computed(() => {
+  if (!brandPages.value.length) return []
+
+  return [...brandPages.value].sort((a, b) => {
+    let valueA, valueB
+
+    // Handle different column types
+    switch (sortColumn.value) {
+      case 'title':
+        valueA = a.title || ''
+        valueB = b.title || ''
+        break
+      case 'keyword':
+        valueA = a.keyword || ''
+        valueB = b.keyword || ''
+        break
+      case 'topic':
+        valueA = a.topic || ''
+        valueB = b.topic || ''
+        break
+      case 'hasSchema':
+        valueA = a.hasSchema ? 1 : 0
+        valueB = b.hasSchema ? 1 : 0
+        break
+      case 'eeatScore':
+        valueA = parseFloat(a.eeatScore) || 0
+        valueB = parseFloat(b.eeatScore) || 0
+        break
+      case 'contentFormat':
+        valueA = a.contentFormat || ''
+        valueB = b.contentFormat || ''
+        break
+      default:
+        valueA = a[sortColumn.value] || ''
+        valueB = b[sortColumn.value] || ''
+    }
+
+    // Sort strings alphabetically, numbers numerically
+    let result
+    if (typeof valueA === 'string' && typeof valueB === 'string') {
+      result = valueA.localeCompare(valueB)
+    } else {
+      result = valueA - valueB
+    }
+
+    // Apply sort direction
+    return sortAscending.value ? result : -result
+  })
 })
 
 // Helper functions
@@ -456,6 +467,29 @@ function getQualityClass(score) {
   if (scoreNum >= 2) return 'text-orange-600 dark:text-orange-400 font-medium'
   return 'text-red-600 dark:text-red-400 font-medium'
 }
+
+function truncateUrl(url, maxLength) {
+  if (!url) return ''
+  if (url.length <= maxLength) return url
+
+  try {
+    const urlObj = new URL(url)
+    const domain = urlObj.hostname
+
+    // If domain itself is longer than maxLength, truncate it
+    if (domain.length >= maxLength - 3) {
+      return domain.substring(0, maxLength - 3) + '...'
+    }
+
+    // Otherwise, show domain + truncated path
+    const pathLength = maxLength - domain.length - 3
+    const path = urlObj.pathname.substring(0, pathLength) + (urlObj.pathname.length > pathLength ? '...' : '')
+    return domain + path
+  } catch (e) {
+    // Handle invalid URLs
+    return url.substring(0, maxLength - 3) + '...'
+  }
+}
 </script>
 
 <style scoped>
@@ -464,7 +498,5 @@ function getQualityClass(score) {
   min-height: 350px;
 }
 
-.query-competitiveness-analysis:hover {
-  transform: translateY(-2px);
-}
+/* Removed hover effect */
 </style>

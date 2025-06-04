@@ -37,9 +37,12 @@
           <span class="font-medium text-sm text-gray-700 dark:text-gray-300">Your Brand</span>
           <span v-if="brandDomain" class="text-xs text-gray-500 dark:text-gray-400">({{ truncateDomain(brandDomain) }})</span>
         </div>
-        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-600/20 text-orange-700 dark:text-orange-200 border border-orange-200/50 dark:border-orange-500/30 font-semibold">
-          {{ formatPercentage(brandMentionRate) }}
-        </span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-500 dark:text-gray-400">{{ calculateBrandMentions() }} of {{ totalQueries }}</span>
+          <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-600/20 text-orange-700 dark:text-orange-200 border border-orange-200/50 dark:border-orange-500/30 font-semibold">
+            {{ formatPercentage(brandMentionRate) }}
+          </span>
+        </div>
       </div>
       <div class="relative h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
         <div
@@ -204,6 +207,12 @@ const competitiveInsight = computed(() => {
 // Helper functions
 const formatPercentage = (value) => {
   return Math.round(value || 0) + '%'
+}
+
+const calculateBrandMentions = () => {
+  // Calculate the number of brand mentions based on the brand mention rate and total queries
+  if (!props.totalQueries || !props.brandMentionRate) return 0
+  return Math.round((props.brandMentionRate / 100) * props.totalQueries)
 }
 
 const truncateName = (name, length) => {

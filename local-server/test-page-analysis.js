@@ -11,6 +11,7 @@
  *   --moz         Enable Moz API testing
  *   --save        Save results to results.json
  *   --verbose     Show detailed debug information
+ *   --help        Show this help message
  *
  * Example:
  *   node test-page-analysis.js https://knak.com/blog/email-template-builders-scale-personalization/
@@ -53,18 +54,43 @@ for (const arg of args) {
   }
 }
 
+// Show help message if requested
+if (options.help) {
+  console.log(`
+  Test script for page analysis
+
+  Usage:
+    node test-page-analysis.js <url> [options]
+
+  Options:
+    --pagespeed   Enable PageSpeed API testing
+    --moz         Enable Moz API testing
+    --save        Save results to results.json
+    --verbose     Show detailed debug information
+    --help        Show this help message
+
+  Example:
+    node test-page-analysis.js https://knak.com/blog/email-template-builders-scale-personalization/
+  `);
+  process.exit(0);
+}
+
 // Validate URL
 if (!url) {
   console.error('Error: URL is required');
   console.log('Usage: node test-page-analysis.js <url> [options]');
+  console.log('Use --help for more information');
   process.exit(1);
 }
 
-// Default to the knak.com test URL if no URL provided
+// Note: This block is now redundant since we have the validation check above,
+// but keeping it here commented out for future reference
+/*
 if (!url) {
   url = 'https://knak.com/blog/email-template-builders-scale-personalization/';
   console.log(`No URL provided, using default test URL: ${url}`);
 }
+*/
 
 // Check for required environment variables
 if (!process.env.SCRAPINGBEE_API_KEY) {
@@ -121,9 +147,35 @@ async function main() {
     console.log(`Page title: ${result.on_page_seo?.page_title || 'Unknown'}`);
     console.log(`Word count: ${result.on_page_seo?.word_count || 0}`);
     console.log(`Technical SEO score: ${result.technical_seo?.html_structure_score || 0}/10`);
-    console.log(`Content quality score: ${result.content_quality?.analysis_score || 0}/5`);
+    console.log(`Content quality score: ${result.content_quality?.analysis_score || 0}/10`);
     console.log(`Domain authority: ${result.domain_authority?.domain_authority || 'N/A'}`);
     console.log(`Page speed score: ${result.page_performance?.page_speed_score || 'N/A'}`);
+
+    // Display EEAT scores if available
+    if (result.eeat_analysis) {
+      console.log('\n=== EEAT SCORES ===');
+      console.log(`Overall EEAT Score: ${result.eeat_score || result.eeat_analysis?.eeat_score || 'N/A'}/10`);
+      console.log(`Experience Score: ${result.eeat_analysis?.experience?.score || 'N/A'}/10`);
+      console.log(`Expertise Score: ${result.eeat_analysis?.expertise?.score || 'N/A'}/10`);
+      console.log(`Authoritativeness Score: ${result.eeat_analysis?.authoritativeness?.score || 'N/A'}/10`);
+      console.log(`Trustworthiness Score: ${result.eeat_analysis?.trustworthiness?.score || 'N/A'}/10`);
+
+      // Display key strengths
+      if (result.eeat_analysis.strengths && result.eeat_analysis.strengths.length > 0) {
+        console.log('\nKey EEAT Strengths:');
+        result.eeat_analysis.strengths.forEach((strength, index) => {
+          console.log(`  ${index + 1}. ${strength}`);
+        });
+      }
+
+      // Display improvement areas
+      if (result.eeat_analysis.improvement_areas && result.eeat_analysis.improvement_areas.length > 0) {
+        console.log('\nEEAT Improvement Areas:');
+        result.eeat_analysis.improvement_areas.forEach((area, index) => {
+          console.log(`  ${index + 1}. ${area}`);
+        });
+      }
+    }
 
     // Save results if requested
     if (options.save) {

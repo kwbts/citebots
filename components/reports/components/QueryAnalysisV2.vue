@@ -1,21 +1,20 @@
 <template>
   <div class="mb-6">
     <!-- Component Header -->
-    <div class="flex items-center gap-3 mb-6">
-      <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/50 dark:border-indigo-500/20 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <div>
-        <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ removeControls ? 'Query Analysis' : 'Query Analysis V2' }}</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400">Enhanced query analysis dashboard</p>
-      </div>
+    <div class="mb-6">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ removeControls ? 'Query Analysis' : 'Query Analysis V2' }}</h2>
     </div>
 
     <!-- Key Metrics Section -->
     <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 mb-6">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Key Metrics</h3>
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/50 dark:border-indigo-500/20 rounded-xl flex items-center justify-center">
+          <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Key Metrics</h3>
+      </div>
 
       <!-- Key Metrics Grid - 4 cards in a grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -31,18 +30,37 @@
         </div>
 
         <div class="px-5 pb-5">
-          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-4">{{ totalQueries }}</div>
+          <!-- Total Query Counter -->
+          <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ totalQueries }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">total queries</div>
+          </div>
 
-          <div class="space-y-2.5">
-            <div v-for="(platform, index) in platformBreakdown" :key="index">
-              <div class="flex justify-between items-center text-xs mb-1">
-                <span class="text-gray-600 dark:text-gray-400">{{ platform.name }}</span>
-                <span class="text-gray-700 dark:text-gray-300 font-medium">{{ platform.count }}</span>
+          <!-- Horizontal Bar Chart -->
+          <div class="space-y-3">
+            <div
+              v-for="(platform, index) in platformBreakdown"
+              :key="index"
+              class="transition-colors duration-150"
+            >
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: getPlatformColorHex(platform.name) }"></div>
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ platform.name }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ platform.count }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({{ platform.percentage }}%)</span>
+                </div>
               </div>
-              <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div class="h-full rounded-full"
-                    :class="getPlatformColor(platform.name)"
-                    :style="`width: ${platform.percentage}%`"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :style="{
+                    width: `${platform.percentage}%`,
+                    backgroundColor: getPlatformColorHex(platform.name)
+                  }"
+                ></div>
               </div>
             </div>
           </div>
@@ -61,107 +79,176 @@
         </div>
 
         <div class="px-5 pb-5">
-          <div class="flex items-end gap-2 mb-1">
-            <span class="text-4xl font-bold text-gray-900 dark:text-white">{{ brandMentionRate }}%</span>
-            <span class="text-sm text-gray-500 dark:text-gray-400">of queries</span>
+          <!-- Brand Mention Rate Counter -->
+          <div class="text-center mb-4">
+            <div class="flex items-center justify-center gap-1">
+              <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ brandMentionRate }}%</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400 pt-2">({{ brandMentions }} mentions)</div>
+            </div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">of queries mention your brand</div>
           </div>
 
-          <div class="text-sm text-gray-500 dark:text-gray-400 mb-3">{{ brandMentions }} mentions</div>
-
-          <!-- Brand mention visualization -->
-          <div class="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
-            <div class="absolute top-0 left-0 h-full bg-orange-500 dark:bg-orange-600 rounded-full"
-                :style="`width: ${brandMentionRate}%`"></div>
-          </div>
-
-          <!-- Platform comparison if available -->
-          <div v-if="platformMentionRates.length > 0" class="space-y-2">
-            <div v-for="(platform, index) in platformMentionRates" :key="index">
-              <div class="flex justify-between items-center text-xs mb-1">
-                <span class="text-gray-600 dark:text-gray-400">{{ platform.name }}</span>
-                <span class="text-gray-700 dark:text-gray-300 font-medium">{{ platform.rate }}%</span>
+          <!-- Horizontal Bar Chart -->
+          <div class="space-y-3">
+            <!-- Overall mention rate -->
+            <div class="transition-colors duration-150">
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 rounded-full mr-2" style="background-color: #f97316;"></div>
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Overall</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ brandMentionRate }}%</span>
+                </div>
               </div>
-              <div class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div class="h-full rounded-full"
-                    :class="getPlatformColor(platform.name)"
-                    :style="`width: ${platform.rate}%`"></div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :style="{ width: `${brandMentionRate}%`, backgroundColor: '#f97316' }"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Platform breakdown -->
+            <div
+              v-for="(platform, index) in platformMentionRates"
+              :key="index"
+              class="transition-colors duration-150"
+            >
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: getPlatformColorHex(platform.name) }"></div>
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ platform.name }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ platform.rate }}%</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({{ platform.count }})</span>
+                </div>
+              </div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :style="{
+                    width: `${platform.rate}%`,
+                    backgroundColor: getPlatformColorHex(platform.name)
+                  }"
+                ></div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- 3. Citations Per Query Card -->
-      <div class="bg-gray-900/5 dark:bg-white/5 rounded-2xl">
-        <div class="p-5 flex items-center gap-3">
-          <div class="w-8 h-8 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-lg flex items-center justify-center">
-            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-          <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Citations Per Query</span>
-        </div>
-
-        <div class="px-5 pb-5">
-          <div class="flex items-end gap-2 mb-1">
-            <span class="text-4xl font-bold text-gray-900 dark:text-white">{{ avgCitationsPerQuery }}</span>
-            <span class="text-sm text-gray-500 dark:text-gray-400">avg. citations</span>
-          </div>
-
-          <!-- Citation comparison visualization -->
-          <div class="space-y-3 mt-4">
-            <!-- All citations -->
-            <div>
-              <div class="flex justify-between items-center text-xs mb-1">
-                <span class="text-gray-600 dark:text-gray-400">All Citations</span>
-                <span class="text-gray-700 dark:text-gray-300 font-medium">{{ avgCitationsPerQuery }}</span>
-              </div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div class="h-full bg-blue-500 dark:bg-blue-600 rounded-full"
-                    :style="`width: ${avgCitationsPerQuery ? Math.min((avgCitationsPerQuery / 10) * 100, 100) : 0}%`"></div>
-              </div>
-            </div>
-
-            <!-- Brand citations -->
-            <div>
-              <div class="flex justify-between items-center text-xs mb-1">
-                <span class="text-gray-600 dark:text-gray-400">Brand Citations</span>
-                <span class="text-gray-700 dark:text-gray-300 font-medium">{{ avgBrandCitationsPerQuery }}</span>
-              </div>
-              <div class="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                <div class="h-full bg-orange-500 dark:bg-orange-600 rounded-full"
-                    :style="`width: ${avgBrandCitationsPerQuery ? Math.min((avgBrandCitationsPerQuery / 10) * 100, 100) : 0}%`"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. Top Performing Query Intent Card -->
+      <!-- 3. Queries by Intent Card -->
       <div class="bg-gray-900/5 dark:bg-white/5 rounded-2xl">
         <div class="p-5 flex items-center gap-3">
           <div class="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/50 dark:border-indigo-500/20 rounded-lg flex items-center justify-center">
             <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
             </svg>
           </div>
-          <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Top Query Intent</span>
+          <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Queries by Intent</span>
         </div>
 
         <div class="px-5 pb-5">
-          <div class="text-4xl font-bold text-gray-900 dark:text-white mb-2">{{ topQueryIntent }}</div>
+          <!-- Total Query Counter -->
+          <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ totalQueries }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">total queries</div>
+          </div>
 
-          <!-- Top intent performance visualization -->
-          <div v-if="topIntentData">
-            <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">Brand Mention Rate</div>
-            <div class="relative h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-2">
-              <div class="h-full bg-indigo-500 dark:bg-indigo-600 rounded-full"
-                  :style="`width: ${topIntentData.mentionRate}%`"></div>
+          <!-- Horizontal Bar Chart -->
+          <div class="space-y-3">
+            <div
+              v-for="(intent, index) in queryIntentBreakdown.slice(0, 6)"
+              :key="index"
+              class="transition-colors duration-150"
+              :class="{ 'bg-white/50 dark:bg-white/5 rounded-lg': highlightedIntent === intent.name }"
+              @mouseenter="highlightedIntent = intent.name"
+              @mouseleave="highlightedIntent = null"
+            >
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: getIntentColor(intent.name) }"></div>
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ formatIntentName(intent.name) }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ intent.count }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({{ intent.percentage }}%)</span>
+                </div>
+              </div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :style="{
+                    width: `${intent.percentage}%`,
+                    backgroundColor: getIntentColor(intent.name)
+                  }"
+                ></div>
+              </div>
             </div>
 
-            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-              <span>{{ topIntentData.mentioned }} of {{ topIntentData.total }} queries</span>
-              <span>{{ topIntentData.mentionRate }}%</span>
+            <!-- Show more if there are more intents -->
+            <div v-if="queryIntentBreakdown.length > 6" class="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+              +{{ queryIntentBreakdown.length - 6 }} more intents
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Responses by Outcome Card -->
+      <div class="bg-gray-900/5 dark:bg-white/5 rounded-2xl">
+        <div class="p-5 flex items-center gap-3">
+          <div class="w-8 h-8 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Responses by Outcome</span>
+        </div>
+
+        <div class="px-5 pb-5">
+          <!-- Total Responses Counter -->
+          <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ totalQueries }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">total responses</div>
+          </div>
+
+          <!-- Horizontal Bar Chart -->
+          <div class="space-y-3">
+            <div
+              v-for="(outcome, index) in responseOutcomeBreakdown.slice(0, 6)"
+              :key="index"
+              class="transition-colors duration-150"
+              :class="{ 'bg-white/50 dark:bg-white/5 rounded-lg': highlightedOutcome === outcome.name }"
+              @mouseenter="highlightedOutcome = outcome.name"
+              @mouseleave="highlightedOutcome = null"
+            >
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: getOutcomeColor(outcome.name) }"></div>
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ formatText(outcome.name) }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ outcome.count }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({{ outcome.percentage }}%)</span>
+                </div>
+              </div>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :style="{
+                    width: `${outcome.percentage}%`,
+                    backgroundColor: getOutcomeColor(outcome.name)
+                  }"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Show more if there are more outcomes -->
+            <div v-if="responseOutcomeBreakdown.length > 6" class="text-xs text-gray-500 dark:text-gray-400 text-center mt-2">
+              +{{ responseOutcomeBreakdown.length - 6 }} more outcomes
             </div>
           </div>
         </div>
@@ -179,7 +266,6 @@
         </div>
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Query Analysis</h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">Intent breakdown and query details</p>
         </div>
       </div>
 
@@ -199,46 +285,40 @@
         </div>
 
         <div class="px-5 pb-5">
-          <!-- Donut Chart Visualization -->
-          <div class="relative mx-auto" style="height: 180px; width: 180px;">
-            <!-- For each intent type, render a donut segment -->
-            <svg viewBox="0 0 100 100" class="w-full h-full">
-              <!-- Donut segments based on the intent data -->
-              <template v-for="(segment, index) in intentPieSegments" :key="index">
-                <path
-                  :d="segment.path"
-                  :fill="segment.color"
-                  class="hover:opacity-90 transition-opacity cursor-pointer"
-                  @mouseenter="highlightedIntent = segment.intent"
-                  @mouseleave="highlightedIntent = null"
-                />
-              </template>
-
-              <!-- Donut hole -->
-              <circle cx="50" cy="50" r="25" fill="#fff" class="dark:fill-gray-800" />
-
-              <!-- Number inside donut -->
-              <text x="50" y="50" text-anchor="middle" dominant-baseline="middle" class="text-3xl font-bold fill-gray-900 dark:fill-white">{{ highlightedIntentCount || totalQueries }}</text>
-            </svg>
+          <!-- Total Query Counter -->
+          <div class="text-center mb-4">
+            <div class="text-3xl font-bold text-gray-900 dark:text-white">{{ totalQueries }}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">total queries</div>
           </div>
 
-          <!-- Label below chart -->
-          <div class="text-center mt-1 mb-4">
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ highlightedIntent ? formatIntentName(highlightedIntent) : 'Total Queries' }}</p>
-          </div>
-
-          <!-- Legend -->
-          <div class="mt-2 space-y-2">
-            <div v-for="(intent, index) in queryIntentBreakdown" :key="index"
-                class="flex items-center justify-between py-1.5 transition-colors"
-                :class="highlightedIntent === intent.name ? 'bg-white/50 dark:bg-white/5 rounded-lg px-2' : ''">
-              <div class="flex items-center">
-                <div class="w-4 h-4 rounded-full mr-2.5" :style="{ backgroundColor: getIntentColor(intent.name) }"></div>
-                <span class="text-sm text-gray-700 dark:text-gray-300">{{ formatIntentName(intent.name) }}</span>
+          <!-- Horizontal Bar Chart -->
+          <div class="space-y-3">
+            <div
+              v-for="(intent, index) in queryIntentBreakdown"
+              :key="index"
+              class="transition-colors duration-150"
+              :class="{ 'bg-white/50 dark:bg-white/5 rounded-lg': highlightedIntent === intent.name }"
+              @mouseenter="highlightedIntent = intent.name"
+              @mouseleave="highlightedIntent = null"
+            >
+              <div class="flex justify-between items-center mb-1">
+                <div class="flex items-center">
+                  <div class="w-3 h-3 rounded-full mr-2" :style="{ backgroundColor: getIntentColor(intent.name) }"></div>
+                  <span class="text-sm text-gray-700 dark:text-gray-300">{{ formatIntentName(intent.name) }}</span>
+                </div>
+                <div class="flex items-center">
+                  <span class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ intent.count }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">({{ intent.percentage }}%)</span>
+                </div>
               </div>
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ intent.count }}</span>
-                <span class="text-sm text-gray-500 dark:text-gray-400">({{ intent.percentage }}%)</span>
+              <div class="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :style="{
+                    width: `${intent.percentage}%`,
+                    backgroundColor: getIntentColor(intent.name)
+                  }"
+                ></div>
               </div>
             </div>
           </div>
@@ -681,13 +761,7 @@
       />
     </div>
 
-    <!-- Query Competitiveness Analysis Section -->
-    <div class="mb-6">
-      <QueryCompetitivenessAnalysis
-        :data="props.data"
-        :client="props.client"
-      />
-    </div>
+    <!-- Query Competitiveness Analysis Section moved to Brand Performance tab -->
   </div>
 </template>
 
@@ -952,6 +1026,15 @@ const highlightedIntentCount = computed(() => {
   return intentData ? intentData.count : null
 })
 
+// State for response outcome pie chart
+const highlightedOutcome = ref(null)
+const highlightedOutcomeCount = computed(() => {
+  if (!highlightedOutcome.value) return null
+
+  const outcomeData = responseOutcomeBreakdown.value.find(o => o.name === highlightedOutcome.value)
+  return outcomeData ? outcomeData.count : null
+})
+
 // Table state
 const tableFilterIntent = ref('all')
 const gapFilterIntent = ref('all')
@@ -1149,25 +1232,40 @@ function formatPlatformName(platform) {
 
 function getPlatformColor(platform) {
   const colorMap = {
-    'ChatGPT': 'bg-green-500 dark:bg-green-600',
-    'Perplexity': 'bg-blue-500 dark:bg-blue-600',
-    'Claude': 'bg-orange-500 dark:bg-orange-600',
-    'Bard': 'bg-purple-500 dark:bg-purple-600',
-    'Gemini': 'bg-red-500 dark:bg-red-600',
+    'ChatGPT': 'bg-blue-500 dark:bg-blue-600',
+    'Perplexity': 'bg-purple-500 dark:bg-purple-600',
+    'Claude': 'bg-green-500 dark:bg-green-600',
+    'Bard': 'bg-amber-500 dark:bg-amber-600',
+    'Gemini': 'bg-gray-500 dark:bg-gray-600',
+    'Overall': 'bg-orange-500 dark:bg-orange-600',
     'Unknown': 'bg-gray-500 dark:bg-gray-600'
   }
   return colorMap[platform] || 'bg-gray-500 dark:bg-gray-600'
 }
 
+function getPlatformColorHex(platform) {
+  const colorMap = {
+    'ChatGPT': '#3b82f6', // blue-500
+    'Perplexity': '#8b5cf6', // purple-500
+    'Claude': '#10b981', // green-500
+    'Bard': '#fbbf24', // amber-400 (yellow)
+    'Gemini': '#6b7280', // gray-500
+    'Unknown': '#6b7280', // gray-500
+    'Overall': '#f97316' // orange-500 (main highlight color)
+  }
+  return colorMap[platform] || '#6b7280'
+}
+
 function getPlatformBadgeClass(platform) {
   const name = formatPlatformName(platform)
   const classMap = {
-    'ChatGPT': 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300',
-    'Perplexity': 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300',
-    'Claude': 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300',
-    'Bard': 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300',
-    'Gemini': 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300',
-    'Unknown': 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-300'
+    'ChatGPT': 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300',
+    'Perplexity': 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300',
+    'Claude': 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300',
+    'Bard': 'bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300',
+    'Gemini': 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-300',
+    'Unknown': 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-300',
+    'Overall': 'bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300'
   }
   return classMap[name] || 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-300'
 }
@@ -1176,13 +1274,17 @@ function getIntentColor(intent) {
   if (!intent) return '#9ca3af' // gray-400
 
   const colorMap = {
-    'informational': '#fb923c', // orange-400 (citebots-orange, brighter)
-    'commercial': '#60a5fa', // blue-400 (brighter blue)
-    'navigational': '#34d399', // emerald-400 (brighter green)
-    'transactional': '#a78bfa', // violet-400 (brighter purple)
-    'consideration': '#fbbf24', // amber-400 (brighter yellow)
-    'comparison': '#818cf8', // indigo-400 (brighter indigo)
-    'recommendation': '#f87171', // red-400 (brighter red)
+    'informational': '#f97316', // orange-500 (primary emphasis)
+    'commercial': '#3b82f6', // blue-500 (secondary emphasis)
+    'navigational': '#8b5cf6', // purple-500 (tertiary emphasis)
+    'transactional': '#10b981', // green-500 (quaternary emphasis)
+    'consideration': '#fbbf24', // amber-400 (quinary emphasis)
+    'comparison': '#9ca3af', // gray-400 (least emphasis)
+    'educational': '#f97316', // orange-500 (primary - reuse)
+    'opinion': '#3b82f6',    // blue-500 (secondary - reuse)
+    'support': '#8b5cf6',    // purple-500 (tertiary - reuse)
+    'local': '#10b981',      // green-500 (quaternary - reuse)
+    'recommendation': '#fbbf24', // amber-400 (quinary - reuse)
     'unknown': '#9ca3af' // gray-400
   }
 
@@ -1193,13 +1295,17 @@ function getIntentBgColor(intent) {
   if (!intent) return '#f3f4f6' // gray-100
 
   const colorMap = {
-    'informational': '#ffedd5', // orange-100 (matches citebots-orange)
-    'commercial': '#dbeafe', // blue-100
-    'navigational': '#d1fae5', // emerald-100
-    'transactional': '#ede9fe', // violet-100
-    'consideration': '#fef3c7', // amber-100
-    'comparison': '#e0e7ff', // indigo-100
-    'recommendation': '#fee2e2', // red-100
+    'informational': '#ffedd5', // orange-100 (primary)
+    'commercial': '#dbeafe', // blue-100 (secondary)
+    'navigational': '#ede9fe', // purple-100 (tertiary)
+    'transactional': '#d1fae5', // green-100 (quaternary)
+    'consideration': '#fef3c7', // amber-100 (quinary)
+    'comparison': '#f3f4f6', // gray-100 (least emphasis)
+    'educational': '#ffedd5', // orange-100 (reuse primary)
+    'opinion': '#dbeafe',    // blue-100 (reuse secondary)
+    'support': '#ede9fe',    // purple-100 (reuse tertiary)
+    'local': '#d1fae5',      // green-100 (reuse quaternary)
+    'recommendation': '#fef3c7', // amber-100 (reuse quinary)
     'unknown': '#f3f4f6' // gray-100
   }
 
@@ -1221,6 +1327,24 @@ function getIntentTextColor(intent) {
   }
 
   return colorMap[intent.toLowerCase()] || '#374151'
+}
+
+// Get color for response outcome
+function getOutcomeColor(outcome) {
+  if (!outcome) return '#9ca3af' // gray-400
+
+  const colorMap = {
+    'recommendation': '#f97316', // orange-500 (primary emphasis)
+    'comparison': '#3b82f6',     // blue-500 (secondary emphasis)
+    'explanation': '#8b5cf6',    // purple-500 (tertiary emphasis)
+    'tutorial': '#10b981',       // green-500 (quaternary emphasis)
+    'analysis': '#fbbf24',       // amber-400 (quinary emphasis)
+    'answer': '#9ca3af',         // gray-400 (least emphasis)
+    'opinion': '#f97316',        // orange-500 (primary - reuse)
+    'unknown': '#9ca3af'         // gray-400
+  }
+
+  return colorMap[outcome.toLowerCase()] || '#9ca3af'
 }
 
 function formatIntentName(intent) {
@@ -1440,6 +1564,90 @@ const topGapTopics = computed(() => {
     })
     .sort((a, b) => b.opportunity_score - a.opportunity_score)
     .slice(0, 5) // Top 5 topics
+})
+
+// Response Outcome Analysis
+// Get breakdown of response outcomes
+const responseOutcomeBreakdown = computed(() => {
+  if (totalQueries.value === 0) return []
+
+  // Group queries by response outcome
+  const outcomeCounts = {}
+
+  queries.value.forEach(query => {
+    const outcome = query.response_outcome || 'unknown'
+    outcomeCounts[outcome] = (outcomeCounts[outcome] || 0) + 1
+  })
+
+  // Convert to array with percentages
+  return Object.entries(outcomeCounts).map(([name, count]) => {
+    return {
+      name,
+      count,
+      percentage: Math.round((count / totalQueries.value) * 100)
+    }
+  }).sort((a, b) => b.count - a.count)
+})
+
+// Donut chart segments for outcome visualization
+const outcomePieSegments = computed(() => {
+  if (responseOutcomeBreakdown.value.length === 0) return []
+
+  // Create a single SVG path for the entire donut chart to avoid gaps
+  // This approach ensures perfect segment connections
+
+  // First, calculate total percentage to normalize the values
+  const totalPercentage = responseOutcomeBreakdown.value.reduce((sum, outcome) => sum + outcome.percentage, 0)
+  const normalizeFactor = totalPercentage > 0 ? 100 / totalPercentage : 1
+
+  const segments = []
+  let startAngle = -Math.PI / 2 // Start from the top (12 o'clock position)
+  const centerX = 50
+  const centerY = 50
+  const outerRadius = 40
+  const innerRadius = 25
+
+  responseOutcomeBreakdown.value.forEach((outcome, index) => {
+    // Calculate normalized angle
+    const normalizedPercentage = outcome.percentage * normalizeFactor
+    const angle = (normalizedPercentage / 100) * 2 * Math.PI
+    const endAngle = startAngle + angle
+
+    // Calculate precise outer arc coordinates with 5 decimal places
+    const outerX1 = +(centerX + outerRadius * Math.cos(startAngle)).toFixed(5)
+    const outerY1 = +(centerY + outerRadius * Math.sin(startAngle)).toFixed(5)
+    const outerX2 = +(centerX + outerRadius * Math.cos(endAngle)).toFixed(5)
+    const outerY2 = +(centerY + outerRadius * Math.sin(endAngle)).toFixed(5)
+
+    // Calculate precise inner arc coordinates with 5 decimal places
+    const innerX1 = +(centerX + innerRadius * Math.cos(endAngle)).toFixed(5)
+    const innerY1 = +(centerY + innerRadius * Math.sin(endAngle)).toFixed(5)
+    const innerX2 = +(centerX + innerRadius * Math.cos(startAngle)).toFixed(5)
+    const innerY2 = +(centerY + innerRadius * Math.sin(startAngle)).toFixed(5)
+
+    // Determine if the arc should be drawn as a large arc
+    const largeArcFlag = angle > Math.PI ? 1 : 0
+
+    // Create SVG path for donut segment with explicit precision
+    const path = [
+      `M ${outerX1} ${outerY1}`, // Start at outer start point
+      `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${outerX2} ${outerY2}`, // Outer arc
+      `L ${innerX1} ${innerY1}`, // Line to inner end point
+      `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${innerX2} ${innerY2}`, // Inner arc (opposite direction)
+      'Z' // Close path
+    ].join(' ')
+
+    segments.push({
+      outcome: outcome.name,
+      count: outcome.count,
+      path,
+      color: getOutcomeColor(outcome.name)
+    })
+
+    startAngle = endAngle
+  })
+
+  return segments
 })
 
 // Citation overlap metrics for Venn diagram

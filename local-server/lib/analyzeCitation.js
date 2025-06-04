@@ -107,9 +107,9 @@ export async function analyzeCitation(requestData) {
     console.log(`✅ CITATION ANALYSIS COMPLETE: ${citation_url}`);
     console.log(`🔢 RESULT SUMMARY:`);
     console.log(`  - Technical SEO Score: ${pageAnalysisResult.technical_seo?.html_structure_score || 'N/A'}/10`);
-    console.log(`  - Content Depth Score: ${pageAnalysisResult.content_quality?.content_depth_score || 'N/A'}/5`);
+    console.log(`  - Content Depth Score: ${pageAnalysisResult.content_quality?.content_depth_score || 'N/A'}/10`);
     console.log(`  - Page Relevance: ${pageAnalysisResult.page_analysis?.page_relevance_type || 'N/A'}`);
-    console.log(`  - Citation Match Quality: ${pageAnalysisResult.content_quality?.citation_match_quality || 'N/A'}/5`);
+    console.log(`  - Citation Match Quality: ${pageAnalysisResult.content_quality?.citation_match_quality || 'N/A'}/10`);
     console.log(`  - Brand Mentioned: ${pageAnalysisResult.brand_mentioned ? 'Yes' : 'No'}`);
     console.log(`==========================================================\n`);
 

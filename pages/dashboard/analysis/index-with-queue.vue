@@ -238,7 +238,7 @@ async function runAnalysis() {
   if (previewQueries.value) {
     // Navigate to preview page
     router.push({
-      path: '/dashboard/analysis/preview-queries-v2',
+      path: '/dashboard/analysis/preview-queries',
       query: {
         client_id: selectedClientId.value,
         platform: platform.value,

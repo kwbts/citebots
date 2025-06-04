@@ -221,6 +221,9 @@ CREATE TABLE public.page_analyses (
   query_text text,
   crawl_error text,
   client_id uuid,
+  crawl_result jsonb,
+  eeat_analysis jsonb,
+  eeat_score numeric,
   CONSTRAINT page_analyses_pkey PRIMARY KEY (id),
   CONSTRAINT page_analyses_client_id_fkey FOREIGN KEY (client_id) REFERENCES public.clients(id),
   CONSTRAINT page_analyses_query_id_fkey FOREIGN KEY (query_id) REFERENCES public.analysis_queries(id)

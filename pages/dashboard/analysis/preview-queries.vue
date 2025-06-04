@@ -105,7 +105,7 @@
         </div>
 
         <!-- Summary -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-6">
           <div>
             <span class="text-gray-600 dark:text-gray-400">Client:</span>
             <span class="font-medium text-gray-900 dark:text-white ml-2">{{ clientName }}</span>
@@ -119,6 +119,18 @@
           <div>
             <span class="text-gray-600 dark:text-gray-400">Keywords:</span>
             <span class="font-medium text-gray-900 dark:text-white ml-2">{{ keywords.length }}</span>
+          </div>
+          <div>
+            <span class="text-gray-600 dark:text-gray-400">Intents:</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">
+              {{ selectedIntents.length > 0 ? selectedIntents.length : 'All' }}
+            </span>
+          </div>
+          <div>
+            <span class="text-gray-600 dark:text-gray-400">Per Keyword:</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">
+              {{ queriesPerKeyword }} {{ queriesPerKeyword === 1 ? 'query' : 'queries' }}
+            </span>
           </div>
         </div>
 
@@ -337,6 +349,8 @@ const clientId = ref('')
 const clientName = ref('')
 const selectedPlatforms = ref([])
 const keywords = ref([])
+const selectedIntents = ref([])
+const queriesPerKeyword = ref(3) // Default to 3 if not specified
 
 // State
 const loading = ref(false)
@@ -393,13 +407,18 @@ const generateQueries = async () => {
   error.value = ''
 
   try {
-    console.log('Generating queries for:', { clientId: clientId.value, keywords: keywords.value })
+    console.log('Generating queries for:', {
+      clientId: clientId.value,
+      keywords: keywords.value,
+      intents: selectedIntents.value
+    })
 
     const { data, error: generateError } = await supabase.functions.invoke('generate-queries', {
       body: {
         client_id: clientId.value,
         keywords: keywords.value,
-        count: 5 // Generate 5 queries per keyword/intent combination
+        count: queriesPerKeyword.value, // Use the selected number of queries per keyword
+        intents: selectedIntents.value.length > 0 ? selectedIntents.value : undefined
       }
     })
 
@@ -522,6 +541,16 @@ onMounted(async () => {
     keywords.value = route.query.keywords.split(',').filter(k => k.trim())
   }
 
+  // Parse intents
+  if (route.query.intents) {
+    selectedIntents.value = route.query.intents.split(',').filter(i => i.trim())
+  }
+
+  // Parse queries per keyword count
+  if (route.query.count && !isNaN(parseInt(route.query.count))) {
+    queriesPerKeyword.value = parseInt(route.query.count)
+  }
+
   // Fetch client name
   if (clientId.value) {
     try {
@@ -547,6 +576,8 @@ onMounted(async () => {
     clientId: clientId.value,
     platforms: selectedPlatforms.value,
     keywords: keywords.value,
+    intents: selectedIntents.value,
+    queriesPerKeyword: queriesPerKeyword.value,
     queueEnabled: queueEnabled.value,
     useQueue: useQueue.value
   })

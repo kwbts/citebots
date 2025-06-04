@@ -12,7 +12,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS'
 };
-async function generateDiverseQueries(keyword, clientInfo, count = 2) {
+async function generateDiverseQueries(keyword, clientInfo, count = 2, selectedIntents = []) {
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   if (!apiKey) {
     throw new Error('OpenAI API key not configured');
@@ -27,6 +27,29 @@ Brand Voice: ${clientInfo.brand_voice?.join(', ') || 'Professional'}
 Customer Problems: ${clientInfo.customer_problems?.join(', ') || 'Not specified'}
 Use Cases: ${clientInfo.use_cases?.join(', ') || 'Not specified'}
 `;
+
+  // Build the list of intent types based on the selected intents
+  const intentTypes = [
+    { key: 'informational', desc: 'Seeking general knowledge' },
+    { key: 'navigational', desc: 'Looking for a specific website/resource' },
+    { key: 'transactional', desc: 'Intent to take an action (purchase, download)' },
+    { key: 'commercial', desc: 'Researching before a purchase decision' },
+    { key: 'local', desc: 'Seeking location-specific information' },
+    { key: 'support', desc: 'Looking for help with a problem' },
+    { key: 'educational', desc: 'Seeking to learn about a topic in depth' },
+    { key: 'opinion', desc: 'Looking for subjective views or recommendations' }
+  ];
+
+  // Filter intent types if specific intents were selected
+  const filteredIntentTypes = selectedIntents && selectedIntents.length > 0
+    ? intentTypes.filter(type => selectedIntents.includes(type.key))
+    : intentTypes;
+
+  // Create a formatted list of intent types for the prompt
+  const intentTypesList = filteredIntentTypes
+    .map((type, index) => `${index + 1}. ${type.key.toUpperCase()}: ${type.desc}`)
+    .join('\n');
+
   const prompt = `Role: You are an expert at generating high quality, natural language queries to be used in LLMs like ChatGPT, Perplexity, Claude, Gemini and others. You take keywords and turn them into queries for the user.
 
 These queries will be used to help the user perform market research.
@@ -42,13 +65,8 @@ What type of queries do you think would a prospective customer ask an LLM when i
 
 Don't be overly complex or contrived in queries.
 
-Generate exactly ${count} diverse queries with different intent types from:
-1. INFORMATIONAL: Seeking general knowledge
-2. NAVIGATIONAL: Looking for a specific website/resource
-3. TRANSACTIONAL: Intent to take an action (purchase, download)
-4. COMMERCIAL: Researching before a purchase decision
-5. EDUCATIONAL: Seeking to learn about a topic in depth
-6. OPINION: Looking for subjective views or recommendations
+Generate exactly ${count} diverse queries with different intent types from ONLY the following types:
+${intentTypesList}
 
 Return ONLY a JSON object with a "queries" array. Each query should be an object with "text" and "intent":
 {"queries": [{"text": "What are the key features to look for in email marketing software?", "intent": "commercial"}, {"text": "How do I set up automated email sequences?", "intent": "educational"}]}
@@ -166,7 +184,7 @@ serve(async (req)=>{
     // Parse request
     const body = await req.json();
     console.log('Request body:', body);
-    const { client_id, keywords, count = 3 } = body; // Default to 3 diverse queries per keyword
+    const { client_id, keywords, count = 3, intents } = body; // Default to 3 diverse queries per keyword
     // Fetch client info
     console.log('Fetching client:', client_id);
     const { data: client, error: clientError } = await supabaseClient.from('clients').select('*, competitors(*)').eq('id', client_id).eq('created_by', user.id).single();
@@ -178,10 +196,13 @@ serve(async (req)=>{
     const allQueries = [];
     console.log('Starting diverse query generation for keywords:', keywords);
 
+    // Log the selected intents
+    console.log('Selected intent types:', intents || 'All intents');
+
     for (const keyword of keywords) {
       try {
         console.log(`Generating ${count} diverse queries for keyword: ${keyword}`);
-        const queries = await generateDiverseQueries(keyword, client, count);
+        const queries = await generateDiverseQueries(keyword, client, count, intents);
         console.log(`Generated ${queries.length} queries for ${keyword}`);
 
         // Format queries with metadata
@@ -194,7 +215,8 @@ serve(async (req)=>{
             client_name: client.name,
             client_domain: client.domain,
             generated_at: new Date().toISOString(),
-            generation_approach: 'diverse_intents'
+            generation_approach: 'diverse_intents',
+            selected_intents: intents || 'all'
           }
         }));
 
@@ -202,12 +224,34 @@ serve(async (req)=>{
       } catch (error) {
         console.error(`Error generating queries for ${keyword}:`, error);
 
-        // Add diverse fallback queries
-        const fallbackQueries = [
-          { text: `What is ${keyword}?`, intent: 'informational' },
-          { text: `Best ${keyword} tools`, intent: 'commercial' },
-          { text: `How to use ${keyword}`, intent: 'educational' }
-        ];
+        // Create fallback queries based on selected intents
+        let fallbackQueries = [];
+
+        // Default fallbacks for each intent type
+        const allFallbacks = {
+          'informational': { text: `What is ${keyword}?`, intent: 'informational' },
+          'commercial': { text: `Best ${keyword} tools`, intent: 'commercial' },
+          'educational': { text: `How to use ${keyword}`, intent: 'educational' },
+          'navigational': { text: `Find ${keyword} website`, intent: 'navigational' },
+          'transactional': { text: `Buy ${keyword} service`, intent: 'transactional' },
+          'opinion': { text: `Is ${keyword} worth it?`, intent: 'opinion' },
+          'local': { text: `${keyword} near me`, intent: 'local' },
+          'support': { text: `${keyword} troubleshooting guide`, intent: 'support' }
+        };
+
+        // If specific intents are selected, use only those for fallbacks
+        if (intents && intents.length > 0) {
+          fallbackQueries = intents
+            .filter(intent => allFallbacks[intent])
+            .map(intent => allFallbacks[intent]);
+        } else {
+          // Otherwise use the default three
+          fallbackQueries = [
+            allFallbacks.informational,
+            allFallbacks.commercial,
+            allFallbacks.educational
+          ];
+        }
 
         fallbackQueries.slice(0, count).forEach(fallback => {
           allQueries.push({
@@ -219,7 +263,8 @@ serve(async (req)=>{
               client_name: client.name,
               client_domain: client.domain,
               generated_at: new Date().toISOString(),
-              fallback: true
+              fallback: true,
+              selected_intents: intents || 'all'
             }
           });
         });

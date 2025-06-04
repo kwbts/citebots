@@ -48,7 +48,13 @@
       />
     </div>
 
-    <!-- Query Data Table has been moved to Overview tab -->
+    <!-- Defensive Query Analysis Section -->
+    <div class="mt-8">
+      <QueryCompetitivenessAnalysis
+        :data="data"
+        :client="client"
+      />
+    </div>
   </div>
 </template>
 
@@ -58,6 +64,7 @@ import BrandQueryPerformanceCard from './components/BrandQueryPerformanceCard.vu
 import SentimentAnalysis from './components/SentimentAnalysis.vue'
 import BrandMentionBreakdown from './components/BrandMentionBreakdown.vue'
 import QueryPerformanceTable from './components/QueryPerformanceTable.vue'
+import QueryCompetitivenessAnalysis from './components/QueryCompetitivenessAnalysis.vue'
 
 export default {
   name: 'BrandPerformanceDashboard',
@@ -65,7 +72,8 @@ export default {
     BrandQueryPerformanceCard,
     SentimentAnalysis,
     BrandMentionBreakdown,
-    QueryPerformanceTable
+    QueryPerformanceTable,
+    QueryCompetitivenessAnalysis
   },
   props: {
     data: {

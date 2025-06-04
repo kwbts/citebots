@@ -74,6 +74,76 @@
         </p>
       </div>
 
+      <!-- Query Intent Section -->
+      <div v-if="selectedClient" class="mb-8">
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Query Intent Types
+          </label>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Select the types of queries to generate (default: all types)
+          </p>
+        </div>
+        <TagInput
+          v-model="selectedIntents"
+          v-model:source="intentSources"
+          :placeholder="'Add intent type...'"
+          :label="''"
+          :show-helper-text="false"
+        />
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-3">
+          <button
+            v-for="intent in availableIntents"
+            :key="intent.value"
+            @click="toggleIntent(intent.value)"
+            class="text-xs py-1.5 px-3 rounded-full text-left transition-colors"
+            :class="[
+              selectedIntents.includes(intent.value)
+                ? 'bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+            ]"
+          >
+            <span class="font-medium">{{ intent.label }}</span>: {{ intent.description }}
+          </button>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+          These intent types determine what kinds of queries will be generated
+        </p>
+      </div>
+
+      <!-- Queries Per Keyword Section -->
+      <div v-if="selectedClient" class="mb-8">
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Queries Per Keyword
+          </label>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Select how many queries to generate for each keyword
+          </p>
+        </div>
+        <div class="flex items-center">
+          <div class="relative w-32">
+            <select
+              v-model="queriesPerKeyword"
+              class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none"
+            >
+              <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+          </div>
+          <span class="ml-3 text-sm text-gray-600 dark:text-gray-400">
+            {{ queriesPerKeyword === 1 ? 'query' : 'queries' }} per keyword
+          </span>
+        </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+          Generating more queries provides better coverage but takes longer
+        </p>
+      </div>
+
       <!-- Action Section -->
       <div class="border-t border-gray-200 dark:border-gray-700/60 pt-8">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
@@ -194,6 +264,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSupabaseClient, useSupabaseUser } from '#imports'
+import TagInput from '~/components/TagInput.vue'
 
 const router = useRouter()
 const supabase = useSupabaseClient()
@@ -209,9 +280,47 @@ const statusClass = ref('')
 const analysisResults = ref(null)
 const customKeywords = ref('')
 const attempted = ref(false)
+const queriesPerKeyword = ref(3) // Default to 3 queries per keyword
+
+// Query Intent Data
+const selectedIntents = ref([
+  'informational',
+  'navigational',
+  'transactional',
+  'commercial',
+  'educational',
+  'opinion'
+])
+const intentSources = ref([
+  'default', 'default', 'default', 'default', 'default', 'default'
+])
+const availableIntents = [
+  { value: 'informational', label: 'Informational', description: 'Seeking general knowledge' },
+  { value: 'navigational', label: 'Navigational', description: 'Looking for a specific website/resource' },
+  { value: 'transactional', label: 'Transactional', description: 'Intent to take an action (purchase, download)' },
+  { value: 'commercial', label: 'Commercial', description: 'Researching before a purchase decision' },
+  { value: 'local', label: 'Local', description: 'Seeking location-specific information' },
+  { value: 'support', label: 'Support', description: 'Looking for help with a problem' },
+  { value: 'educational', label: 'Educational', description: 'Seeking to learn about a topic in depth' },
+  { value: 'opinion', label: 'Opinion', description: 'Looking for subjective views or recommendations' }
+]
+
+// Toggle intent selection
+const toggleIntent = (intent) => {
+  const index = selectedIntents.value.indexOf(intent)
+  if (index === -1) {
+    // Add intent
+    selectedIntents.value.push(intent)
+    intentSources.value.push('manual')
+  } else {
+    // Remove intent
+    selectedIntents.value.splice(index, 1)
+    intentSources.value.splice(index, 1)
+  }
+}
 
 // Computed
-const selectedClient = computed(() => 
+const selectedClient = computed(() =>
   clients.value.find(c => c.id === selectedClientId.value)
 )
 
@@ -291,16 +400,25 @@ async function generateQueries() {
     return
   }
 
+  // Check if we have any intents selected
+  if (selectedIntents.value.length === 0) {
+    statusMessage.value = 'Please select at least one query intent type'
+    statusClass.value = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+    return
+  }
+
   // Clear any previous status messages
   statusMessage.value = ''
   statusClass.value = ''
 
-  // Navigate to preview page with all keywords (no platform selected yet)
+  // Navigate to preview page with all keywords and selected intents
   router.push({
     path: '/dashboard/analysis/preview-queries',
     query: {
       client_id: selectedClientId.value,
-      keywords: allKeywords.join(',')
+      keywords: allKeywords.join(','),
+      intents: selectedIntents.value.join(','),
+      count: queriesPerKeyword.value.toString()
     }
   })
 }

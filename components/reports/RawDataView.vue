@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-8">
     <!-- Raw Data Header -->
-    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8">
       <div class="flex items-center gap-3 mb-6">
         <div class="w-8 h-8 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/50 dark:border-indigo-500/20 rounded-lg flex items-center justify-center">
           <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
     </div>
     
     <!-- Query Results List -->
-    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl">
       <div class="px-8 py-6 border-b border-gray-200/50 dark:border-gray-700/50">
         <div class="flex items-center gap-3">
           <div class="w-8 h-8 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-lg flex items-center justify-center">
@@ -84,7 +84,7 @@
 
       <div class="divide-y divide-gray-200/50 dark:divide-gray-700/50">
         <div v-for="query in data.analysis_queries" :key="query.id"
-             class="p-8 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-200 hover:scale-[1.005]"
+             class="p-8 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 cursor-pointer"
              @click="selectedQuery = query">
 
           <!-- Query Header -->

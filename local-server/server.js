@@ -681,7 +681,7 @@ app.post('/analyze-page', async (req, res) => {
     // Log results summary
     console.log(`📊 RESULTS SUMMARY (${requestId}):`);
     console.log(`  - Technical SEO Score: ${result.technical_seo?.html_structure_score || 'N/A'}/10`);
-    console.log(`  - Content Depth: ${result.content_quality?.content_depth_score || 'N/A'}/5`);
+    console.log(`  - Content Depth: ${result.content_quality?.content_depth_score || 'N/A'}/10`);
     console.log(`  - Brand Mentioned: ${result.brand_mentioned ? 'Yes' : 'No'}`);
     console.log(`  - Page Speed Score: ${result.page_performance?.page_speed_score || 'N/A'}/100`);
     console.log(`  - Domain Authority: ${result.domain_authority?.domain_authority || 'N/A'}`);
