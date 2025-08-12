@@ -171,7 +171,7 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
-      queries: [],
+      analysis_queries: [],
       competitors: [],
       page_analyses: []
     })
@@ -206,14 +206,19 @@ const filterOptions = [
 ]
 const selectedFilter = ref('all')
 
+// Get queries from either queries or analysis_queries (for compatibility)
+const queries = computed(() => {
+  return props.data.analysis_queries || props.data.queries || []
+})
+
 // Total queries count
 const totalQueries = computed(() => {
-  return props.data.queries?.length || 0
+  return queries.value?.length || 0
 })
 
 // Brand mention metrics from analysis_queries
 const brandMentions = computed(() => {
-  return props.data.queries?.filter(q => q.brand_mentioned === true)?.length || 0
+  return queries.value?.filter(q => q.brand_mentioned === true)?.length || 0
 })
 
 const brandMentionRate = computed(() => {
@@ -225,7 +230,7 @@ const brandMentionRate = computed(() => {
 const filteredQueryIds = computed(() => {
   // Get all query IDs from the filtered queries
   const ids = new Set()
-  props.data.queries?.forEach(query => {
+  queries.value?.forEach(query => {
     if (query.id) {
       ids.add(query.id)
     }
@@ -251,12 +256,12 @@ const brandCitationRate = computed(() => {
 
 // Query Type Distribution (informational, navigational, transactional, commercial)
 const queryTypeDistribution = computed(() => {
-  if (!props.data.queries || props.data.queries.length === 0) return []
+  if (!queries.value || queries.value.length === 0) return []
 
   const types = {}
-  const total = props.data.queries.length
+  const total = queries.value.length
 
-  props.data.queries.forEach(query => {
+  queries.value.forEach(query => {
     const type = query.query_intent || 'unknown'
     types[type] = (types[type] || 0) + 1
   })
@@ -345,11 +350,34 @@ const responseOutcomeDistribution = computed(() => {
 
 // Platform mention rates
 const platformMentionRates = computed(() => {
-  // Calculate platform-specific mention rates
-  return [
-    { platform: 'ChatGPT', totalQueries: Math.round(totalQueries.value * 0.6), brandMentions: Math.round(totalQueries.value * 0.6 * 0.7), mentionRate: 70 },
-    { platform: 'Perplexity', totalQueries: Math.round(totalQueries.value * 0.4), brandMentions: Math.round(totalQueries.value * 0.4 * 0.6), mentionRate: 60 }
-  ]
+  // Calculate platform-specific mention rates from actual data
+  const platforms = ['chatgpt', 'perplexity'];
+  
+  if (!queries.value || queries.value.length === 0) {
+    return [];
+  }
+  
+  return platforms.map(platform => {
+    // Filter queries by platform
+    const platformQueries = queries.value.filter(q => 
+      q.data_source?.toLowerCase() === platform.toLowerCase()
+    );
+    
+    // Count brand mentions for this platform
+    const platformBrandMentions = platformQueries.filter(q => q.brand_mentioned === true);
+    
+    // Calculate rate
+    const totalPlatformQueries = platformQueries.length;
+    const brandMentionCount = platformBrandMentions.length;
+    const mentionRate = totalPlatformQueries ? Math.round((brandMentionCount / totalPlatformQueries) * 100) : 0;
+    
+    return {
+      platform: platform === 'chatgpt' ? 'ChatGPT' : 'Perplexity',
+      totalQueries: totalPlatformQueries,
+      brandMentions: brandMentionCount,
+      mentionRate
+    };
+  }).filter(p => p.totalQueries > 0); // Only show platforms with queries
 })
 
 // Platform citation rates
@@ -371,7 +399,7 @@ const platformCitationRates = computed(() => {
     const platformPages = props.data.page_analyses.filter(page => {
       // Match query's data_source to platform (using the query_id to look up the query)
       if (page.query_id) {
-        const query = props.data.queries.find(q => q.id === page.query_id);
+        const query = queries.value.find(q => q.id === page.query_id);
         return query && query.data_source?.toLowerCase() === platform.toLowerCase();
       }
       return false;
