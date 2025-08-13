@@ -39,5 +39,15 @@ export default defineNuxtConfig({
   ssr: false, // SPA mode for MVP
   nitro: {
     preset: 'static'
+  },
+  // Add routes configuration to ensure dynamic routes are properly generated
+  router: {
+    options: {
+      strict: false
+    }
+  },
+  // Configure generate to handle dynamic routes
+  generate: {
+    fallback: true
   }
 })

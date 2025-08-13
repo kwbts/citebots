@@ -245,7 +245,8 @@ async function processQueueItem(item) {
         query_keyword: query_data.keyword || null,
         query_intent: query_data.intent || null,
         data_source: query_data.platform,
-        status: 'pending'
+        status: 'pending',
+        is_custom: query_data.is_custom || false
       })
       .select()
       .single();

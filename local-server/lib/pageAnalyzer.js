@@ -10,6 +10,48 @@ import { getDomainMetrics } from './domainAuthority.js';
 import { analyzeEEAT } from './eeatAnalyzer.js';
 
 /**
+ * Normalize domain for comparison by extracting hostname and removing www prefix
+ * Handles both plain domains and full URLs with protocols
+ * @param {string} domainOrUrl - Domain or full URL to normalize  
+ * @returns {string} - Normalized domain
+ */
+function normalizeDomain(domainOrUrl) {
+  if (!domainOrUrl) return '';
+  
+  let domain = domainOrUrl.trim();
+  
+  // If it looks like a full URL with protocol, extract the hostname
+  if (domain.includes('://')) {
+    try {
+      const urlObj = new URL(domain);
+      domain = urlObj.hostname;
+    } catch (error) {
+      // If URL parsing fails, try to extract domain manually
+      console.warn(`Failed to parse URL: ${domainOrUrl}, attempting manual extraction`);
+      
+      // Remove protocol
+      domain = domain.replace(/^https?:\/\//, '');
+      // Remove path and query params
+      domain = domain.split('/')[0].split('?')[0].split('#')[0];
+    }
+  }
+  
+  // Remove www prefix and convert to lowercase
+  return domain.toLowerCase().replace(/^www\./, '');
+}
+
+/**
+ * Check if two domains match (exact match after normalization)
+ * @param {string} domain1 - First domain
+ * @param {string} domain2 - Second domain  
+ * @returns {boolean} - Whether domains match
+ */
+function domainsMatch(domain1, domain2) {
+  if (!domain1 || !domain2) return false;
+  return normalizeDomain(domain1) === normalizeDomain(domain2);
+}
+
+/**
  * Main function to analyze a web page
  * @param {Object} requestData - Request data including URL and analysis parameters
  * @returns {Object} - Complete page analysis results
@@ -52,10 +94,10 @@ async function analyzePage(requestData) {
       throw new Error(`Skipping analysis for test/local domain: ${domain}`);
     }
 
-    // Check if this is a client or competitor domain
-    const isClientDomain = brand_domain && domain.includes(brand_domain.toLowerCase());
+    // Check if this is a client or competitor domain using exact domain matching
+    const isClientDomain = brand_domain && domainsMatch(domain, brand_domain);
     const competitorMatch = competitors.find(comp => 
-      comp.domain && domain.includes(comp.domain.toLowerCase())
+      comp.domain && domainsMatch(domain, comp.domain)
     );
     const isCompetitorDomain = !!competitorMatch;
 
@@ -729,7 +771,20 @@ function extractPageInfo(html, url) {
     const hrefMatch = link.match(/href=["\']([^"\']*)["\']/i);
     if (!hrefMatch) return false;
     const href = hrefMatch[1];
-    return href.includes(domain) || href.startsWith('/');
+    
+    // Relative links are internal
+    if (href.startsWith('/') || href.startsWith('#') || href.startsWith('?')) {
+      return true;
+    }
+    
+    // Check if absolute URL has same domain
+    try {
+      const linkUrl = new URL(href, url);
+      return domainsMatch(linkUrl.hostname, domain);
+    } catch (e) {
+      // If URL parsing fails, fall back to simple domain check
+      return href.includes(domain);
+    }
   }).length;
   
   return {
