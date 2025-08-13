@@ -87,7 +87,8 @@ BEGIN
           'keyword', p_queries[i]->>'keyword',
           'intent', p_queries[i]->>'intent',
           'platform', v_platform,  -- Individual platform for each queue item
-          'client', v_client_data
+          'client', v_client_data,
+          'is_custom', COALESCE((p_queries[i]->>'is_custom')::boolean, false)
         ),
         'pending',
         0,
