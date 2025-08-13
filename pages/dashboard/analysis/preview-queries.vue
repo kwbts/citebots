@@ -4,9 +4,14 @@
     <div class="page-header">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="page-title text-gray-900 dark:text-white">Review Generated Queries</h1>
+          <h1 class="page-title text-gray-900 dark:text-white">
+            {{ queryMode === 'custom' ? 'Review Custom Queries' : 'Review Generated Queries' }}
+          </h1>
           <p class="page-subtitle text-gray-600 dark:text-gray-300">
-            Review and select queries for analysis based on your keywords and client profile
+            {{ queryMode === 'custom' 
+              ? 'Review and select your custom queries for analysis'
+              : 'Review and select queries for analysis based on your keywords and client profile'
+            }}
           </p>
         </div>
         <button
@@ -44,7 +49,7 @@
     <!-- Query Preview -->
     <div v-else>
       <!-- Analysis Parameters -->
-      <div v-if="clientId && keywords.length > 0" class="card mb-8">
+      <div v-if="clientId && (keywords.length > 0 || customQueries.length > 0)" class="card mb-8">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Analysis Parameters</h2>
 
         <!-- Platform Selection -->
@@ -116,17 +121,25 @@
               {{ selectedPlatforms.length > 0 ? selectedPlatforms.join(', ') : 'None selected' }}
             </span>
           </div>
-          <div>
+          <div v-if="queryMode === 'custom'">
+            <span class="text-gray-600 dark:text-gray-400">Mode:</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">Custom Queries</span>
+          </div>
+          <div v-if="queryMode === 'custom'">
+            <span class="text-gray-600 dark:text-gray-400">Queries:</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">{{ customQueries.length }}</span>
+          </div>
+          <div v-if="queryMode === 'keywords'">
             <span class="text-gray-600 dark:text-gray-400">Keywords:</span>
             <span class="font-medium text-gray-900 dark:text-white ml-2">{{ keywords.length }}</span>
           </div>
-          <div>
+          <div v-if="queryMode === 'keywords'">
             <span class="text-gray-600 dark:text-gray-400">Intents:</span>
             <span class="font-medium text-gray-900 dark:text-white ml-2">
               {{ selectedIntents.length > 0 ? selectedIntents.length : 'All' }}
             </span>
           </div>
-          <div>
+          <div v-if="queryMode === 'keywords'">
             <span class="text-gray-600 dark:text-gray-400">Per Keyword:</span>
             <span class="font-medium text-gray-900 dark:text-white ml-2">
               {{ queriesPerKeyword }} {{ queriesPerKeyword === 1 ? 'query' : 'queries' }}
@@ -159,7 +172,9 @@
         <div class="card">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">Generated Queries</h2>
+              <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                {{ queryMode === 'custom' ? 'Custom Queries' : 'Generated Queries' }}
+              </h2>
               <p class="text-gray-600 dark:text-gray-400">
                 {{ selectedCount }} of {{ queries.length }} queries selected for analysis
               </p>
@@ -205,17 +220,23 @@
                   {{ query.query_text }}
                 </p>
                 <div class="mt-3 flex flex-wrap gap-4 text-sm">
-                  <div class="flex items-center">
+                  <div v-if="queryMode === 'keywords' && query.keyword" class="flex items-center">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
                       {{ query.keyword }}
                     </span>
                     <span class="text-gray-500 dark:text-gray-400 ml-2">Keyword</span>
                   </div>
-                  <div class="flex items-center">
+                  <div v-if="queryMode === 'keywords' && query.intent" class="flex items-center">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                       {{ formatIntent(query.intent) }}
                     </span>
                     <span class="text-gray-500 dark:text-gray-400 ml-2">Intent</span>
+                  </div>
+                  <div v-if="queryMode === 'custom'" class="flex items-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
+                      Custom Query
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400 ml-2">Type</span>
                   </div>
                 </div>
               </div>
@@ -260,6 +281,7 @@
             </button>
             
             <button
+              v-if="queryMode === 'keywords'"
               @click="regenerateQueries"
               class="btn-outline"
             >
@@ -351,6 +373,8 @@ const selectedPlatforms = ref([])
 const keywords = ref([])
 const selectedIntents = ref([])
 const queriesPerKeyword = ref(3) // Default to 3 if not specified
+const queryMode = ref('keywords') // 'keywords' or 'custom'
+const customQueries = ref([])
 
 // State
 const loading = ref(false)
@@ -536,19 +560,31 @@ onMounted(async () => {
     selectedPlatforms.value = [route.query.platform]
   }
 
-  // Parse keywords
-  if (route.query.keywords) {
-    keywords.value = route.query.keywords.split(',').filter(k => k.trim())
-  }
+  // Check if this is custom query mode
+  if (route.query.mode === 'custom') {
+    queryMode.value = 'custom'
+    
+    // Parse custom queries
+    if (route.query.queries) {
+      customQueries.value = route.query.queries.split(',').filter(q => q.trim())
+    }
+  } else {
+    queryMode.value = 'keywords'
+    
+    // Parse keywords
+    if (route.query.keywords) {
+      keywords.value = route.query.keywords.split(',').filter(k => k.trim())
+    }
 
-  // Parse intents
-  if (route.query.intents) {
-    selectedIntents.value = route.query.intents.split(',').filter(i => i.trim())
-  }
+    // Parse intents
+    if (route.query.intents) {
+      selectedIntents.value = route.query.intents.split(',').filter(i => i.trim())
+    }
 
-  // Parse queries per keyword count
-  if (route.query.count && !isNaN(parseInt(route.query.count))) {
-    queriesPerKeyword.value = parseInt(route.query.count)
+    // Parse queries per keyword count
+    if (route.query.count && !isNaN(parseInt(route.query.count))) {
+      queriesPerKeyword.value = parseInt(route.query.count)
+    }
   }
 
   // Fetch client name
@@ -575,7 +611,9 @@ onMounted(async () => {
   console.log('Page initialized with:', {
     clientId: clientId.value,
     platforms: selectedPlatforms.value,
+    queryMode: queryMode.value,
     keywords: keywords.value,
+    customQueries: customQueries.value,
     intents: selectedIntents.value,
     queriesPerKeyword: queriesPerKeyword.value,
     queueEnabled: queueEnabled.value,
@@ -583,12 +621,33 @@ onMounted(async () => {
   })
 
   // Validate parameters
-  if (!clientId.value || keywords.value.length === 0) {
-    error.value = 'Missing required parameters. Please go back and ensure a client and keywords are selected.'
+  if (!clientId.value) {
+    error.value = 'Missing client ID. Please go back and select a client.'
     return
   }
 
-  // Generate queries automatically
-  await generateQueries()
+  if (queryMode.value === 'custom') {
+    if (customQueries.value.length === 0) {
+      error.value = 'Missing custom queries. Please go back and enter your queries.'
+      return
+    }
+
+    // For custom queries, convert them to the expected format and skip generation
+    queries.value = customQueries.value.map((queryText, index) => ({
+      query_text: queryText,
+      keyword: 'custom', // Use 'custom' as keyword for tracking
+      intent: 'custom',
+      selected: true,
+      is_custom: true // Flag to indicate this is a custom query
+    }))
+  } else {
+    if (keywords.value.length === 0) {
+      error.value = 'Missing keywords. Please go back and enter keywords.'
+      return
+    }
+
+    // Generate queries automatically for keywords mode
+    await generateQueries()
+  }
 })
 </script>

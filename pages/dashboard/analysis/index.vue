@@ -51,8 +51,50 @@
       </div>
 
 
-      <!-- Keywords Section -->
+      <!-- Query Mode Toggle -->
       <div v-if="selectedClient" class="mb-8">
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Query Mode
+          </label>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Choose whether to generate queries from keywords or enter custom queries directly
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            @click="queryMode = 'keywords'"
+            :class="[
+              'px-4 py-3 rounded-lg font-medium text-sm border transition-all duration-150',
+              queryMode === 'keywords'
+                ? 'bg-citebots-orange/15 text-citebots-orange border-citebots-orange/30'
+                : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
+            ]"
+          >
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+            </svg>
+            Generate from Keywords
+          </button>
+          <button
+            @click="queryMode = 'custom'"
+            :class="[
+              'px-4 py-3 rounded-lg font-medium text-sm border transition-all duration-150',
+              queryMode === 'custom'
+                ? 'bg-citebots-orange/15 text-citebots-orange border-citebots-orange/30'
+                : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
+            ]"
+          >
+            <svg class="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Custom Queries
+          </button>
+        </div>
+      </div>
+
+      <!-- Keywords Section (shown when queryMode === 'keywords') -->
+      <div v-if="selectedClient && queryMode === 'keywords'" class="mb-8">
         <div class="mb-4">
           <label for="custom-keywords" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
             Keywords <span class="text-red-500">*</span>
@@ -74,8 +116,31 @@
         </p>
       </div>
 
+      <!-- Custom Queries Section (shown when queryMode === 'custom') -->
+      <div v-if="selectedClient && queryMode === 'custom'" class="mb-8">
+        <div class="mb-4">
+          <label for="custom-queries" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Custom Queries <span class="text-red-500">*</span>
+          </label>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Enter your custom queries directly (one per line)
+          </p>
+        </div>
+        <textarea
+          id="custom-queries"
+          v-model="customQueries"
+          class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150"
+          rows="6"
+          placeholder="Enter queries, one per line&#10;e.g.:&#10;What is the best email marketing software?&#10;How to automate lead generation?&#10;Email marketing best practices 2024"
+          :class="{ 'border-red-300 dark:border-red-600 ring-2 ring-red-200 dark:ring-red-800': !customQueries && attempted }"
+        ></textarea>
+        <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
+          These queries will be analyzed directly without AI modification
+        </p>
+      </div>
+
       <!-- Query Intent Section -->
-      <div v-if="selectedClient" class="mb-8">
+      <div v-if="selectedClient && queryMode === 'keywords'" class="mb-8">
         <div class="mb-4">
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
             Query Intent Types
@@ -112,7 +177,7 @@
       </div>
 
       <!-- Queries Per Keyword Section -->
-      <div v-if="selectedClient" class="mb-8">
+      <div v-if="selectedClient && queryMode === 'keywords'" class="mb-8">
         <div class="mb-4">
           <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
             Queries Per Keyword
@@ -149,7 +214,7 @@
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
           <div class="text-sm text-gray-600 dark:text-gray-400">
             <span v-if="totalKeywords > 0" class="font-semibold">
-              {{ totalKeywords }} keywords ready for analysis
+              {{ totalKeywords }} {{ queryMode === 'custom' ? 'custom queries' : 'keywords' }} ready for analysis
             </span>
             <span v-else>
               Select a client to begin
@@ -168,7 +233,7 @@
             <svg v-else class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            {{ loading ? 'Generating Queries...' : 'Generate Queries' }}
+            {{ loading ? (queryMode === 'custom' ? 'Processing Queries...' : 'Generating Queries...') : (queryMode === 'custom' ? 'Continue with Custom Queries' : 'Generate Queries') }}
           </button>
         </div>
       </div>
@@ -279,6 +344,8 @@ const statusMessage = ref('')
 const statusClass = ref('')
 const analysisResults = ref(null)
 const customKeywords = ref('')
+const customQueries = ref('')
+const queryMode = ref('keywords') // 'keywords' or 'custom'
 const attempted = ref(false)
 const queriesPerKeyword = ref(3) // Default to 3 queries per keyword
 
@@ -325,6 +392,14 @@ const selectedClient = computed(() =>
 )
 
 const totalKeywords = computed(() => {
+  if (queryMode.value === 'custom') {
+    if (!customQueries.value) return 0
+    return customQueries.value
+      .split('\n')
+      .map(q => q.trim())
+      .filter(q => q).length
+  }
+  
   if (!customKeywords.value) return 0
 
   const customKeywordsList = customKeywords.value
@@ -336,6 +411,9 @@ const totalKeywords = computed(() => {
 })
 
 const canGenerateQueries = computed(() => {
+  if (queryMode.value === 'custom') {
+    return selectedClientId.value && customQueries.value && customQueries.value.trim()
+  }
   return selectedClientId.value && totalKeywords.value > 0
 })
 
@@ -381,7 +459,43 @@ async function generateQueries() {
     return
   }
 
-  // Prepare the keywords from custom input only
+  // Handle custom query mode
+  if (queryMode.value === 'custom') {
+    if (!customQueries.value) {
+      statusMessage.value = 'Please provide at least one custom query'
+      statusClass.value = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+      return
+    }
+
+    const allQueries = customQueries.value
+      .split('\n')
+      .map(q => q.trim())
+      .filter(q => q) // Filter out empty strings
+
+    // Check if we have any queries
+    if (allQueries.length === 0) {
+      statusMessage.value = 'Please provide at least one custom query'
+      statusClass.value = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'
+      return
+    }
+
+    // Clear any previous status messages
+    statusMessage.value = ''
+    statusClass.value = ''
+
+    // Navigate to preview page with custom queries
+    router.push({
+      path: '/dashboard/analysis/preview-queries',
+      query: {
+        client_id: selectedClientId.value,
+        mode: 'custom',
+        queries: allQueries.join(',')
+      }
+    })
+    return
+  }
+
+  // Handle keywords mode (existing logic)
   if (!customKeywords.value) {
     statusMessage.value = 'Please provide at least one keyword'
     statusClass.value = 'border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300'

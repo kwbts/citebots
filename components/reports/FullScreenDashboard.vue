@@ -59,6 +59,9 @@
         <!-- Query Analysis Dashboard -->
         <QueryAnalysisDashboard v-else-if="activeTab === 'query-analysis'" :data="filteredData" :client="client" />
 
+        <!-- Query Explorer Dashboard -->
+        <QueryExplorerDashboard v-else-if="activeTab === 'query-explorer'" :data="filteredData" :client="client" />
+
         <!-- Technical SEO Dashboard -->
         <OnPageSEODashboard v-else-if="activeTab === 'technical-seo'" :data="filteredData" :client="client" />
 
@@ -81,6 +84,7 @@ import { computed, ref, onMounted, watch } from 'vue'
 import MetricCard from './MetricCard.vue'
 import BrandPerformanceDashboard from './BrandPerformanceDashboard.vue'
 import QueryAnalysisDashboard from './QueryAnalysisDashboard.vue'
+import QueryExplorerDashboard from './QueryExplorerDashboard.vue'
 import OnPageSEODashboard from './OnPageSEODashboard.vue'
 import PageAnalyticsDashboard from './PageAnalyticsDashboard.vue'
 import CompetitorComparisonDashboard from './CompetitorComparisonDashboard.vue'

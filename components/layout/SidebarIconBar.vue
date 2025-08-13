@@ -78,6 +78,22 @@
             </svg>
           </button>
 
+          <!-- Actions -->
+          <button
+            @click="setActiveSection('actions')"
+            :class="[
+              'rounded-lg flex items-center h-12 justify-center transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+              'w-10',
+              activeSection === 'actions'
+                ? 'bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
+            ]"
+          >
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </button>
+
           <!-- Admin (Super Admin only) -->
           <button
             v-if="isSuperAdmin"
@@ -235,6 +251,25 @@
             </svg>
             <span class="ml-3 whitespace-nowrap font-semibold text-sm tracking-tight">
               Reports
+            </span>
+          </button>
+
+          <!-- Actions -->
+          <button
+            @click="setActiveSection('actions')"
+            :class="[
+              'rounded-lg flex items-center h-12 justify-start transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+              'w-full px-3',
+              activeSection === 'actions'
+                ? 'bg-citebots-orange/15 text-citebots-orange border border-citebots-orange/30'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800/50 border border-transparent'
+            ]"
+          >
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            <span class="ml-3 whitespace-nowrap font-semibold text-sm tracking-tight">
+              Actions
             </span>
           </button>
 

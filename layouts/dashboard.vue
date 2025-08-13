@@ -44,6 +44,7 @@ const activeSection = computed(() => {
   if (path.startsWith('/dashboard/clients')) return 'clients'
   if (path.startsWith('/dashboard/analysis')) return 'analysis'
   if (path.startsWith('/dashboard/reports')) return 'reports'
+  if (path.startsWith('/dashboard/actions')) return 'actions'
   if (path.startsWith('/dashboard/admin')) return 'admin'
   return 'dashboard'
 })
@@ -55,6 +56,7 @@ const handleSectionChange = (section) => {
     clients: '/dashboard/clients',
     analysis: '/dashboard/analysis',
     reports: '/dashboard/reports',
+    actions: '/dashboard/actions',
     admin: '/dashboard/admin'
   }
 
