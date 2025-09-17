@@ -50,6 +50,23 @@
         </p>
       </div>
 
+      <!-- Report Name (Optional) -->
+      <div v-if="selectedClient" class="mb-8">
+        <label for="report-name" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 tracking-tight">
+          Report Name (Optional)
+        </label>
+        <input
+          id="report-name"
+          v-model="reportName"
+          type="text"
+          placeholder="e.g., Q4 Competitor Analysis"
+          maxlength="150"
+          class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 placeholder-gray-400 dark:placeholder-gray-500"
+        />
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+          Leave blank to auto-generate: "{{ selectedClient?.name }} Analysis - {{ new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}"
+        </p>
+      </div>
 
       <!-- Query Mode Toggle -->
       <div v-if="selectedClient" class="mb-8">
@@ -347,6 +364,7 @@ const customKeywords = ref('')
 const customQueries = ref('')
 const queryMode = ref('keywords') // 'keywords' or 'custom'
 const attempted = ref(false)
+const reportName = ref('')
 const queriesPerKeyword = ref(3) // Default to 3 queries per keyword
 
 // Query Intent Data
@@ -489,7 +507,8 @@ async function generateQueries() {
       query: {
         client_id: selectedClientId.value,
         mode: 'custom',
-        queries: allQueries.join(',')
+        queries: allQueries.join(','),
+        report_name: reportName.value || ''
       }
     })
     return
@@ -532,7 +551,8 @@ async function generateQueries() {
       client_id: selectedClientId.value,
       keywords: allKeywords.join(','),
       intents: selectedIntents.value.join(','),
-      count: queriesPerKeyword.value.toString()
+      count: queriesPerKeyword.value.toString(),
+      report_name: reportName.value || ''
     }
   })
 }

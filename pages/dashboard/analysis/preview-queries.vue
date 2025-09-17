@@ -375,6 +375,7 @@ const selectedIntents = ref([])
 const queriesPerKeyword = ref(3) // Default to 3 if not specified
 const queryMode = ref('keywords') // 'keywords' or 'custom'
 const customQueries = ref([])
+const reportName = ref('')
 
 // State
 const loading = ref(false)
@@ -504,7 +505,8 @@ const runAnalysis = async () => {
     const result = await runAnalysisWithQueue({
       client_id: clientId.value,
       platforms: selectedPlatforms.value, // Pass array of platforms
-      queries: selectedQueries
+      queries: selectedQueries,
+      report_name: reportName.value || ''
     })
 
     console.log('Run analysis response:', result)
@@ -554,6 +556,7 @@ const handleQueueComplete = (runData) => {
 onMounted(async () => {
   // Get query parameters
   clientId.value = route.query.client_id || ''
+  reportName.value = route.query.report_name || ''
 
   // Handle platform parameter (convert to array for multi-select)
   if (route.query.platform) {

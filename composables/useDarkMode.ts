@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 
 // Global reactive state for dark mode
-const isDark = ref(false)
+const isDark = ref(true) // Default to dark mode
 let isInitialized = false
 
 export const useDarkMode = () => {
@@ -14,11 +14,11 @@ export const useDarkMode = () => {
           isDark.value = JSON.parse(stored)
         } catch (error) {
           console.warn('Error parsing darkMode from localStorage:', error)
-          isDark.value = false
+          isDark.value = true // Default to dark mode on error
         }
       } else {
-        // Check system preference
-        isDark.value = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        // Default to dark mode (instead of system preference)
+        isDark.value = true
       }
       updateDOM()
       isInitialized = true

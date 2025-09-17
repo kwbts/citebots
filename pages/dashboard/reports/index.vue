@@ -131,9 +131,59 @@
         <div class="flex items-center justify-between">
           <div class="flex-1 min-w-0">
             <div class="flex items-center space-x-4 mb-3">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-citebots-orange transition-colors tracking-tight">
-                {{ report.client_name }}
-              </h3>
+              <div class="flex-1 min-w-0">
+                <!-- Editing Mode -->
+                <div v-if="editingReportId === report.id" class="flex items-center space-x-2">
+                  <input
+                    v-model="editingName"
+                    @keydown.enter="saveReportName(report)"
+                    @keydown.escape="cancelEdit"
+                    @blur="saveReportName(report)"
+                    class="text-lg font-semibold bg-white dark:bg-gray-700 border border-citebots-orange rounded px-2 py-1 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 min-w-0 flex-1"
+                    maxlength="150"
+                    :id="`edit-input-${report.id}`"
+                  />
+                  <button
+                    @click="saveReportName(report)"
+                    class="text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+                    title="Save"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </button>
+                  <button
+                    @click="cancelEdit"
+                    class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                    title="Cancel"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Display Mode -->
+                <div v-else class="flex items-center space-x-2">
+                  <h3 class="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-citebots-orange transition-colors tracking-tight flex-1">
+                    {{ report.name || `${report.client_name} Analysis` }}
+                  </h3>
+                  <button
+                    v-if="!isClient"
+                    @click.stop="startEdit(report)"
+                    class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-citebots-orange dark:text-gray-500 dark:hover:text-citebots-orange transition-all duration-150"
+                    title="Edit report name"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                  </button>
+                </div>
+
+                <p v-if="report.name && editingReportId !== report.id" class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {{ report.client_name }}
+                </p>
+              </div>
               <span :class="getStatusClass(report.status)" class="px-3 py-1 rounded-lg text-xs font-semibold">
                 {{ report.status }}
               </span>
@@ -254,7 +304,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 
 definePageMeta({
   middleware: ['auth'],
@@ -270,6 +320,8 @@ const loading = ref(true)
 const selectedClientFilter = ref('')
 const selectedStatusFilter = ref('')
 const isClient = ref(false)
+const editingReportId = ref(null)
+const editingName = ref('')
 
 // Computed
 const uniqueClients = computed(() => {
@@ -464,13 +516,66 @@ const getStatusClass = (status) => {
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   const date = new Date(dateString)
-  return date.toLocaleDateString(undefined, { 
-    month: 'short', 
-    day: 'numeric', 
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+// Editing functions
+const startEdit = (report) => {
+  editingReportId.value = report.id
+  editingName.value = report.name || `${report.client_name} Analysis`
+
+  // Focus the input field after DOM update
+  nextTick(() => {
+    const input = document.getElementById(`edit-input-${report.id}`)
+    if (input) {
+      input.focus()
+      input.select()
+    }
+  })
+}
+
+const cancelEdit = () => {
+  editingReportId.value = null
+  editingName.value = ''
+}
+
+const saveReportName = async (report) => {
+  if (!editingName.value.trim()) {
+    cancelEdit()
+    return
+  }
+
+  if (editingName.value.trim() === (report.name || `${report.client_name} Analysis`)) {
+    cancelEdit()
+    return
+  }
+
+  try {
+    const { error } = await supabase
+      .from('analysis_runs')
+      .update({ name: editingName.value.trim() })
+      .eq('id', report.id)
+
+    if (error) throw error
+
+    // Update the local report data
+    const reportIndex = reports.value.findIndex(r => r.id === report.id)
+    if (reportIndex !== -1) {
+      reports.value[reportIndex].name = editingName.value.trim()
+    }
+
+    cancelEdit()
+  } catch (error) {
+    console.error('Error updating report name:', error)
+    // You could add a toast notification here
+    alert('Failed to update report name. Please try again.')
+  }
 }
 
 onMounted(async () => {

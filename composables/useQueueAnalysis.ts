@@ -36,6 +36,7 @@ export const useQueueAnalysis = () => {
     platform?: 'chatgpt' | 'perplexity' | 'both'  // Legacy support
     platforms?: string[]  // New multi-platform support
     queries: any[]
+    report_name?: string  // Optional custom report name
   }) => {
     try {
       // Log the current queue setting
@@ -53,7 +54,8 @@ export const useQueueAnalysis = () => {
         const response = await supabase.rpc('submit_analysis_to_queue', {
           p_client_id: params.client_id,
           p_platforms: platforms,
-          p_queries: params.queries
+          p_queries: params.queries,
+          p_report_name: params.report_name || null
         });
         result = response.data;
         error = response.error;
@@ -62,7 +64,8 @@ export const useQueueAnalysis = () => {
         const response = await supabase.rpc('submit_analysis_to_queue', {
           p_client_id: params.client_id,
           p_platform: platforms[0],
-          p_queries: params.queries
+          p_queries: params.queries,
+          p_report_name: params.report_name || null
         });
         result = response.data;
         error = response.error;

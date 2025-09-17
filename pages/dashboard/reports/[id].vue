@@ -116,6 +116,7 @@ const hasCustomComponent = computed(() => {
 // Format analysis run title
 const formatAnalysisRunTitle = (run) => {
   if (!run) return ''
+  if (run.name) return run.name
   return `Analysis Run from ${new Date(run.created_at).toLocaleDateString()}`
 }
 
@@ -253,6 +254,16 @@ onMounted(() => {
   // Listen for dashboard tab changes
   window.addEventListener('dashboard-tab-changed', handleDashboardTabChange)
 })
+
+// Update page title when analysisRun changes
+watch(analysisRun, (newRun) => {
+  if (newRun) {
+    const title = formatAnalysisRunTitle(newRun)
+    useHead({
+      title: `${title} - Citebots`
+    })
+  }
+}, { immediate: true })
 
 // Clean up event listeners
 onUnmounted(() => {
