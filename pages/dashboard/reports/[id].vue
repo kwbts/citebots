@@ -30,7 +30,9 @@
         <FullScreenDashboard
           :data="reportData"
           :client="client"
+          :analysis-run="analysisRun"
           @close="handleClose"
+          @update-report-name="updateReportName"
         />
       </div>
 
@@ -139,6 +141,30 @@ const getStatusClass = (status) => {
 // Handle close - go back to reports index
 const handleClose = () => {
   router.push('/dashboard/reports')
+}
+
+// Update report name
+const updateReportName = async (newName) => {
+  try {
+    const { error } = await supabase
+      .from('analysis_runs')
+      .update({ name: newName.trim() })
+      .eq('id', analysisRun.value.id)
+
+    if (error) throw error
+
+    // Update local data
+    analysisRun.value.name = newName.trim()
+
+    // Update page title
+    const title = formatAnalysisRunTitle(analysisRun.value)
+    useHead({
+      title: `${title} - Citebots`
+    })
+  } catch (error) {
+    console.error('Error updating report name:', error)
+    throw error
+  }
 }
 
 // Fetch report data
