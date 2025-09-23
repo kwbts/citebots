@@ -16,19 +16,46 @@ I'm continuing a systematic refactoring of the Citebots application. This is **c
 
 ## Current Status
 
-**Phase**: [TO BE FILLED BY USER]
-**Progress**: [TO BE FILLED BY USER]
-**Last Validation**: [TO BE FILLED BY USER]
-**Next Target**: [TO BE FILLED BY USER]
+**Phase**: Phase 3 - Directory-by-directory final cleanup
+**Progress**: Major cleanup completed - 69+ files removed, 2 large directories removed
+**Last Validation**: All core functionality validated, application running normally
+**Next Target**: Thorough evaluation of /examples directory before potential removal
 
-## USER INSTRUCTIONS PLACEHOLDER
+## USER INSTRUCTIONS
 
-[USER: Add specific instructions for this session here]
+**CRITICAL TASK: Thoroughly review /examples directory before any removal**
 
-Example:
-- "Ready to proceed with Phase 1: Root directory cleanup"
-- "Continue with scripts directory consolidation"
-- "Need to pause and reassess /extraction directory"
+The /examples directory contains ~40 files including Vue components and backend analysis scripts. Initial analysis suggests these may be duplicates/unused, but we need CONCRETE EVIDENCE before removal.
+
+**Required Analysis Process:**
+
+1. **Deep Component Analysis**:
+   - Compare each component in `/examples/frontend/reports/` with `/components/reports/`
+   - Check for any subtle differences that might indicate active use
+   - Verify imports and dependencies thoroughly
+
+2. **Backend Script Evaluation**:
+   - Review `/examples/backend/analysis-script/essential-scripts/`
+   - Determine if this is legacy code or has active dependencies
+   - Check if local-server references any of these files
+
+3. **Comprehensive Search**:
+   - Search entire codebase for any imports from `/examples/`
+   - Check for dynamic imports or indirect references
+   - Verify no build processes depend on examples
+
+4. **Validation Strategy**:
+   - Test application extensively before any removal
+   - Check all reports pages, components, and functionality
+   - Verify no broken imports or missing components
+
+**DO NOT REMOVE ANYTHING until we have concrete evidence that:**
+- No production code imports from `/examples/`
+- All components in `/examples/` are true duplicates
+- Backend scripts are not referenced by local-server or other systems
+- Application functions normally without any `/examples/` dependencies
+
+This is our final major cleanup target - let's be thorough and safe.
 
 ## Required Protocol
 

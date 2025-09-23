@@ -67,7 +67,7 @@ Phase 2: Scripts directory consolidation (109+ files to review)
 - **Validation**: All tests passed consistently
 
 ### 🎯 Next Session
-Phase 3: Secondary directories evaluation (/extraction, /local-server)
+**CRITICAL**: Thorough /examples directory evaluation before potential removal
 
 ---
 
