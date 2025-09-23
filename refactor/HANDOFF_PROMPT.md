@@ -16,46 +16,66 @@ I'm continuing a systematic refactoring of the Citebots application. This is **c
 
 ## Current Status
 
-**Phase**: Phase 3 - Directory-by-directory final cleanup
-**Progress**: Major cleanup completed - 69+ files removed, 2 large directories removed
-**Last Validation**: All core functionality validated, application running normally
-**Next Target**: Thorough evaluation of /examples directory before potential removal
+**Phase**: Session 005 - Scripts & Server Directory Evaluation
+**Progress**: Major cleanup completed - 132+ files removed, 2 large directories removed
+**Last Validation**: All core functionality validated, hybrid local-server architecture preserved and cleaned
+**Next Targets**: Scripts directory further consolidation + Server directory evaluation
 
 ## USER INSTRUCTIONS
 
-**CRITICAL TASK: Thoroughly review /examples directory before any removal**
+**NEXT CLEANUP TARGETS IDENTIFIED:**
 
-The /examples directory contains ~40 files including Vue components and backend analysis scripts. Initial analysis suggests these may be duplicates/unused, but we need CONCRETE EVIDENCE before removal.
+### 1. **Scripts Directory Further Consolidation**
+The `/scripts` directory currently has ~70 files remaining after initial cleanup. Opportunities for further refinement:
+
+**Analysis Required:**
+- Review remaining SQL migration scripts for duplicates
+- Identify one-time vs reusable scripts
+- Check for additional diagnostic scripts that can be removed
+- Consolidate related scripts into logical groups
+
+### 2. **Server Directory Evaluation**
+The `/server` directory contains Nuxt server-side code that should be evaluated:
+
+**Analysis Required:**
+- Review `/server/api/` endpoints for unused routes
+- Check for development/test endpoints
+- Identify any duplicate functionality with Supabase edge functions
+- Evaluate middleware and utilities for necessity
+
+### 3. **Additional Cleanup Opportunities**
+Based on updated assessment after local-server cleanup:
+
+**Potential Targets:**
+- Documentation consolidation to `/docs/` structure
+- Additional test artifacts in other directories
+- Development configuration files
+- Log files or cache files
 
 **Required Analysis Process:**
 
-1. **Deep Component Analysis**:
-   - Compare each component in `/examples/frontend/reports/` with `/components/reports/`
-   - Check for any subtle differences that might indicate active use
-   - Verify imports and dependencies thoroughly
+1. **Scripts Directory Deep Dive**:
+   - Categorize remaining 70 files by purpose and date
+   - Identify clear duplicates or obsolete migrations
+   - Check references in documentation and application code
+   - Test that essential migrations are preserved
 
-2. **Backend Script Evaluation**:
-   - Review `/examples/backend/analysis-script/essential-scripts/`
-   - Determine if this is legacy code or has active dependencies
-   - Check if local-server references any of these files
+2. **Server Directory Assessment**:
+   - Map all API routes and their usage
+   - Compare with Supabase edge functions for overlap
+   - Identify development vs production endpoints
+   - Verify middleware necessity
 
-3. **Comprehensive Search**:
-   - Search entire codebase for any imports from `/examples/`
-   - Check for dynamic imports or indirect references
-   - Verify no build processes depend on examples
+3. **Conservative Approach**:
+   - Continue human-in-the-loop approval for all removals
+   - Batch by risk level (LOW/MEDIUM/HIGH)
+   - Validate functionality after each batch
+   - Document all decisions and reasoning
 
-4. **Validation Strategy**:
-   - Test application extensively before any removal
-   - Check all reports pages, components, and functionality
-   - Verify no broken imports or missing components
-
-**DO NOT REMOVE ANYTHING until we have concrete evidence that:**
-- No production code imports from `/examples/`
-- All components in `/examples/` are true duplicates
-- Backend scripts are not referenced by local-server or other systems
-- Application functions normally without any `/examples/` dependencies
-
-This is our final major cleanup target - let's be thorough and safe.
+**SUCCESS CRITERIA for Session 005:**
+- Further reduce repository clutter while preserving all functionality
+- Maintain perfect safety record established in previous sessions
+- Prepare clean foundation for future architectural improvements
 
 ## Required Protocol
 
