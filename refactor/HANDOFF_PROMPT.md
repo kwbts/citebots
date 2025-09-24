@@ -16,23 +16,50 @@ I'm continuing a systematic refactoring of the Citebots application. This is **c
 
 ## Current Status
 
-**Phase**: Session 005 - Scripts & Server Directory Evaluation
-**Progress**: Major cleanup completed - 132+ files removed, 2 large directories removed
-**Last Validation**: All core functionality validated, hybrid local-server architecture preserved and cleaned
-**Next Targets**: Scripts directory further consolidation + Server directory evaluation
+**Phase**: Session 005 ✅ COMPLETE - Massive Cleanup Achieved
+**Progress**: **288+ files removed** across 5 sessions with perfect safety record
+**Last Validation**: All core functionality validated, build successful (29 routes)
+**Next Targets**: Brief-generator session docs (5 files) + Server directory evaluation
 
-## USER INSTRUCTIONS
+## SESSION 005 ACHIEVEMENTS ✅
 
-**NEXT CLEANUP TARGETS IDENTIFIED:**
+### **Scripts Directory - AGGRESSIVE CLEANUP (137 files removed)**
+**Production-focused approach**: Removed all legacy migrations, diagnostics, and historical scripts
 
-### 1. **Scripts Directory Further Consolidation**
-The `/scripts` directory currently has ~70 files remaining after initial cleanup. Opportunities for further refinement:
+- Removed entire `migrations/` directory (43 files) - historical migrations already applied
+- Removed entire `rls/` directory (13 files) - RLS policies already in database
+- Removed entire `utils/` directory (14 files) - diagnostic scripts not needed for production
+- Removed entire `archive/` and `_archived-edge-function-scripts/` (6 files)
+- Removed root level files (8 files) - deployment scripts, diagnostic docs, SQL files
 
-**Analysis Required:**
-- Review remaining SQL migration scripts for duplicates
-- Identify one-time vs reusable scripts
-- Check for additional diagnostic scripts that can be removed
-- Consolidate related scripts into logical groups
+**Result**: Scripts reduced from 148 → 4 files (96% reduction!)
+**Kept**: Only `schema/` directory (3 reference files) + README.md
+
+### **Local-Server Cleanup (19 files removed)**
+**Streamlined to production essentials**:
+- Removed all test-*.js files (6 files) from root
+- Removed 13 development utilities from brief-generator (check-*.js, view-*.js, verify, run, cli utilities)
+
+**Result**: Local-server focused on production servers and core libraries only
+
+### **Cumulative Totals**
+- **Sessions 001-004**: 132 files removed
+- **Session 005**: 156 files removed
+- **GRAND TOTAL**: **288+ files removed**
+
+## USER INSTRUCTIONS - NEXT TARGETS
+
+### 1. **Brief-Generator Session Documentation (5 files)**
+Location: `/local-server/brief-generator/*.md`
+
+**Files to remove**:
+- `BRIEF-GENERATOR-FIX-SUMMARY.md`
+- `BRIEF-GENERATOR-IMPROVEMENTS.md`
+- `BRIEF-VIEWER-FIX.md`
+- `CONTENT-BRIEF-IMPROVEMENTS.md`
+- `MODULAR_ASSEMBLY_DESIGN.md`
+
+**Rationale**: Historical fix/improvement session notes, not needed for production
 
 ### 2. **Server Directory Evaluation**
 The `/server` directory contains Nuxt server-side code that should be evaluated:
@@ -43,39 +70,15 @@ The `/server` directory contains Nuxt server-side code that should be evaluated:
 - Identify any duplicate functionality with Supabase edge functions
 - Evaluate middleware and utilities for necessity
 
-### 3. **Additional Cleanup Opportunities**
-Based on updated assessment after local-server cleanup:
+### 3. **Docs Directory Consolidation (Optional)**
+- `/docs/fixes/` (120KB) - Many historical fix documents
+- `/docs/archive/` (112KB) - Already archived docs
 
-**Potential Targets:**
-- Documentation consolidation to `/docs/` structure
-- Additional test artifacts in other directories
-- Development configuration files
-- Log files or cache files
-
-**Required Analysis Process:**
-
-1. **Scripts Directory Deep Dive**:
-   - Categorize remaining 70 files by purpose and date
-   - Identify clear duplicates or obsolete migrations
-   - Check references in documentation and application code
-   - Test that essential migrations are preserved
-
-2. **Server Directory Assessment**:
-   - Map all API routes and their usage
-   - Compare with Supabase edge functions for overlap
-   - Identify development vs production endpoints
-   - Verify middleware necessity
-
-3. **Conservative Approach**:
-   - Continue human-in-the-loop approval for all removals
-   - Batch by risk level (LOW/MEDIUM/HIGH)
-   - Validate functionality after each batch
-   - Document all decisions and reasoning
-
-**SUCCESS CRITERIA for Session 005:**
-- Further reduce repository clutter while preserving all functionality
-- Maintain perfect safety record established in previous sessions
-- Prepare clean foundation for future architectural improvements
+**SUCCESS CRITERIA for Session 006:**
+- Complete brief-generator docs cleanup
+- Evaluate server directory for production vs development code
+- Maintain perfect safety record
+- Final validation before Round 2 architectural work
 
 ## Required Protocol
 

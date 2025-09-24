@@ -165,41 +165,90 @@ Phase 2: Scripts directory consolidation (109+ files to review)
 
 ---
 
-## Session 005 - TBD: Scripts & Server Directories
-**Objective**: Continue systematic cleanup
+## Session 005 - MASSIVE CLEANUP: Scripts + Local-Server + Utils ✅
+**Date**: September 23, 2025
+**Duration**: ~4 hours (extended session)
+**Objective**: Aggressive production-focused cleanup across multiple directories
 
-### 🎯 Next Targets Identified
-- **Scripts directory**: Further consolidation opportunities (70 files remaining)
-- **Server directory**: Nuxt server-side code evaluation
-- **Additional directories**: Based on updated assessment
+### ✅ PHASE 1: Scripts Directory Initial Cleanup (55 files)
+- **Root duplicates removed**: 44 SQL files (duplicated in subdirectories)
+- **Subdirectory optimization**: 8 files (archive duplicates, emergency RLS files, obsolete root files)
+- **Utils cleanup**: 3 files (obsolete diagnostic utilities)
+- **Result**: Scripts reduced from 148 → 93 files (37% reduction)
 
-### Future Plans
-- [ ] Scripts directory deeper cleanup
-- [ ] Server directory evaluation
-- [ ] Documentation consolidation to /docs/
-- [ ] Final validation and handoff preparation
+### ✅ PHASE 2: Local-Server Test/Development Cleanup (19 files)
+**Root Level (6 files)**:
+- All test-*.js files removed (citation analysis, crawl page, EEAT analyzer, page analysis, Supabase connection)
+- quick-scrapingbee-test.js removed
+
+**Brief-Generator Utilities (13 files)**:
+- 8 check-*.js diagnostic utilities removed
+- 2 view-*.js utilities removed (view-briefs, view-all-briefs)
+- verify-columns.js, run-tracking-fields-sql.js, cli-brief-generator.js removed
+- cors-test.html removed
+
+**Result**: Local-server streamlined to production essentials only
+
+### ✅ PHASE 3: AGGRESSIVE Scripts Directory Cleanup (82 files)
+**Production-focused approach: Keep only what's needed for upgrade**
+
+**Entire Directories Removed (76 files)**:
+- migrations/ (43 files) - Historical migrations already applied
+- rls/ (13 files) - RLS policies already in database
+- utils/ (14 files) - Diagnostic scripts not needed for production
+- archive/ (2 files) - Manual fix scripts
+- _archived-edge-function-scripts/ (4 files) - Archived scripts
+
+**Root Level Removed (8 files)**:
+- 5 deployment shell scripts (.sh files)
+- diagnose-page-analysis-issue.md
+- 2 one-time SQL files
+
+**KEPT for Reference**:
+- schema/ (3 files) - Core table definitions
+- README.md
+
+**Result**: Scripts directory reduced from 93 → 4 files (96% reduction!)
+
+### 📊 Session 005 Total Impact
+- **Scripts cleanup**: 55 + 82 = 137 files removed
+- **Local-server cleanup**: 19 files removed
+- **SESSION 005 TOTAL**: **156 files removed**
+
+### 📊 Cumulative Project Totals
+- **Sessions 001-004**: 132 files removed
+- **Session 005**: 156 files removed
+- **GRAND TOTAL**: **288+ files removed** with perfect safety record
+
+### 🎯 Key Achievements
+- ✅ Scripts directory now production-ready (only schema reference files)
+- ✅ Local-server streamlined (no test/diagnostic files)
+- ✅ Repository prepared for system upgrade
+- ✅ Zero functionality regression - all validations passed
+- ✅ Build process: All 29 routes prerendered successfully
+
+### 🔄 Next Phase Identified
+**Session 006 Targets**:
+- Brief-generator session documentation (5 .md files)
+- Server directory evaluation (Nuxt server-side code)
+- Docs directory consolidation
 
 ---
 
-## Session 006+ - TBD (Future Round 2)
-**Objective**: Architectural improvements
+## Session 006 - TBD: Documentation & Server Directory
+**Objective**: Complete cleanup with docs and server evaluation
 
-### Future Plans
+### 🎯 Next Targets
+- [ ] Brief-generator session docs (5 historical .md files in local-server/brief-generator/)
+- [ ] Server directory evaluation (Nuxt server-side code)
+- [ ] Docs/fixes consolidation (historical fix documents)
+- [ ] Final validation and handoff preparation
+
+### Future Plans (Round 2)
 - [ ] New system architecture implementation
 - [ ] Client Knowledge & Automation Portal integration
 - [ ] Database schema improvements
 - [ ] API consolidation
-
----
-
-## Session 005 - TBD
-**Objective**: Final polish
-
-### Plan
-- [ ] Final validation
-- [ ] Documentation updates
-- [ ] Prepare for Round 2 architectural work
-- [ ] Create handoff documentation
 
 ---
 
