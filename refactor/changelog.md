@@ -235,20 +235,72 @@ Phase 2: Scripts directory consolidation (109+ files to review)
 
 ---
 
-## Session 006 - TBD: Documentation & Server Directory
-**Objective**: Complete cleanup with docs and server evaluation
+## Session 006 - Server Directory Cleanup ✅
+**Date**: September 24, 2025
+**Duration**: ~30 minutes
+**Objective**: Remove unused server API endpoints and empty directories
 
-### 🎯 Next Targets
-- [ ] Brief-generator session docs (5 historical .md files in local-server/brief-generator/)
-- [ ] Server directory evaluation (Nuxt server-side code)
-- [ ] Docs/fixes consolidation (historical fix documents)
-- [ ] Final validation and handoff preparation
+### ✅ Completed
+- [x] Brief-generator session docs (already removed in previous session)
+- [x] Removed `/server/api/auth/provision.post.ts` (replaced by Netlify function)
+- [x] Removed 3 empty directories (clients/, share/, middleware/)
+- [x] Validated dev server and build process
+- [x] All core API endpoints preserved (query-chatgpt, query-perplexity, brand-performance)
 
-### Future Plans (Round 2)
+### 📊 Results
+- **Total removed**: 4 items (1 file + 3 directories)
+- **Validation**: Dev ✓, Build ✓ (29 routes)
+- **Session total**: 4 files/directories
+- **Project total**: **292+ files removed** across 6 sessions
+
+### 🎯 Next Session
+Frontend diagnostics and cleanup preparation
+
+---
+
+## Session 007 - Frontend Architecture Diagnostics ✅
+**Date**: September 24, 2025
+**Duration**: ~2 hours
+**Objective**: Deep frontend analysis without code changes
+
+### ✅ Completed
+- [x] Comprehensive frontend architecture mapping
+- [x] Analyzed all 32 pages and 52 components
+- [x] Import usage verification for backup/debug files
+- [x] Component duplication pattern analysis
+- [x] Created evidence-based cleanup checklist
+
+### 📊 Key Findings
+**Pages Analysis:**
+- Identified 2 unused backup files (index-backup, index-with-queue)
+- Documented client management routing pattern (all routes have distinct purposes)
+- Found debug pages accessible in production (move to dev-only recommended)
+
+**Components Analysis:**
+- 3 gauge components appear unused (needs verification)
+- Both QueryAnalysis versions actively used (V2 migration path identified)
+- TestingDashboard actively used for V1/V2 comparison
+
+**Documentation Created:**
+- `/refactor/session-notes/session-007-frontend-diagnostics.md` (detailed analysis)
+- `/refactor/frontend-cleanup-checklist.md` (evidence-based cleanup plan)
+
+### 📊 Results
+- **Analysis only**: Zero code changes
+- **Cleanup potential**: 5-9 files identified after verification
+- **Refactoring opportunities**: Gauge consolidation, V2 migration, debug/dev separation
+
+### 🎯 Next Session
+Execute frontend cleanup based on checklist (Session 008)
+
+---
+
+## Future Plans (Round 2)
 - [ ] New system architecture implementation
 - [ ] Client Knowledge & Automation Portal integration
 - [ ] Database schema improvements
 - [ ] API consolidation
+- [ ] Frontend component consolidation (gauges, query analysis)
 
 ---
 
