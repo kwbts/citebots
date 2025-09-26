@@ -130,7 +130,7 @@ CREATE POLICY "Users can view their own analysis runs"
     EXISTS (
       SELECT 1 FROM clients c
       WHERE c.id = analysis_runs.client_id
-      AND c.user_id = auth.uid()
+      AND (c.user_id = auth.uid() OR c.created_by = auth.uid())
     )
   );
 
@@ -141,7 +141,7 @@ CREATE POLICY "Users can create analysis runs for their clients"
     EXISTS (
       SELECT 1 FROM clients c
       WHERE c.id = client_id
-      AND c.user_id = auth.uid()
+      AND (c.user_id = auth.uid() OR c.created_by = auth.uid())
     )
   );
 
@@ -152,7 +152,7 @@ CREATE POLICY "Users can update their own analysis runs"
     EXISTS (
       SELECT 1 FROM clients c
       WHERE c.id = analysis_runs.client_id
-      AND c.user_id = auth.uid()
+      AND (c.user_id = auth.uid() OR c.created_by = auth.uid())
     )
   );
 
@@ -165,7 +165,7 @@ CREATE POLICY "Users can view queries from their analysis runs"
       SELECT 1 FROM analysis_runs ar
       JOIN clients c ON c.id = ar.client_id
       WHERE ar.id = analysis_queries.analysis_run_id
-      AND c.user_id = auth.uid()
+      AND (c.user_id = auth.uid() OR c.created_by = auth.uid())
     )
   );
 
@@ -184,7 +184,7 @@ CREATE POLICY "Users can view pages from their queries"
       JOIN analysis_runs ar ON ar.id = aq.analysis_run_id
       JOIN clients c ON c.id = ar.client_id
       WHERE aq.id = page_analyses.query_id
-      AND c.user_id = auth.uid()
+      AND (c.user_id = auth.uid() OR c.created_by = auth.uid())
     )
   );
 
