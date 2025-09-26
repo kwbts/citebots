@@ -39,8 +39,7 @@ BEGIN
     queries_processing,
     queries_failed,
     created_by,
-    processing_method,
-    report_name  -- Added report name field
+    processing_method
   ) VALUES (
     p_client_id,
     v_batch_id,
@@ -52,8 +51,7 @@ BEGIN
     0,
     0,
     auth.uid(),
-    'queue',
-    p_report_name
+    'queue'
   ) RETURNING * INTO v_analysis_run;
 
   -- Get client data with competitors
