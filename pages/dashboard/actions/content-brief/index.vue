@@ -315,7 +315,7 @@ import { useRouter } from 'vue-router'
 import { useBriefGenerator } from '~/composables/useBriefGenerator'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

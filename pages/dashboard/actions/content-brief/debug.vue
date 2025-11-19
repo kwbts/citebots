@@ -126,7 +126,7 @@
 import { ref, computed, onMounted } from 'vue'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

@@ -304,7 +304,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useBriefGenerator } from '~/composables/useBriefGenerator'
 
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 

@@ -22,7 +22,8 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     const restrictedPaths = [
       '/dashboard/analysis',
       '/dashboard/clients',
-      '/dashboard/admin'
+      '/dashboard/admin',
+      '/dashboard/actions'
     ];
 
     // Check if the current route starts with any restricted path

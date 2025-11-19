@@ -110,10 +110,21 @@
         </div>
 
         <!-- Summary -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 text-sm p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-4 text-sm p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-6">
           <div>
             <span class="text-gray-600 dark:text-gray-400">Client:</span>
             <span class="font-medium text-gray-900 dark:text-white ml-2">{{ clientName }}</span>
+          </div>
+          <div>
+            <span class="text-gray-600 dark:text-gray-400">Type:</span>
+            <span class="font-medium text-gray-900 dark:text-white ml-2">
+              <span v-if="analysisType === 'query-only'" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-200">
+                Query Only
+              </span>
+              <span v-else class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-200">
+                Comprehensive
+              </span>
+            </span>
           </div>
           <div>
             <span class="text-gray-600 dark:text-gray-400">Platforms:</span>
@@ -348,7 +359,7 @@ import QueueProgress from '~/components/analysis/QueueProgress.vue'
 
 // Ensure this page uses the dashboard layout
 definePageMeta({
-  middleware: 'auth',
+  middleware: ['auth', 'client-restricted'],
   layout: 'dashboard'
 })
 
@@ -376,6 +387,7 @@ const queriesPerKeyword = ref(3) // Default to 3 if not specified
 const queryMode = ref('keywords') // 'keywords' or 'custom'
 const customQueries = ref([])
 const reportName = ref('')
+const analysisType = ref('query-only') // 'query-only' or 'comprehensive'
 
 // State
 const loading = ref(false)
@@ -506,7 +518,8 @@ const runAnalysis = async () => {
       client_id: clientId.value,
       platforms: selectedPlatforms.value, // Pass array of platforms
       queries: selectedQueries,
-      report_name: reportName.value || ''
+      report_name: reportName.value || '',
+      analysis_type: analysisType.value // Pass analysis type
     })
 
     console.log('Run analysis response:', result)
@@ -557,6 +570,7 @@ onMounted(async () => {
   // Get query parameters
   clientId.value = route.query.client_id || ''
   reportName.value = route.query.report_name || ''
+  analysisType.value = route.query.analysis_type || 'query-only' // Get analysis type from URL
 
   // Handle platform parameter (convert to array for multi-select)
   if (route.query.platform) {
