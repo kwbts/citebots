@@ -9,35 +9,51 @@
     <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
       <!-- Dashboard Section -->
       <template v-if="activeSection === 'dashboard'">
-        <div class="mb-6">
-          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">OVERVIEW</h3>
-          <NuxtLink to="/dashboard" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard' }">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-            </svg>
-            Home
-          </NuxtLink>
-        </div>
+        <!-- Client users only see Reports link -->
+        <template v-if="isClient">
+          <div class="mb-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">YOUR REPORTS</h3>
+            <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' || $route.path.startsWith('/dashboard/reports') }">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              My Reports
+            </NuxtLink>
+          </div>
+        </template>
 
-        <div class="mb-6">
-          <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">QUICK ACTIONS</h3>
-          <NuxtLink to="/dashboard/clients" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients' }">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            Manage Clients
-          </NuxtLink>
-          <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' || $route.path.startsWith('/dashboard/analysis') }">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Reports & Analysis
-          </NuxtLink>
-        </div>
+        <!-- Non-client users see full navigation -->
+        <template v-else>
+          <div class="mb-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">OVERVIEW</h3>
+            <NuxtLink to="/dashboard" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard' }">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+              </svg>
+              Home
+            </NuxtLink>
+          </div>
+
+          <div class="mb-6">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">QUICK ACTIONS</h3>
+            <NuxtLink to="/dashboard/clients" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients' }">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              Manage Clients
+            </NuxtLink>
+            <NuxtLink to="/dashboard/reports" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/reports' || $route.path.startsWith('/dashboard/analysis') }">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Reports & Analysis
+            </NuxtLink>
+          </div>
+        </template>
       </template>
 
-      <!-- Clients Section -->
-      <template v-if="activeSection === 'clients'">
+      <!-- Clients Section (Hidden for client users) -->
+      <template v-if="activeSection === 'clients' && !isClient">
         <div class="mb-6">
           <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">CLIENT MANAGEMENT</h3>
           <NuxtLink to="/dashboard/clients" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/clients' }">
@@ -62,8 +78,8 @@
 
       </template>
 
-      <!-- Analysis Section -->
-      <template v-if="activeSection === 'analysis'">
+      <!-- Analysis Section (Hidden for client users) -->
+      <template v-if="activeSection === 'analysis' && !isClient">
         <div class="mb-6">
           <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">ANALYSIS</h3>
           <NuxtLink to="/dashboard/analysis" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/analysis' || $route.path.startsWith('/dashboard/analysis/') }">
@@ -76,8 +92,8 @@
         </div>
       </template>
 
-      <!-- Admin Section -->
-      <template v-if="activeSection === 'admin'">
+      <!-- Admin Section (Hidden for client users) -->
+      <template v-if="activeSection === 'admin' && !isClient">
         <div class="mb-6">
           <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">ADMINISTRATION</h3>
           <NuxtLink to="/dashboard/admin/profile" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/admin/profile' }">
@@ -101,8 +117,8 @@
         </div>
       </template>
 
-      <!-- Actions Section -->
-      <template v-if="activeSection === 'actions'">
+      <!-- Actions Section (Hidden for client users) -->
+      <template v-if="activeSection === 'actions' && !isClient">
         <div class="mb-6">
           <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">QUICK ACTIONS</h3>
           <NuxtLink to="/dashboard/actions" class="nav-item" :class="{ 'nav-item-active': $route.path === '/dashboard/actions' }">
