@@ -25,11 +25,6 @@
 
     <!-- Dashboard Content -->
     <div v-else-if="reportData && client" class="h-full">
-      <!-- Debug indicator -->
-      <div class="fixed bottom-4 right-4 bg-black text-white px-3 py-1 rounded text-xs z-50">
-        {{ isQueryOnlyAnalysis ? 'Query-Only Dashboard' : 'Comprehensive Dashboard' }}
-      </div>
-
       <!-- Query-Only Dashboard -->
       <QueryOnlyDashboard
         v-if="isQueryOnlyAnalysis"
