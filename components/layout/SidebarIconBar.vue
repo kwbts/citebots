@@ -78,8 +78,9 @@
             </svg>
           </button>
 
-          <!-- Actions -->
+          <!-- Actions (Hidden for client users) -->
           <button
+            v-if="!isClient"
             @click="setActiveSection('actions')"
             :class="[
               'rounded-lg flex items-center h-12 justify-center transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
@@ -254,8 +255,9 @@
             </span>
           </button>
 
-          <!-- Actions -->
+          <!-- Actions (Hidden for client users) -->
           <button
+            v-if="!isClient"
             @click="setActiveSection('actions')"
             :class="[
               'rounded-lg flex items-center h-12 justify-start transition-all duration-150 ease-out relative focus:outline-none focus:ring-2 focus:ring-citebots-orange/50 focus:ring-offset-2 focus:ring-offset-gray-900',
