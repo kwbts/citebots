@@ -82,12 +82,34 @@
                 </div>
               </div>
             </div>
+
+            <!-- Analysis Type Filter -->
+            <div class="min-w-0 flex-1 sm:max-w-xs">
+              <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                Filter by Type
+              </label>
+              <div class="relative">
+                <select
+                  v-model="selectedTypeFilter"
+                  class="block w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-citebots-orange/50 focus:border-citebots-orange transition-all duration-150 pr-10 appearance-none"
+                >
+                  <option value="">All Types</option>
+                  <option value="query-only">Query-Only</option>
+                  <option value="comprehensive">Comprehensive</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- Clear Filters & Actions -->
           <div class="flex gap-3">
             <button
-              v-if="selectedClientFilter || selectedStatusFilter"
+              v-if="selectedClientFilter || selectedStatusFilter || selectedTypeFilter"
               @click="clearFilters"
               class="bg-gray-100 dark:bg-gray-700/60 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 font-medium text-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-150 ease-out"
             >
@@ -139,9 +161,17 @@
                   {{ report.client_name }}
                 </p>
               </div>
-              <span :class="getStatusClass(report.status)" class="px-3 py-1 rounded-lg text-xs font-semibold">
-                {{ report.status }}
-              </span>
+              <div class="flex items-center gap-2">
+                <span :class="getAnalysisTypeClass(report.analysis_type)" class="px-3 py-1 rounded-lg text-xs font-semibold">
+                  {{ getAnalysisTypeLabel(report.analysis_type) }}
+                </span>
+                <span :class="getStatusClass(report.status)" class="px-3 py-1 rounded-lg text-xs font-semibold">
+                  {{ report.status }}
+                </span>
+                <span v-if="report.status === 'completed' && getBrandMentionRate(report) !== null" class="bg-indigo-100 dark:bg-indigo-900/40 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-700/50 px-3 py-1 rounded-lg text-xs font-semibold">
+                  {{ getBrandMentionRate(report) }}% Brand Mention
+                </span>
+              </div>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm">
@@ -274,6 +304,7 @@ const reports = ref([])
 const loading = ref(true)
 const selectedClientFilter = ref('')
 const selectedStatusFilter = ref('')
+const selectedTypeFilter = ref('')
 const isClient = ref(false)
 
 // Computed
@@ -292,15 +323,19 @@ const uniqueClients = computed(() => {
 
 const filteredReports = computed(() => {
   let filtered = [...reports.value]
-  
+
   if (selectedClientFilter.value) {
     filtered = filtered.filter(report => report.client_id === selectedClientFilter.value)
   }
-  
+
   if (selectedStatusFilter.value) {
     filtered = filtered.filter(report => report.status === selectedStatusFilter.value)
   }
-  
+
+  if (selectedTypeFilter.value) {
+    filtered = filtered.filter(report => report.analysis_type === selectedTypeFilter.value)
+  }
+
   return filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
 })
 
@@ -431,13 +466,90 @@ const fetchAllReports = async () => {
       clientMap.set(client.id, client.name)
     })
 
+    // Fetch brand mention counts for each completed analysis run
+    const completedRunIds = analysisRuns
+      .filter(run => run.status === 'completed')
+      .map(run => run.id)
+
+    console.log('Completed run IDs:', completedRunIds)
+    console.log('Number of completed runs:', completedRunIds.length)
+
+    let brandMentionCounts = new Map()
+
+    if (completedRunIds.length > 0) {
+      // Use RPC function to get aggregated brand mention counts efficiently
+      // This avoids the 1000 row limit issue
+      const { data: aggregatedCounts, error: rpcError } = await supabase
+        .rpc('get_brand_mention_counts', { run_ids: completedRunIds })
+
+      if (!rpcError && aggregatedCounts) {
+        console.log('Aggregated brand mention counts from RPC:', aggregatedCounts)
+        aggregatedCounts.forEach(row => {
+          brandMentionCounts.set(row.analysis_run_id, row.brand_mention_count)
+        })
+        console.log('Brand mention counts Map:', Object.fromEntries(brandMentionCounts))
+      } else if (rpcError) {
+        console.error('RPC error, falling back to direct query:', rpcError)
+
+        // Fallback: Fetch in batches to avoid limit
+        // Query to get brand mention counts per analysis run
+        let allMentionData = []
+        const batchSize = 5 // Process 5 analysis runs at a time
+
+        for (let i = 0; i < completedRunIds.length; i += batchSize) {
+          const batchIds = completedRunIds.slice(i, i + batchSize)
+          console.log(`Fetching batch ${Math.floor(i/batchSize) + 1}:`, batchIds)
+
+          const { data: mentionData, error: mentionError } = await supabase
+            .from('analysis_queries')
+            .select('analysis_run_id, brand_mentioned, brand_mention_type')
+            .in('analysis_run_id', batchIds)
+
+          if (!mentionError && mentionData) {
+            allMentionData = allMentionData.concat(mentionData)
+            console.log(`  Fetched ${mentionData.length} queries for this batch`)
+          } else if (mentionError) {
+            console.error('Error fetching batch:', mentionError)
+          }
+        }
+
+        console.log('Total mention data fetched across all batches:', allMentionData.length)
+
+        // Count brand mentions per analysis run (excluding implicit mentions)
+        allMentionData.forEach(query => {
+          const runId = query.analysis_run_id
+          if (!brandMentionCounts.has(runId)) {
+            brandMentionCounts.set(runId, 0)
+          }
+          // Only count if brand_mentioned is true AND mention type is not implicit
+          if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
+            brandMentionCounts.set(runId, brandMentionCounts.get(runId) + 1)
+          }
+        })
+
+        console.log('Brand mention counts:', Object.fromEntries(brandMentionCounts))
+      }
+    }
+
     // Combine the data
-    reports.value = analysisRuns.map(report => ({
-      ...report,
-      client_name: clientMap.get(report.client_id) || 'Unknown Client'
-    }))
+    reports.value = analysisRuns.map(report => {
+      const mentionCount = brandMentionCounts.get(report.id) || 0
+      if (report.status === 'completed' && (report.name?.includes('Must-Win') || !report.name)) {
+        console.log('Mapping report:', report.name || report.id)
+        console.log('  Report ID:', report.id, 'Type:', typeof report.id)
+        console.log('  Map has key:', brandMentionCounts.has(report.id))
+        console.log('  Mention count from map:', mentionCount)
+        console.log('  All keys in map:', Array.from(brandMentionCounts.keys()).slice(0, 5))
+      }
+      return {
+        ...report,
+        client_name: clientMap.get(report.client_id) || 'Unknown Client',
+        brand_mention_count: mentionCount
+      }
+    })
 
     console.log('Final reports count:', reports.value.length)
+    console.log('Sample report with brand data:', reports.value.find(r => r.status === 'completed'))
 
   } catch (error) {
     console.error('Error fetching reports:', error)
@@ -450,6 +562,7 @@ const fetchAllReports = async () => {
 const clearFilters = () => {
   selectedClientFilter.value = ''
   selectedStatusFilter.value = ''
+  selectedTypeFilter.value = ''
 }
 
 const viewReport = (reportId) => {
@@ -466,6 +579,22 @@ const getStatusClass = (status) => {
   return classes[status] || classes.pending
 }
 
+const getAnalysisTypeClass = (analysisType) => {
+  const classes = {
+    'query-only': 'bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-200 border border-purple-200 dark:border-purple-700/50',
+    'comprehensive': 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-700/50'
+  }
+  return classes[analysisType] || classes['comprehensive']
+}
+
+const getAnalysisTypeLabel = (analysisType) => {
+  const labels = {
+    'query-only': 'Query-Only',
+    'comprehensive': 'Comprehensive'
+  }
+  return labels[analysisType] || 'Comprehensive'
+}
+
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   const date = new Date(dateString)
@@ -476,6 +605,32 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+const getBrandMentionRate = (report) => {
+  // Check if we have the necessary data
+  if (!report.queries_total || report.queries_total === 0) {
+    console.log('No queries_total for report:', report.id, report.queries_total)
+    return null
+  }
+
+  // If we have brand_mention_count field, use it directly
+  if (typeof report.brand_mention_count === 'number') {
+    const rate = Math.round((report.brand_mention_count / report.queries_total) * 100)
+    console.log('Brand mention rate for', report.name || report.id, ':', report.brand_mention_count, '/', report.queries_total, '=', rate + '%')
+    return rate
+  }
+
+  // If we have queries_brand_mentioned field, use it
+  if (typeof report.queries_brand_mentioned === 'number') {
+    const rate = Math.round((report.queries_brand_mentioned / report.queries_total) * 100)
+    console.log('Brand mention rate (queries_brand_mentioned) for', report.name || report.id, ':', report.queries_brand_mentioned, '/', report.queries_total, '=', rate + '%')
+    return rate
+  }
+
+  // Otherwise return null (we don't have the data)
+  console.log('No brand mention data for report:', report.id)
+  return null
 }
 
 
