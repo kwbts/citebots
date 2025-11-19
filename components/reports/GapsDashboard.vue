@@ -1,5 +1,5 @@
 <template>
-  <div class="gaps-dashboard">
+  <div class="gaps-dashboard" data-dashboard-version="v2-query-only">
     <!-- Top Section: Gap Severity Overview -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       <!-- Opportunity -->

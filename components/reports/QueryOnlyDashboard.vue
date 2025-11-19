@@ -110,8 +110,6 @@ const filteredData = computed(() => {
     activePlatforms.value.includes(query.data_source)
   ) || []
 
-  console.log('QueryOnlyDashboard - Filtered queries:', filteredQueries.length)
-
   return {
     ...props.data,
     analysis_queries: filteredQueries
@@ -145,12 +143,10 @@ const getFilterSummary = () => {
 // Action handlers
 const exportReport = () => {
   // Implementation for export functionality
-  console.log('Exporting report...')
 }
 
 const refreshData = () => {
   // Implementation for refresh functionality
-  console.log('Refreshing data...')
 }
 </script>
 

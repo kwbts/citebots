@@ -1,5 +1,5 @@
 <template>
-  <div class="overview-dashboard">
+  <div class="overview-dashboard" data-dashboard-version="v2-query-only">
     <!-- Section 1: Brand Query Performance (Donut Chart) -->
     <div class="mb-8">
       <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
