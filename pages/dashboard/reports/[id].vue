@@ -25,40 +25,32 @@
 
     <!-- Dashboard Content -->
     <div v-else-if="reportData && client" class="h-full">
-      <!-- Show different dashboard components based on activeTab -->
-      <div v-if="activeTab === 'overview'" class="h-full">
-        <FullScreenDashboard
-          :data="reportData"
-          :client="client"
-          :analysis-run="analysisRun"
-          @close="handleClose"
-          @update-report-name="updateReportName"
-        />
+      <!-- Debug indicator -->
+      <div class="fixed bottom-4 right-4 bg-black text-white px-3 py-1 rounded text-xs z-50">
+        {{ isQueryOnlyAnalysis ? 'Query-Only Dashboard' : 'Comprehensive Dashboard' }}
       </div>
 
-      <!-- Brand Performance Dashboard -->
-      <div v-else-if="activeTab === 'brand-performance'" class="h-full px-6 pt-2 pb-6">
-        <BrandPerformanceDashboard
-          :data="reportData"
-          :client="client"
-          :competitors="reportData?.competitors || []"
-        />
-      </div>
+      <!-- Query-Only Dashboard -->
+      <QueryOnlyDashboard
+        v-if="isQueryOnlyAnalysis"
+        :data="reportData"
+        :client="client"
+        :analysis-run="analysisRun"
+        :activeTab="activeTab"
+        @close="handleClose"
+        @update-report-name="updateReportName"
+      />
 
-      <!-- Testing Dashboard -->
-      <div v-else-if="activeTab === 'testing'" class="h-full p-6">
-        <TestingDashboard :reportData="reportData" />
-      </div>
-
-      <!-- Other dashboard tabs use FullScreenDashboard with the activeTab prop -->
-      <div v-else class="h-full">
-        <FullScreenDashboard
-          :data="reportData"
-          :client="client"
-          :activeTab="activeTab"
-          @close="handleClose"
-        />
-      </div>
+      <!-- Comprehensive Dashboard (default) -->
+      <FullScreenDashboard
+        v-else
+        :data="reportData"
+        :client="client"
+        :analysis-run="analysisRun"
+        :activeTab="activeTab"
+        @close="handleClose"
+        @update-report-name="updateReportName"
+      />
     </div>
   </div>
 </template>
@@ -67,6 +59,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import FullScreenDashboard from '~/components/reports/FullScreenDashboard.vue'
+import QueryOnlyDashboard from '~/components/reports/QueryOnlyDashboard.vue'
 import TestingDashboard from '~/components/reports/TestingDashboard.vue'
 import BrandPerformanceDashboard from '~/components/reports/BrandPerformanceDashboard.vue'
 
@@ -109,6 +102,11 @@ watch(() => route.query.tab, (newTab) => {
 
 // Computed
 const clientName = computed(() => client.value?.name || 'Loading...')
+
+// Check if this is a query-only analysis
+const isQueryOnlyAnalysis = computed(() => {
+  return analysisRun.value?.analysis_type === 'query-only'
+})
 
 // Check if we have a dedicated component for this tab
 const hasCustomComponent = computed(() => {
