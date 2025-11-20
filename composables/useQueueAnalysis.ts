@@ -55,7 +55,8 @@ export const useQueueAnalysis = () => {
           p_client_id: params.client_id,
           p_platforms: platforms,
           p_queries: params.queries,
-          p_report_name: params.report_name || null
+          p_report_name: params.report_name || null,
+          p_analysis_type: params.analysis_type || 'comprehensive'
         });
         result = response.data;
         error = response.error;
@@ -65,7 +66,8 @@ export const useQueueAnalysis = () => {
           p_client_id: params.client_id,
           p_platform: platforms[0],
           p_queries: params.queries,
-          p_report_name: params.report_name || null
+          p_report_name: params.report_name || null,
+          p_analysis_type: params.analysis_type || 'comprehensive'
         });
         result = response.data;
         error = response.error;

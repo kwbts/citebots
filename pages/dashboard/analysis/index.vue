@@ -68,6 +68,58 @@
         </p>
       </div>
 
+      <!-- Analysis Type Selection -->
+      <div v-if="selectedClient" class="mb-8">
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 tracking-tight">
+            Analysis Type
+          </label>
+          <p class="text-sm text-gray-600 dark:text-gray-400">
+            Choose the type of analysis to perform
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button
+            @click="analysisType = 'query-only'"
+            :class="[
+              'px-4 py-3 rounded-lg font-medium text-sm border transition-all duration-150 text-left',
+              analysisType === 'query-only'
+                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border-green-300 dark:border-green-700'
+                : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
+            ]"
+          >
+            <div class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <div>
+                <div class="font-semibold">Query-Only</div>
+                <div class="text-xs mt-1 opacity-80">Fast analysis without web scraping</div>
+              </div>
+            </div>
+          </button>
+          <button
+            @click="analysisType = 'comprehensive'"
+            :class="[
+              'px-4 py-3 rounded-lg font-medium text-sm border transition-all duration-150 text-left',
+              analysisType === 'comprehensive'
+                ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700'
+                : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800'
+            ]"
+          >
+            <div class="flex items-start">
+              <svg class="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <div>
+                <div class="font-semibold">Comprehensive</div>
+                <div class="text-xs mt-1 opacity-80">Full SEO analysis with page scraping</div>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
       <!-- Query Mode Toggle -->
       <div v-if="selectedClient" class="mb-8">
         <div class="mb-4">
@@ -363,6 +415,7 @@ const analysisResults = ref(null)
 const customKeywords = ref('')
 const customQueries = ref('')
 const queryMode = ref('keywords') // 'keywords' or 'custom'
+const analysisType = ref('query-only') // 'query-only' or 'comprehensive'
 const attempted = ref(false)
 const reportName = ref('')
 const queriesPerKeyword = ref(3) // Default to 3 queries per keyword
@@ -508,7 +561,8 @@ async function generateQueries() {
         client_id: selectedClientId.value,
         mode: 'custom',
         queries: allQueries.join(','),
-        report_name: reportName.value || ''
+        report_name: reportName.value || '',
+        analysis_type: analysisType.value
       }
     })
     return
@@ -552,7 +606,8 @@ async function generateQueries() {
       keywords: allKeywords.join(','),
       intents: selectedIntents.value.join(','),
       count: queriesPerKeyword.value.toString(),
-      report_name: reportName.value || ''
+      report_name: reportName.value || '',
+      analysis_type: analysisType.value
     }
   })
 }

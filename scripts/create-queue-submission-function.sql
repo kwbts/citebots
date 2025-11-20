@@ -1,3 +1,9 @@
+-- Drop existing functions to avoid ambiguity
+DROP FUNCTION IF EXISTS submit_analysis_to_queue(UUID, TEXT[], JSONB[], TEXT);
+DROP FUNCTION IF EXISTS submit_analysis_to_queue(UUID, TEXT[], JSONB[], TEXT, TEXT);
+DROP FUNCTION IF EXISTS submit_analysis_to_queue(UUID, TEXT, JSONB[], TEXT);
+DROP FUNCTION IF EXISTS submit_analysis_to_queue(UUID, TEXT, JSONB[], TEXT, TEXT);
+
 -- Create updated function to submit analysis jobs to the queue with multi-platform support
 -- This bypasses RLS since it runs with SECURITY DEFINER
 
@@ -5,7 +11,8 @@ CREATE OR REPLACE FUNCTION submit_analysis_to_queue(
   p_client_id UUID,
   p_platforms TEXT[],  -- Changed to array of platforms
   p_queries JSONB[],
-  p_report_name TEXT DEFAULT NULL  -- Added optional report name
+  p_report_name TEXT DEFAULT NULL,  -- Added optional report name
+  p_analysis_type TEXT DEFAULT 'comprehensive'  -- Added analysis type parameter
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -39,7 +46,8 @@ BEGIN
     queries_processing,
     queries_failed,
     created_by,
-    processing_method
+    processing_method,
+    analysis_type  -- Store analysis type
   ) VALUES (
     p_client_id,
     v_batch_id,
@@ -51,7 +59,8 @@ BEGIN
     0,
     0,
     auth.uid(),
-    'queue'
+    'queue',
+    p_analysis_type  -- Store the analysis type
   ) RETURNING * INTO v_analysis_run;
 
   -- Get client data with competitors
@@ -89,7 +98,8 @@ BEGIN
           'intent', p_queries[i]->>'intent',
           'platform', v_platform,  -- Individual platform for each queue item
           'client', v_client_data,
-          'is_custom', COALESCE((p_queries[i]->>'is_custom')::boolean, false)
+          'is_custom', COALESCE((p_queries[i]->>'is_custom')::boolean, false),
+          'analysis_type', p_analysis_type  -- Include analysis type in queue data
         ),
         'pending',
         0,
@@ -107,7 +117,8 @@ BEGIN
     'queries_queued', v_total_queue_items,
     'platforms', p_platforms,
     'processing_method', 'queue',
-    'total_query_executions', v_total_queue_items
+    'total_query_executions', v_total_queue_items,
+    'analysis_type', p_analysis_type  -- Include analysis type in response
   );
 
   RETURN v_result;
@@ -126,7 +137,8 @@ CREATE OR REPLACE FUNCTION submit_analysis_to_queue(
   p_client_id UUID,
   p_platform TEXT,  -- Single platform (legacy)
   p_queries JSONB[],
-  p_report_name TEXT DEFAULT NULL
+  p_report_name TEXT DEFAULT NULL,
+  p_analysis_type TEXT DEFAULT 'comprehensive'
 )
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -135,18 +147,12 @@ SET search_path = public
 AS $$
 BEGIN
   -- Call the new multi-platform function with single platform
-  RETURN submit_analysis_to_queue(p_client_id, ARRAY[p_platform], p_queries, p_report_name);
+  RETURN submit_analysis_to_queue(p_client_id, ARRAY[p_platform], p_queries, p_report_name, p_analysis_type);
 END;
 $$;
 
 -- Grant execute permissions
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT[], JSONB[], TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT[], JSONB[], TEXT) TO service_role;
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT, JSONB[], TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT, JSONB[], TEXT) TO service_role;
-
--- Grant execute permissions for functions without report_name parameter (backwards compatibility)
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT[], JSONB[]) TO authenticated;
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT[], JSONB[]) TO service_role;
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT, JSONB[]) TO authenticated;
-GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT, JSONB[]) TO service_role;
+GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT[], JSONB[], TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT[], JSONB[], TEXT, TEXT) TO service_role;
+GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT, JSONB[], TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION submit_analysis_to_queue(UUID, TEXT, JSONB[], TEXT, TEXT) TO service_role;

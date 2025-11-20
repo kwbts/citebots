@@ -359,7 +359,7 @@ import QueueProgress from '~/components/analysis/QueueProgress.vue'
 
 // Ensure this page uses the dashboard layout
 definePageMeta({
-  middleware: ['auth', 'client-restricted'],
+  middleware: ['auth', 'client-access'],
   layout: 'dashboard'
 })
 
