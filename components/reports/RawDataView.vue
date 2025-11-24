@@ -106,7 +106,7 @@
 
           <!-- Metrics Tags -->
           <div class="flex flex-wrap gap-3 mb-6">
-            <span v-if="query.brand_mentioned" class="text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-2 rounded-xl font-semibold border border-green-200/50 dark:border-green-700/50">
+            <span v-if="query.brand_mentioned && query.brand_mention_type !== 'implicit'" class="text-sm bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-2 rounded-xl font-semibold border border-green-200/50 dark:border-green-700/50">
               Brand Mentioned
             </span>
             <span v-if="query.competitor_count > 0" class="text-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 px-3 py-2 rounded-xl font-semibold border border-yellow-200/50 dark:border-yellow-700/50">
@@ -138,7 +138,7 @@
             <p class="text-base font-semibold text-gray-700 dark:text-gray-300 mb-4">Citations ({{ getPageAnalysesForQuery(query.id).length }}):</p>
             <div class="text-sm text-gray-600 dark:text-gray-400 space-y-2 max-h-24 overflow-y-auto">
               <div v-for="page in getPageAnalysesForQuery(query.id).slice(0, 3)" :key="page.id" class="flex items-start">
-                <span v-if="page.brand_mentioned" class="text-green-600 dark:text-green-400 mr-2 text-lg">✓</span>
+                <span v-if="page.brand_mentioned && page.brand_mention_type !== 'implicit'" class="text-green-600 dark:text-green-400 mr-2 text-lg">✓</span>
                 <span v-else class="text-gray-400 dark:text-gray-500 mr-2 text-lg">○</span>
                 <span class="truncate" :title="page.page_title || page.citation_url">
                   {{ truncateText(page.page_title || page.citation_url, 80) }}
@@ -240,7 +240,7 @@
                      class="bg-gray-50/50 dark:bg-gray-700/50 border border-gray-200/50 dark:border-gray-700/50 p-6 rounded-xl">
                   <div class="flex justify-between items-start mb-4">
                     <h5 class="font-semibold text-base text-gray-900 dark:text-white">{{ page.page_title || 'Untitled Page' }}</h5>
-                    <span v-if="page.brand_mentioned" class="text-green-600 dark:text-green-300 text-sm bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-xl font-semibold border border-green-200/50 dark:border-green-700/50">
+                    <span v-if="page.brand_mentioned && page.brand_mention_type !== 'implicit'" class="text-green-600 dark:text-green-300 text-sm bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-xl font-semibold border border-green-200/50 dark:border-green-700/50">
                       Brand Mentioned
                     </span>
                   </div>

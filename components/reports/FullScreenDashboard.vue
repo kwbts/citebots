@@ -269,7 +269,7 @@ const totalQueries = computed(() => {
 })
 
 const brandMentions = computed(() => {
-  return filteredQueries.value.filter(q => q.brand_mentioned === true).length
+  return filteredQueries.value.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit').length
 })
 
 const brandMentionRate = computed(() => {
@@ -354,16 +354,16 @@ const brandCitationRate = computed(() => {
   return Math.round((brandCitations.value / totalCitations.value) * 100)
 })
 
-// Filtered query rows for the table
+// Filtered query rows for the table (excluding implicit mentions from "mentioned")
 const filteredQueryRows = computed(() => {
   const queries = filteredData.value?.analysis_queries || []
 
   if (queryFilterType.value === 'all') {
     return queries
   } else if (queryFilterType.value === 'mentioned') {
-    return queries.filter(q => q.brand_mentioned === true)
+    return queries.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit')
   } else if (queryFilterType.value === 'not-mentioned') {
-    return queries.filter(q => q.brand_mentioned === false || q.brand_mentioned === undefined)
+    return queries.filter(q => q.brand_mentioned !== true || q.brand_mention_type === 'implicit')
   }
 
   return queries

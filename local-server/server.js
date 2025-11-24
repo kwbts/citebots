@@ -167,9 +167,9 @@ async function processQueue() {
           await handleItemError(item, error);
         }
 
-        // Add delay between items to avoid rate limits
-        const delayMs = 2000;
-        console.log(`⏱️ RATE LIMIT: Adding ${delayMs}ms delay before next item`);
+        // Add delay between items to avoid LLM rate limits
+        const delayMs = 5000;
+        console.log(`⏱️ RATE LIMIT: Adding ${delayMs}ms delay before next item (LLM rate limiting)`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
 
@@ -343,75 +343,112 @@ async function processQueueItem(item) {
     throw updateError;
   }
 
-  // Process citations if available
+  // Process citations based on analysis type
   const citations = queryResult.citations;
+  const analysisType = query_data.analysis_type || 'comprehensive';
+
   if (Array.isArray(citations) && citations.length > 0) {
-    console.log(`\n🔗 CITATIONS: Processing ${citations.length} citations`);
+    console.log(`\n🔗 CITATIONS: Found ${citations.length} citations`);
+    console.log(`📊 ANALYSIS TYPE: ${analysisType}`);
 
-    const pageAnalyses = [];
-    for (const [index, citation] of citations.entries()) {
-      if (!citation || !citation.url) {
-        console.log(`⚠️ CITATION WARNING: Skipping citation at index ${index} - missing URL`);
-        continue;
-      }
+    if (analysisType === 'query-only') {
+      // Query-only mode: Store basic citation data without deep page analysis
+      console.log(`⚡ QUERY-ONLY MODE: Skipping page analysis (PageSpeed, Moz, scraping)`);
 
-      console.log(`\n🔗 CITATION ${index + 1}/${citations.length}: ${citation.url}`);
+      // Store basic citation info on the query record
+      const basicCitations = citations
+        .filter(c => c && c.url)
+        .map((citation, index) => ({
+          url: citation.url,
+          domain: citation.domain || '',
+          citation_number: citation.citation_number || index + 1,
+          title: citation.title || ''
+        }));
 
-      try {
-        // Enhanced citation analysis with PageSpeed and domain metrics
-        console.log(`📊 ANALYZING CITATION: Position ${citation.citation_number || index + 1}`);
-        const pageAnalysis = await analyzeCitation({
-          query_id: queryRecord.id,
-          citation_url: citation.url,
-          citation_position: citation.citation_number || index + 1,
-          query_text: query_data.query_text,
-          keyword: query_data.keyword || '',
-          brand_name: query_data.client?.name || '',
-          brand_domain: query_data.client?.domain || '',
-          competitors: Array.isArray(query_data.client?.competitors) ? query_data.client.competitors : [],
-          options: {
-            // Enable enhanced features
-            enhanced: true,
-            verbose: true, // Enable verbose logging
-            // Enable these if you have API keys configured
-            pagespeed: !!process.env.PAGESPEED_API_KEY || !!process.env.GOOGLE_PAGESPEED_API_KEY,
-            moz: true // Use smart domain metrics system
-          }
-        });
-
-        if (pageAnalysis) {
-          pageAnalyses.push(pageAnalysis);
-          console.log(`✅ CITATION ANALYSIS: Successfully analyzed ${citation.url}`);
-          console.log(`📊 ANALYSIS SUMMARY:`);
-          console.log(`  - Technical SEO Score: ${pageAnalysis.technical_seo?.html_structure_score || 'N/A'}/10`);
-          console.log(`  - Content Depth: ${pageAnalysis.content_quality?.content_depth_score || 'N/A'}/5`);
-          console.log(`  - Brand Mentioned: ${pageAnalysis.brand_mentioned ? 'Yes' : 'No'}`);
+      if (basicCitations.length > 0) {
+        console.log(`📝 DATABASE: Saving ${basicCitations.length} citation references to query record`);
+        try {
+          await supabase
+            .from('analysis_queries')
+            .update({
+              citation_urls: basicCitations,
+              citation_count: basicCitations.length
+            })
+            .eq('id', queryRecord.id);
+          console.log(`✅ DATABASE: Citation references saved successfully`);
+        } catch (updateError) {
+          console.error(`❌ DATABASE ERROR: Failed to save citation references: ${updateError.message}`);
         }
-      } catch (error) {
-        console.error(`❌ CITATION ERROR: Failed to analyze citation ${citation.url}:`, error.message);
-        console.error(`🔄 STACK TRACE: ${error.stack}`);
+      }
+    } else {
+      // Comprehensive mode: Full page analysis with PageSpeed, Moz, scraping
+      console.log(`🔬 COMPREHENSIVE MODE: Running full page analysis`);
+
+      const pageAnalyses = [];
+      for (const [index, citation] of citations.entries()) {
+        if (!citation || !citation.url) {
+          console.log(`⚠️ CITATION WARNING: Skipping citation at index ${index} - missing URL`);
+          continue;
+        }
+
+        console.log(`\n🔗 CITATION ${index + 1}/${citations.length}: ${citation.url}`);
+
+        try {
+          // Enhanced citation analysis with PageSpeed and domain metrics
+          console.log(`📊 ANALYZING CITATION: Position ${citation.citation_number || index + 1}`);
+          const pageAnalysis = await analyzeCitation({
+            query_id: queryRecord.id,
+            citation_url: citation.url,
+            citation_position: citation.citation_number || index + 1,
+            query_text: query_data.query_text,
+            keyword: query_data.keyword || '',
+            brand_name: query_data.client?.name || '',
+            brand_domain: query_data.client?.domain || '',
+            competitors: Array.isArray(query_data.client?.competitors) ? query_data.client.competitors : [],
+            options: {
+              // Enable enhanced features
+              enhanced: true,
+              verbose: true, // Enable verbose logging
+              // Enable these if you have API keys configured
+              pagespeed: !!process.env.PAGESPEED_API_KEY || !!process.env.GOOGLE_PAGESPEED_API_KEY,
+              moz: true // Use smart domain metrics system
+            }
+          });
+
+          if (pageAnalysis) {
+            pageAnalyses.push(pageAnalysis);
+            console.log(`✅ CITATION ANALYSIS: Successfully analyzed ${citation.url}`);
+            console.log(`📊 ANALYSIS SUMMARY:`);
+            console.log(`  - Technical SEO Score: ${pageAnalysis.technical_seo?.html_structure_score || 'N/A'}/10`);
+            console.log(`  - Content Depth: ${pageAnalysis.content_quality?.content_depth_score || 'N/A'}/5`);
+            console.log(`  - Brand Mentioned: ${pageAnalysis.brand_mentioned ? 'Yes' : 'No'}`);
+          }
+        } catch (error) {
+          console.error(`❌ CITATION ERROR: Failed to analyze citation ${citation.url}:`, error.message);
+          console.error(`🔄 STACK TRACE: ${error.stack}`);
+        }
+
+        // Add longer delay between citations for API rate limits
+        console.log(`⏱️ RATE LIMIT: Adding 3-second delay before next citation`);
+        await new Promise(resolve => setTimeout(resolve, 3000));
       }
 
-      // Add longer delay between citations for API rate limits
-      console.log(`⏱️ RATE LIMIT: Adding 3-second delay before next citation`);
-      await new Promise(resolve => setTimeout(resolve, 3000));
-    }
+      if (pageAnalyses.length > 0) {
+        console.log(`\n📝 DATABASE: Saving ${pageAnalyses.length} page analyses to query record`);
+        try {
+          await supabase
+            .from('analysis_queries')
+            .update({
+              associated_pages: pageAnalyses,
+              associated_pages_count: pageAnalyses.length
+            })
+            .eq('id', queryRecord.id);
 
-    if (pageAnalyses.length > 0) {
-      console.log(`\n📝 DATABASE: Saving ${pageAnalyses.length} page analyses to query record`);
-      try {
-        await supabase
-          .from('analysis_queries')
-          .update({
-            associated_pages: pageAnalyses,
-            associated_pages_count: pageAnalyses.length
-          })
-          .eq('id', queryRecord.id);
-
-        console.log(`✅ DATABASE: Associated pages saved successfully`);
-      } catch (updateError) {
-        console.error(`❌ DATABASE ERROR: Failed to save associated pages: ${updateError.message}`);
-        // Continue processing even if this fails
+          console.log(`✅ DATABASE: Associated pages saved successfully`);
+        } catch (updateError) {
+          console.error(`❌ DATABASE ERROR: Failed to save associated pages: ${updateError.message}`);
+          // Continue processing even if this fails
+        }
       }
     }
   } else {

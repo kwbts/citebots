@@ -96,9 +96,95 @@
       </div>
     </div>
 
-    <!-- Section 2: Two Side-by-Side Visualizations -->
+    <!-- Section 2: Brand Mentions by Category and Cluster -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-      <!-- Left: Competitive Citation Landscape -->
+      <!-- Left: Brand Mentions by Category -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Brand Mentions by Category</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Top categories where your brand appears</p>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <div
+            v-for="category in topBrandCategories"
+            :key="category.name"
+            class="relative"
+          >
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ category.name }}</span>
+              <span class="text-sm font-bold tabular-nums text-orange-600 dark:text-orange-400">
+                {{ category.count }}
+              </span>
+            </div>
+            <div class="h-8 bg-gray-100 dark:bg-gray-700/30 rounded-lg overflow-hidden">
+              <div
+                class="h-full bg-orange-500 transition-all duration-500 ease-out"
+                :style="{ width: category.percentage + '%' }"
+              ></div>
+            </div>
+          </div>
+
+          <div v-if="topBrandCategories.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+            No brand mentions found
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Brand Mentions by Cluster -->
+      <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 bg-amber-50 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Brand Mentions by Cluster</h3>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Top topic clusters where your brand appears</p>
+          </div>
+        </div>
+
+        <!-- Topic Cluster Bars -->
+        <div class="space-y-3">
+          <div
+            v-for="cluster in topBrandClusters"
+            :key="cluster.topic"
+            class="relative"
+          >
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ cluster.topic }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400">{{ cluster.queryCount }} queries</span>
+            </div>
+            <div class="h-8 bg-gray-100 dark:bg-gray-700/30 rounded-lg overflow-hidden">
+              <div
+                class="h-full bg-amber-500 transition-all duration-500 ease-out flex items-center justify-end pr-2"
+                :style="{ width: cluster.percentage + '%' }"
+              >
+                <span v-if="cluster.percentage > 15" class="text-xs font-medium text-white">
+                  {{ cluster.brandMentions }} mentions
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="topBrandClusters.length === 0" class="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+            No brand mentions found
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Competitor Mentions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- Left: Competitor Mentions -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 bg-purple-50 dark:bg-purple-500/10 border border-purple-200/50 dark:border-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -108,7 +194,7 @@
           </div>
           <div>
             <h3 class="text-base font-semibold text-gray-900 dark:text-white">Competitor Mentions</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Total mentions across all queries</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Total competitor mentions across all queries</p>
           </div>
         </div>
 
@@ -119,17 +205,16 @@
             class="relative"
           >
             <div class="flex items-center justify-between mb-1">
-              <span class="text-sm font-medium" :class="competitor.isClient ? 'text-orange-600 dark:text-orange-400' : 'text-gray-700 dark:text-gray-300'">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ competitor.name }}
               </span>
-              <span class="text-sm font-bold tabular-nums" :class="competitor.isClient ? 'text-orange-600 dark:text-orange-400' : 'text-gray-900 dark:text-white'">
+              <span class="text-sm font-bold tabular-nums text-gray-900 dark:text-white">
                 {{ competitor.count }}
               </span>
             </div>
             <div class="h-8 bg-gray-100 dark:bg-gray-700/30 rounded-lg overflow-hidden">
               <div
-                :class="competitor.isClient ? 'bg-orange-500' : 'bg-purple-500'"
-                class="h-full transition-all duration-500 ease-out"
+                class="h-full bg-purple-500 transition-all duration-500 ease-out"
                 :style="{ width: competitor.percentage + '%' }"
               ></div>
             </div>
@@ -185,7 +270,7 @@
       </div>
     </div>
 
-    <!-- Section 3: Response Analysis (Full Width) -->
+    <!-- Section 4: Response Analysis (Full Width) -->
     <div class="mb-8">
       <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
         <!-- Header with Filter Tabs -->
@@ -256,7 +341,7 @@
       </div>
     </div>
 
-    <!-- Section 4: Action Items -->
+    <!-- Section 5: Action Items -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Column 1: Top Content Opportunities -->
       <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
@@ -399,10 +484,20 @@ const brandVisibilityRate = computed(() => {
 
 // Brand mention count
 const brandMentionCount = computed(() => {
-  return queries.value.filter(q =>
+  const filtered = queries.value.filter(q =>
     q.brand_mentioned && q.brand_mention_type !== 'implicit'
-  ).length
+  )
+  console.log('[OverviewDashboard] Brand mention count:', {
+    total: queries.value.length,
+    mentioned: queries.value.filter(q => q.brand_mentioned).length,
+    nonImplicit: filtered.length,
+    sample: filtered.slice(0, 3).map(q => ({ brand_mentioned: q.brand_mentioned, brand_mention_type: q.brand_mention_type }))
+  })
+  return filtered.length
 })
+
+// Total queries count
+const totalQueries = computed(() => queries.value.length)
 
 // Query Competition Breakdown (filter out "Unknown")
 const queryCompetitionBreakdown = computed(() => {
@@ -490,7 +585,69 @@ const getCompetitionBgColor = (level) => {
   return getCompetitionColor(level)
 }
 
-// Section 2: Competitor Mentions by Cluster
+// Section 2: Brand Mentions by Category
+const topBrandCategories = computed(() => {
+  const categories = new Map()
+
+  queries.value.forEach(query => {
+    // Only count queries where brand is mentioned (excluding implicit)
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
+      const category = query.query_category || 'Uncategorized'
+      categories.set(category, (categories.get(category) || 0) + 1)
+    }
+  })
+
+  const categoryList = Array.from(categories.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 6)
+
+  const maxCount = categoryList.length > 0 ? categoryList[0].count : 1
+  categoryList.forEach(cat => {
+    cat.percentage = (cat.count / maxCount) * 100
+  })
+
+  return categoryList
+})
+
+// Section 2: Brand Mentions by Cluster
+const topBrandClusters = computed(() => {
+  const topicClusters = new Map()
+
+  queries.value.forEach(query => {
+    const topic = query.query_topic || 'Uncategorized'
+
+    if (!topicClusters.has(topic)) {
+      topicClusters.set(topic, {
+        topic,
+        queryCount: 0,
+        brandMentions: 0
+      })
+    }
+
+    const cluster = topicClusters.get(topic)
+    cluster.queryCount++
+
+    // Count brand mentions (excluding implicit)
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
+      cluster.brandMentions++
+    }
+  })
+
+  const clusters = Array.from(topicClusters.values())
+    .filter(c => c.brandMentions > 0)
+    .sort((a, b) => b.brandMentions - a.brandMentions)
+    .slice(0, 6)
+
+  const maxMentions = clusters.length > 0 ? clusters[0].brandMentions : 1
+  clusters.forEach(cluster => {
+    cluster.percentage = (cluster.brandMentions / maxMentions) * 100
+  })
+
+  return clusters
+})
+
+// Section 3: Competitor Mentions by Cluster
 const topCompetitorClusters = computed(() => {
   const topicClusters = new Map()
 
@@ -526,7 +683,7 @@ const topCompetitorClusters = computed(() => {
   return clusters
 })
 
-// Section 3: Response Analysis
+// Section 4: Response Analysis
 const selectedResponseFilter = ref('category')
 
 const responseFilterOptions = [
@@ -575,16 +732,11 @@ const responseDistribution = computed(() => {
     .sort((a, b) => b.count - a.count)
 })
 
-// Competitive Citation Landscape (reused from Gaps)
+// Section 3: Competitive Citation Landscape (competitors only, no brand)
 const competitiveLandscape = computed(() => {
   const competitorMentions = new Map()
-  let brandMentionCount = 0
 
   queries.value.forEach(query => {
-    if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
-      brandMentionCount++
-    }
-
     if (query.competitor_mentioned_names && query.competitor_mentioned_names.length > 0) {
       query.competitor_mentioned_names.forEach(competitor => {
         competitorMentions.set(competitor, (competitorMentions.get(competitor) || 0) + 1)
@@ -594,19 +746,10 @@ const competitiveLandscape = computed(() => {
 
   const landscape = []
 
-  if (props.client?.name) {
-    landscape.push({
-      name: props.client.name,
-      count: brandMentionCount,
-      isClient: true
-    })
-  }
-
   competitorMentions.forEach((count, name) => {
     landscape.push({
       name,
-      count,
-      isClient: false
+      count
     })
   })
 
@@ -621,7 +764,7 @@ const competitiveLandscape = computed(() => {
   return topLandscape
 })
 
-// Section 3: Action Items
+// Section 5: Action Items
 
 // Top Content Gaps
 const topContentGaps = computed(() => {

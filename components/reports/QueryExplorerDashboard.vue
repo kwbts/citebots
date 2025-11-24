@@ -82,6 +82,7 @@
       <BrandMentionsMetric
         :brand-mention-count="brandMentionCount"
         :brand-mention-rate="brandMentionRate"
+        :total-queries="filteredQueries.length"
       />
       <ContentGapsMetric
         :content-gap-count="contentGapCount"

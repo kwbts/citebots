@@ -409,10 +409,10 @@ const pageAnalyses = computed(() => {
   return analyses
 })
 
-// Filter brand and competitor pages
+// Filter brand and competitor pages (excluding implicit mentions)
 const brandPages = computed(() => {
-  return pageAnalyses.value.filter(page => 
-    page.brand_mentioned === true || 
+  return pageAnalyses.value.filter(page =>
+    (page.brand_mentioned === true && page.brand_mention_type !== 'implicit') ||
     page.is_client_domain === true ||
     (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain))
   )
@@ -493,7 +493,7 @@ const topCitedPages = computed(() => {
         positions: [],
         qualityScore: Number(page.content_quality_score || page.relevance_score || 0) * 20,
         contentType: page.on_page_seo?.content_type || 'Unknown',
-        isBrand: page.brand_mentioned || page.is_client_domain,
+        isBrand: (page.brand_mentioned && page.brand_mention_type !== 'implicit') || page.is_client_domain,
         isCompetitor: page.competitor_mentioned || page.is_competitor_domain
       })
     }
@@ -629,7 +629,7 @@ const contentFormats = computed(() => {
     
     const data = formatMap.get(format)
     data.total++
-    if (page.brand_mentioned || page.is_client_domain) {
+    if ((page.brand_mentioned && page.brand_mention_type !== 'implicit') || page.is_client_domain) {
       data.brand++
     }
   })

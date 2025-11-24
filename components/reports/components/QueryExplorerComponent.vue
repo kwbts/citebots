@@ -95,8 +95,8 @@
                 </span>
                 
                 <!-- Brand Mention Badge -->
-                <span 
-                  v-if="query.brand_mentioned"
+                <span
+                  v-if="query.brand_mentioned && query.brand_mention_type !== 'implicit'"
                   class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300"
                 >
                   Brand Mentioned
@@ -193,7 +193,7 @@
                     <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
                       #{{ page.citation_position }}
                     </div>
-                    <div v-if="page.brand_mentioned" class="text-xs text-green-600 dark:text-green-400">
+                    <div v-if="page.brand_mentioned && page.brand_mention_type !== 'implicit'" class="text-xs text-green-600 dark:text-green-400">
                       Brand mentioned
                     </div>
                   </div>
@@ -320,7 +320,7 @@ const filteredQueries = computed(() => {
       case 'recent':
         return new Date(b.created_at || 0) - new Date(a.created_at || 0)
       default: // relevance
-        return (b.brand_mentioned ? 1 : 0) - (a.brand_mentioned ? 1 : 0)
+        return ((b.brand_mentioned && b.brand_mention_type !== 'implicit') ? 1 : 0) - ((a.brand_mentioned && a.brand_mention_type !== 'implicit') ? 1 : 0)
     }
   })
 
@@ -336,8 +336,8 @@ const paginatedQueries = computed(() => {
 })
 
 // Summary counts
-const brandMentionCount = computed(() => 
-  filteredQueries.value.filter(q => q.brand_mentioned).length
+const brandMentionCount = computed(() =>
+  filteredQueries.value.filter(q => q.brand_mentioned && q.brand_mention_type !== 'implicit').length
 )
 
 const citationCount = computed(() => 

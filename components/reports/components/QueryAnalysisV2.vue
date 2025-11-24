@@ -396,7 +396,7 @@
                       </span>
                     </td>
                     <td class="p-3 text-sm">
-                      <span v-if="query.brand_mentioned" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300">
+                      <span v-if="query.brand_mentioned && query.brand_mention_type !== 'implicit'" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300">
                         Yes
                       </span>
                       <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
@@ -815,9 +815,9 @@ const platformBreakdown = computed(() => {
   }).sort((a, b) => b.count - a.count)
 })
 
-// 2. Brand Mention Rate Metric
+// 2. Brand Mention Rate Metric (excluding implicit mentions)
 const brandMentions = computed(() => {
-  return queries.value.filter(q => q.brand_mentioned === true).length
+  return queries.value.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit').length
 })
 
 const brandMentionRate = computed(() => {
@@ -837,7 +837,7 @@ const platformMentionRates = computed(() => {
     const platform = query.data_source || 'unknown'
     platformCounts[platform] = (platformCounts[platform] || 0) + 1
 
-    if (query.brand_mentioned) {
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
       platforms[platform] = (platforms[platform] || 0) + 1
     }
   })
@@ -876,7 +876,7 @@ const avgBrandCitationsPerQuery = computed(() => {
     if (query.associated_pages && Array.isArray(query.associated_pages)) {
       brandCitationCount += query.associated_pages.filter(page =>
         page.is_client_domain === true ||
-        page.brand_mentioned === true
+        (page.brand_mentioned === true && page.brand_mention_type !== 'implicit')
       ).length
     }
   })
@@ -892,7 +892,7 @@ const topQueryIntent = computed(() => {
   const intentMap = new Map()
 
   queries.value.forEach(query => {
-    if (query.brand_mentioned && query.query_intent) {
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit' && query.query_intent) {
       const intent = query.query_intent
       intentMap.set(intent, (intentMap.get(intent) || 0) + 1)
     }
@@ -923,7 +923,7 @@ const topIntentData = computed(() => {
     q.query_intent && q.query_intent.toLowerCase() === intent
   )
 
-  const mentionedWithIntent = queriesWithIntent.filter(q => q.brand_mentioned).length
+  const mentionedWithIntent = queriesWithIntent.filter(q => q.brand_mentioned && q.brand_mention_type !== 'implicit').length
   const totalWithIntent = queriesWithIntent.length
 
   return {
@@ -1381,10 +1381,10 @@ const contentGapQueries = computed(() => {
   const competitors = props.data?.competitors || []
   const queries = props.data.analysis_queries || []
 
-  // Find queries where competitors are cited but brand isn't
+  // Find queries where competitors are cited but brand isn't (excluding implicit mentions)
   return queries.filter(query => {
-    // Skip if brand is mentioned
-    if (query.brand_mentioned) return false
+    // Skip if brand is mentioned (excluding implicit)
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit') return false
 
     // Check if any competitors are mentioned
     const competitorMentioned = query.competitor_mentioned === true ||
@@ -1432,9 +1432,9 @@ const contentGapQueries = computed(() => {
 const contentGapScore = computed(() => {
   if (!props.data || !props.data.analysis_queries || props.data.analysis_queries.length === 0) return 0
 
-  // Queries with neither brand nor competitor mentions - pure opportunities
+  // Queries with neither brand nor competitor mentions - pure opportunities (excluding implicit)
   const opportunityQueries = props.data.analysis_queries.filter(query =>
-    !query.brand_mentioned &&
+    !(query.brand_mentioned && query.brand_mention_type !== 'implicit') &&
     (!query.competitor_mentioned ||
      (query.competitor_mentioned_names && query.competitor_mentioned_names.length === 0))
   ).length
@@ -1449,7 +1449,7 @@ const contentGapQueryCount = computed(() => {
   if (!props.data || !props.data.analysis_queries) return 0
 
   return props.data.analysis_queries.filter(query =>
-    !query.brand_mentioned &&
+    !(query.brand_mentioned && query.brand_mention_type !== 'implicit') &&
     (!query.competitor_mentioned ||
      (query.competitor_mentioned_names && query.competitor_mentioned_names.length === 0))
   ).length
@@ -1459,10 +1459,10 @@ const contentGapQueryCount = computed(() => {
 const opportunityQueries = computed(() => {
   if (!props.data || !props.data.analysis_queries) return []
 
-  // Find queries with competition opportunities (queries marked as opportunity)
+  // Find queries with competition opportunities (queries marked as opportunity, excluding implicit)
   return props.data.analysis_queries.filter(query =>
     query.query_competition === 'opportunity' ||
-    (!query.brand_mentioned && (!query.competitor_mentioned || !query.competitor_mentioned_names?.length))
+    (!(query.brand_mentioned && query.brand_mention_type !== 'implicit') && (!query.competitor_mentioned || !query.competitor_mentioned_names?.length))
   )
 })
 
@@ -1515,10 +1515,10 @@ const topGapTopics = computed(() => {
 
   const topics = {}
 
-  // Find queries with competition opportunities (queries marked as opportunity)
+  // Find queries with competition opportunities (queries marked as opportunity, excluding implicit)
   const opportunityQueries = props.data.analysis_queries.filter(query =>
     query.query_competition === 'opportunity' ||
-    (!query.brand_mentioned && (!query.competitor_mentioned || !query.competitor_mentioned_names?.length))
+    (!(query.brand_mentioned && query.brand_mention_type !== 'implicit') && (!query.competitor_mentioned || !query.competitor_mentioned_names?.length))
   )
 
   if (opportunityQueries.length === 0) return []

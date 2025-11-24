@@ -227,7 +227,7 @@ const defensiveQueries = computed(() => {
 
 // Primary Metrics
 const defensiveQueryCount = computed(() => defensiveQueries.value.length)
-const totalBrandMentions = computed(() => queries.value.filter(q => q.brand_mentioned).length)
+const totalBrandMentions = computed(() => queries.value.filter(q => q.brand_mentioned && q.brand_mention_type !== 'implicit').length)
 const defensiveMentionRate = computed(() => {
   if (totalBrandMentions.value === 0) return 0
   return Math.round((defensiveQueryCount.value / totalBrandMentions.value) * 100)

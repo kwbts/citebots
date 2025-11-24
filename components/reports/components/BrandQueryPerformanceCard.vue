@@ -144,7 +144,7 @@ const totalQueries = computed(() => {
 })
 
 const brandMentions = computed(() => {
-  const count = props.data.queries?.filter(q => q.brand_mentioned === true)?.length || 0
+  const count = props.data.queries?.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit')?.length || 0
   console.log('BrandQueryPerformanceCard brandMentions:', count)
   return count
 })

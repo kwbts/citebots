@@ -410,10 +410,10 @@ const pageAnalyses = computed(() => {
   return analyses
 })
 
-// Filter brand pages only (pages that mention the client's brand)
+// Filter brand pages only (pages that mention the client's brand, excluding implicit mentions)
 const brandPages = computed(() => {
   return pageAnalyses.value.filter(page =>
-    page.brand_mentioned === true ||
+    (page.brand_mentioned === true && page.brand_mention_type !== 'implicit') ||
     page.is_client_domain === true ||
     (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain))
   )
@@ -422,7 +422,7 @@ const brandPages = computed(() => {
 // Filter non-brand pages for benchmarking
 const nonBrandPages = computed(() => {
   return pageAnalyses.value.filter(page =>
-    !(page.brand_mentioned === true ||
+    !((page.brand_mentioned === true && page.brand_mention_type !== 'implicit') ||
       page.is_client_domain === true ||
       (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain)))
   )
@@ -956,10 +956,10 @@ const performanceRanges = computed(() => {
       return score >= range.min && score <= range.max
     })
 
-    // Check for citations using schema fields
+    // Check for citations using schema fields (excluding implicit mentions)
     const citations = pagesInRange.filter(page =>
       page.is_client_domain ||
-      page.brand_mentioned ||
+      (page.brand_mentioned && page.brand_mention_type !== 'implicit') ||
       (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain))
     ).length
 

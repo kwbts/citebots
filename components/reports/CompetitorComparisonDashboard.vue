@@ -406,13 +406,13 @@ const metrics = computed(() => {
   const avgCompetitorMentions = totalCompetitorMentions / totalQueries
   
   // Calculate brand win rate (brand mentioned but competitors have lower count)
-  const brandWins = queries.filter(q => 
-    q.brand_mentioned && 
+  const brandWins = queries.filter(q =>
+    q.brand_mentioned && q.brand_mention_type !== 'implicit' &&
     (q.brand_mention_count || 0) > (q.competitor_count || 0)
   ).length
-  
-  const competitiveQueries = queries.filter(q => 
-    q.brand_mentioned && q.competitor_count > 0
+
+  const competitiveQueries = queries.filter(q =>
+    q.brand_mentioned && q.brand_mention_type !== 'implicit' && q.competitor_count > 0
   ).length
   
   const brandWinRate = competitiveQueries > 0 ? (brandWins / competitiveQueries) * 100 : 0
@@ -463,8 +463,8 @@ const positioningMetrics = computed(() => {
   queries.forEach(query => {
     const brandMentions = query.brand_mention_count || 0
     const competitorMentions = query.competitor_count || 0
-    const brandMentioned = query.brand_mentioned || false
-    
+    const brandMentioned = (query.brand_mentioned && query.brand_mention_type !== 'implicit') || false
+
     if (brandMentioned && competitorMentions === 0) {
       brandDominant++
     } else if (brandMentioned && competitorMentions > 0) {
@@ -494,7 +494,7 @@ const cooccurrenceData = computed(() => {
   const queries = filteredQueries.value
   
   queries.forEach(query => {
-    if (query.brand_mentioned && query.competitor_mentioned_names) {
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit' && query.competitor_mentioned_names) {
       query.competitor_mentioned_names.forEach(competitorName => {
         if (!competitorStats[competitorName]) {
           competitorStats[competitorName] = {
@@ -560,11 +560,11 @@ const queryTypePerformance = computed(() => {
     
     const stats = typeStats[type]
     stats.totalQueries++
-    
-    if (query.brand_mentioned) {
+
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
       stats.brandMentions++
     }
-    
+
     if (query.competitor_count > 0) {
       stats.competitorMentions++
     }

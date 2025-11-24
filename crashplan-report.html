@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrashPlan Traffic Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        /* Two Column Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Summary Stats */
+        .summary-stats {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 1.5rem;
+        }
+
+        .summary-stats h2 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .total-sessions {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #D36641;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 1.5rem;
+        }
+
+        .chart-section h2 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Bar Chart */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            min-width: 140px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            text-align: right;
+        }
+
+        .bar-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 32px;
+            background-color: #f3f4f6;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #D36641 0%, #E88968 100%);
+            border-radius: 0.375rem;
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+        }
+
+        .bar-value {
+            min-width: 80px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            text-align: right;
+        }
+
+        .bar-percentage {
+            font-size: 0.75rem;
+            color: #6b7280;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* Conversion Rate Bars - smaller compact version */
+        .bar-chart-small {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .bar-item-small {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .bar-label-small {
+            min-width: 110px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+            text-align: right;
+        }
+
+        .bar-container-small {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .bar-track-small {
+            flex: 1;
+            height: 24px;
+            background-color: #f3f4f6;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+
+        .bar-fill-small {
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 0.25rem;
+            transition: width 1s ease-out;
+        }
+
+        .bar-value-small {
+            min-width: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            text-align: right;
+        }
+
+        /* Comparison Cards */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .comparison-card.highlight {
+            border: 2px solid #10B981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .comparison-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-card.highlight .comparison-value {
+            color: #10B981;
+        }
+
+        .comparison-subtext {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .comparison-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Table Styles */
+        .table-section {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+
+        .table-section h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table thead {
+            background-color: #f9fafb;
+        }
+
+        .data-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table th:last-child,
+        .data-table td:last-child {
+            text-align: right;
+        }
+
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) {
+            text-align: center;
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.15s;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .data-table td {
+            padding: 0.875rem 1rem;
+            color: #111827;
+        }
+
+        .data-table .page-url {
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .data-table .metric-value {
+            font-weight: 600;
+            color: #0D1B2A;
+        }
+
+        .data-table .conversion-rate {
+            font-weight: 700;
+        }
+
+        .data-table .conversion-high {
+            color: #059669;
+        }
+
+        .data-table .conversion-zero {
+            color: #9ca3af;
+        }
+
+        /* Query Strategy Diagram */
+        .strategy-diagram {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .core-node {
+            background: linear-gradient(135deg, #D36641 0%, #E88968 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .core-node h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .core-node .query-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .core-node .label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .connector-line {
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, #D36641, #e5e7eb);
+            margin-bottom: 1rem;
+        }
+
+        .branches-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .branch-node {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .branch-node:hover {
+            border-color: #D36641;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
+        }
+
+        .branch-node h5 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #0D1B2A;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+            min-height: 2.6rem;
+        }
+
+        .branch-node .query-count {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #D36641;
+            margin-bottom: 0.25rem;
+        }
+
+        .branch-node .label {
+            font-size: 0.65rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .total-summary {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .total-summary .total-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 0.25rem;
+        }
+
+        .total-summary .total-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Animation */
+        @keyframes slideIn {
+            from {
+                width: 0;
+            }
+        }
+
+        .bar-fill {
+            animation: slideIn 1s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>CrashPlan Traffic Analysis</h1>
+            <p class="subtitle">Session Traffic by Channel Group</p>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="content-grid">
+            <!-- Summary Stats -->
+            <div class="summary-stats">
+                <h2>Total Sessions</h2>
+                <div class="total-sessions">95,737</div>
+                <div class="total-label">Across All Channels</div>
+            </div>
+
+            <!-- Traffic by Channel Chart -->
+            <div class="chart-section">
+                <h2>Sessions by Channel</h2>
+
+                <div class="bar-chart">
+                <!-- Direct -->
+                <div class="bar-item">
+                    <div class="bar-label">Direct</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 100%;"></div>
+                        </div>
+                        <div class="bar-value">60,517</div>
+                        <div class="bar-percentage">63.2%</div>
+                    </div>
+                </div>
+
+                <!-- Unassigned -->
+                <div class="bar-item">
+                    <div class="bar-label">Unassigned</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 17.0%;"></div>
+                        </div>
+                        <div class="bar-value">10,289</div>
+                        <div class="bar-percentage">10.7%</div>
+                    </div>
+                </div>
+
+                <!-- Paid Search -->
+                <div class="bar-item">
+                    <div class="bar-label">Paid Search</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 14.2%;"></div>
+                        </div>
+                        <div class="bar-value">8,582</div>
+                        <div class="bar-percentage">9.0%</div>
+                    </div>
+                </div>
+
+                <!-- Organic Search -->
+                <div class="bar-item">
+                    <div class="bar-label">Organic Search</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 13.7%;"></div>
+                        </div>
+                        <div class="bar-value">8,316</div>
+                        <div class="bar-percentage">8.7%</div>
+                    </div>
+                </div>
+
+                <!-- Referral -->
+                <div class="bar-item">
+                    <div class="bar-label">Referral</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 12.0%;"></div>
+                        </div>
+                        <div class="bar-value">7,271</div>
+                        <div class="bar-percentage">7.6%</div>
+                    </div>
+                </div>
+
+                <!-- Organic Social -->
+                <div class="bar-item">
+                    <div class="bar-label">Organic Social</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.5%;"></div>
+                        </div>
+                        <div class="bar-value">329</div>
+                        <div class="bar-percentage">0.3%</div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="bar-item">
+                    <div class="bar-label">Email</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.5%;"></div>
+                        </div>
+                        <div class="bar-value">315</div>
+                        <div class="bar-percentage">0.3%</div>
+                    </div>
+                </div>
+
+                <!-- Organic Shopping -->
+                <div class="bar-item">
+                    <div class="bar-label">Organic Shopping</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.1%;"></div>
+                        </div>
+                        <div class="bar-value">59</div>
+                        <div class="bar-percentage">0.1%</div>
+                    </div>
+                </div>
+
+                <!-- Cross-network -->
+                <div class="bar-item">
+                    <div class="bar-label">Cross-network</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.08%;"></div>
+                        </div>
+                        <div class="bar-value">47</div>
+                        <div class="bar-percentage">0.05%</div>
+                    </div>
+                </div>
+
+                <!-- Organic Video -->
+                <div class="bar-item">
+                    <div class="bar-label">Organic Video</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.02%;"></div>
+                        </div>
+                        <div class="bar-value">10</div>
+                        <div class="bar-percentage">0.01%</div>
+                    </div>
+                </div>
+
+                <!-- Paid Social -->
+                <div class="bar-item">
+                    <div class="bar-label">Paid Social</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.003%;"></div>
+                        </div>
+                        <div class="bar-value">2</div>
+                        <div class="bar-percentage">0.002%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Conversion Rate Section -->
+        <div class="content-grid">
+            <!-- Placeholder for left side balance -->
+            <div></div>
+
+            <!-- Conversion Rate Chart -->
+            <div class="chart-section">
+                <h2>Key Event Rate by Channel (Top 7)</h2>
+
+                <div class="bar-chart-small">
+                    <!-- Organic Social -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Organic Social</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 100%;"></div>
+                            </div>
+                            <div class="bar-value-small">2.13%</div>
+                        </div>
+                    </div>
+
+                    <!-- Paid Search -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Paid Search</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 65.7%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.40%</div>
+                        </div>
+                    </div>
+
+                    <!-- Direct -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Direct</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 50.3%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.07%</div>
+                        </div>
+                    </div>
+
+                    <!-- Referral -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Referral</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 36.2%;"></div>
+                            </div>
+                            <div class="bar-value-small">0.77%</div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Email</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 29.8%;"></div>
+                            </div>
+                            <div class="bar-value-small">0.63%</div>
+                        </div>
+                    </div>
+
+                    <!-- Organic Search -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Organic Search</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 28.8%;"></div>
+                            </div>
+                            <div class="bar-value-small">0.61%</div>
+                        </div>
+                    </div>
+
+                    <!-- Unassigned -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Unassigned</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 13.2%;"></div>
+                            </div>
+                            <div class="bar-value-small">0.28%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ChatGPT Traffic Comparison -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>ChatGPT Traffic Performance</h1>
+            <p class="subtitle">Traffic Volume & Conversion Rate Analysis</p>
+        </div>
+
+        <!-- Volume Comparison -->
+        <div class="comparison-grid">
+            <!-- Total Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">Total Sessions</div>
+                <div class="comparison-value">95,737</div>
+                <div class="comparison-subtext">All Traffic Sources</div>
+            </div>
+
+            <!-- ChatGPT Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">ChatGPT Sessions</div>
+                <div class="comparison-value">80</div>
+                <div class="comparison-subtext">20 Landing Pages</div>
+                <div class="comparison-badge" style="background-color: #dbeafe; color: #1e40af;">0.08% of Total Traffic</div>
+            </div>
+        </div>
+
+        <!-- Conversion Rate Comparison -->
+        <div class="comparison-grid">
+            <!-- Overall Average -->
+            <div class="comparison-card">
+                <div class="comparison-label">Overall Average Rate</div>
+                <div class="comparison-value">0.94%</div>
+                <div class="comparison-subtext">All Traffic Sources</div>
+            </div>
+
+            <!-- ChatGPT Traffic -->
+            <div class="comparison-card highlight">
+                <div class="comparison-label">ChatGPT Traffic Rate</div>
+                <div class="comparison-value">1.01%</div>
+                <div class="comparison-subtext">ChatGPT Referred Traffic</div>
+                <div class="comparison-badge">+7.4% Higher than Average</div>
+            </div>
+        </div>
+
+        <!-- ChatGPT vs Organic Search Comparison -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>ChatGPT vs Organic Search</h1>
+            <p class="subtitle">Direct Channel Performance Comparison</p>
+        </div>
+
+        <!-- Volume Comparison -->
+        <div class="comparison-grid">
+            <!-- Organic Search Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">Organic Search Sessions</div>
+                <div class="comparison-value">8,316</div>
+                <div class="comparison-subtext">Traditional Search Traffic</div>
+            </div>
+
+            <!-- ChatGPT Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">ChatGPT Sessions</div>
+                <div class="comparison-value">80</div>
+                <div class="comparison-subtext">AI-Referred Traffic</div>
+                <div class="comparison-badge" style="background-color: #fef3c7; color: #92400e;">0.96% of Organic Search Volume</div>
+            </div>
+        </div>
+
+        <!-- Conversion Rate Comparison -->
+        <div class="comparison-grid">
+            <!-- Organic Search -->
+            <div class="comparison-card">
+                <div class="comparison-label">Organic Search Rate</div>
+                <div class="comparison-value">0.61%</div>
+                <div class="comparison-subtext">Traditional Search Conversion</div>
+            </div>
+
+            <!-- ChatGPT Traffic -->
+            <div class="comparison-card highlight">
+                <div class="comparison-label">ChatGPT Traffic Rate</div>
+                <div class="comparison-value">1.01%</div>
+                <div class="comparison-subtext">AI Search Conversion</div>
+                <div class="comparison-badge">+65.6% Higher than Organic Search</div>
+            </div>
+        </div>
+
+        <!-- Landing Pages Table -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>ChatGPT Landing Page Performance</h1>
+            <p class="subtitle">Detailed breakdown of all ChatGPT-referred landing pages</p>
+        </div>
+
+        <div class="table-section">
+            <h2>Landing Pages by Sessions & Conversion Rate</h2>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Landing Page</th>
+                        <th>Sessions</th>
+                        <th>Conversion Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="page-url">/</td>
+                        <td class="metric-value">29</td>
+                        <td class="conversion-rate conversion-high">3.45%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/smb-pricing/</td>
+                        <td class="metric-value">7</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/computer-backup-for-small-businesses/</td>
+                        <td class="metric-value">6</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/products/saas/crashplan-for-google-workspace/</td>
+                        <td class="metric-value">6</td>
+                        <td class="conversion-rate conversion-high">16.67%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">(not set)</td>
+                        <td class="metric-value">4</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/products/saas/m365/</td>
+                        <td class="metric-value">3</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/blog/encryption-key-management-what-you-need-to-know/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/blog/thinking-about-sharing-your-login-credentials-dont/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/blog/three-reasons-to-encrypt-your-business-data-before-uploading-to-the-cloud/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/company/careers/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/microsoft-ignite-sponsor-directory</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/msp-backup-solutions/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/news/sensitive-data-saved-on-employee-devices-against-policy/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/plans/small-business/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/resources/blog/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/resources/crashplan-shared-responsibility-model/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/glossary/what-is-gdpr-compliance/</td>
+                        <td class="metric-value">2</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/404/</td>
+                        <td class="metric-value">1</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/blog/cyber-attacks-increase-during-holidays-how-you-can-prepare/</td>
+                        <td class="metric-value">1</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                    <tr>
+                        <td class="page-url">/blog/the-importance-of-online-backup-unlimited-versioning/</td>
+                        <td class="metric-value">1</td>
+                        <td class="conversion-rate conversion-zero">0.00%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Query Analysis Strategy -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>Query Analysis Strategy</h1>
+            <p class="subtitle">Comprehensive approach to identifying and testing high-value queries</p>
+        </div>
+
+        <div class="strategy-diagram">
+            <div class="tree-container">
+                <!-- Core Node -->
+                <div class="core-node">
+                    <h4>Foundation</h4>
+                    <div class="query-count">50</div>
+                    <div class="label">Must-Win Queries</div>
+                </div>
+
+                <!-- Connector -->
+                <div class="connector-line"></div>
+
+                <!-- Branch Nodes -->
+                <div class="branches-grid">
+                    <div class="branch-node">
+                        <h5>Microsoft 365 Data Protection & Governance</h5>
+                        <div class="query-count">40</div>
+                        <div class="label">Queries Analyzed</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Data Governance, Legal Hold & Compliance</h5>
+                        <div class="query-count">39</div>
+                        <div class="label">Queries Analyzed</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Unified Platform & Enterprise Architecture</h5>
+                        <div class="query-count">30</div>
+                        <div class="label">Queries Analyzed</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Disaster Recovery & Business Continuity</h5>
+                        <div class="query-count">29</div>
+                        <div class="label">Queries Analyzed</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Google Workspace Backup</h5>
+                        <div class="query-count">18</div>
+                        <div class="label">Queries Analyzed</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Ransomware & Security</h5>
+                        <div class="query-count">16</div>
+                        <div class="label">Queries Analyzed</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>MSP & Multi-Tenant Operations</h5>
+                        <div class="query-count">16</div>
+                        <div class="label">Queries Analyzed</div>
+                    </div>
+                </div>
+
+                <!-- Total Summary -->
+                <div class="total-summary">
+                    <div class="total-count">238</div>
+                    <div class="total-label">Total Queries Analyzed Across All Categories</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Generated for CrashPlan | Data from Google Analytics 4</p>
+            <p style="margin-top: 0.5rem;">Traffic analysis by channel group</p>
+        </div>
+    </div>
+</body>
+</html>

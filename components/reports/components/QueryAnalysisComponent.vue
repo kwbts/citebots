@@ -216,9 +216,9 @@ const totalQueries = computed(() => {
   return queries.value?.length || 0
 })
 
-// Brand mention metrics from analysis_queries
+// Brand mention metrics from analysis_queries (excluding implicit mentions)
 const brandMentions = computed(() => {
-  return queries.value?.filter(q => q.brand_mentioned === true)?.length || 0
+  return queries.value?.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit')?.length || 0
 })
 
 const brandMentionRate = computed(() => {
@@ -363,8 +363,8 @@ const platformMentionRates = computed(() => {
       q.data_source?.toLowerCase() === platform.toLowerCase()
     );
     
-    // Count brand mentions for this platform
-    const platformBrandMentions = platformQueries.filter(q => q.brand_mentioned === true);
+    // Count brand mentions for this platform (excluding implicit mentions)
+    const platformBrandMentions = platformQueries.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit');
     
     // Calculate rate
     const totalPlatformQueries = platformQueries.length;

@@ -208,7 +208,7 @@
                               <tr v-for="query in topic.queries.slice(0, 5)" :key="query.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/25">
                                 <td class="px-3 py-2 text-xs text-gray-700 dark:text-gray-300 max-w-xs truncate">{{ query.query_text }}</td>
                                 <td class="px-3 py-2 text-xs">
-                                  <span v-if="query.brand_mentioned" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300">Yes</span>
+                                  <span v-if="query.brand_mentioned && query.brand_mention_type !== 'implicit'" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300">Yes</span>
                                   <span v-else class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">No</span>
                                 </td>
                                 <td class="px-3 py-2 text-xs text-gray-700 dark:text-gray-300">{{ query.citation_count || 0 }}</td>
@@ -371,7 +371,7 @@ const topicData = computed(() => {
     
     // Add query to topic and update brand mentions
     topics[topic].queries.push(query)
-    if (query.brand_mentioned) {
+    if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
       topics[topic].brandMentions++
     }
     

@@ -302,7 +302,7 @@
                           {{ formatPlatform(query.data_source) }}
                         </span>
                         <span
-                          v-if="!query.brand_mentioned"
+                          v-if="!query.brand_mentioned || query.brand_mention_type === 'implicit'"
                           class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
                         >
                           Not Mentioned
@@ -617,12 +617,13 @@ const opportunity = computed(() => {
 })
 
 const competitorAdvantage = computed(() => {
-  // Competitor Advantage: Competitors have the advantage
+  // Competitor Advantage: Competitors have the advantage (excluding implicit mentions)
   return queries.value.filter(q => {
+    const isBrandMentioned = q.brand_mentioned && q.brand_mention_type !== 'implicit'
     const hasCompetitors = q.competitor_count > 0
     // Either not mentioned at all, or mentioned but competitors have advantage
-    return (!q.brand_mentioned && hasCompetitors) ||
-           (q.brand_mentioned && hasCompetitors && q.query_competition === 'competitor_advantage')
+    return (!isBrandMentioned && hasCompetitors) ||
+           (isBrandMentioned && hasCompetitors && q.query_competition === 'competitor_advantage')
   }).length
 })
 
@@ -787,8 +788,8 @@ const platformDifference = computed(() => {
   const chatgptQueries = queries.value.filter(q => q.data_source === 'chatgpt')
   const perplexityQueries = queries.value.filter(q => q.data_source === 'perplexity')
 
-  const chatgptMentionRate = chatgptQueries.filter(q => q.brand_mentioned).length / (chatgptQueries.length || 1) * 100
-  const perplexityMentionRate = perplexityQueries.filter(q => q.brand_mentioned).length / (perplexityQueries.length || 1) * 100
+  const chatgptMentionRate = chatgptQueries.filter(q => q.brand_mentioned && q.brand_mention_type !== 'implicit').length / (chatgptQueries.length || 1) * 100
+  const perplexityMentionRate = perplexityQueries.filter(q => q.brand_mentioned && q.brand_mention_type !== 'implicit').length / (perplexityQueries.length || 1) * 100
 
   const diff = Math.abs(chatgptMentionRate - perplexityMentionRate).toFixed(1)
 
@@ -997,8 +998,8 @@ const getQueryGapType = (query) => {
     return 'opportunity'
   }
 
-  // Competitor Advantage: Not mentioned at all, or competitors have advantage
-  if ((!query.brand_mentioned && hasCompetitors) ||
+  // Competitor Advantage: Not mentioned at all (excluding implicit), or competitors have advantage
+  if ((!isBrandMentioned && hasCompetitors) ||
       (isBrandMentioned && hasCompetitors && query.query_competition === 'competitor_advantage')) {
     return 'competitor_advantage'
   }

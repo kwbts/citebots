@@ -16,7 +16,7 @@
     <!-- Child Container -->
     <div class="bg-gray-50/50 dark:bg-gray-700/30 rounded-xl p-4">
       <div>
-        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ brandMentionCount }}</p>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ brandMentionCount }}<span class="text-base font-normal text-gray-500 dark:text-gray-400"> / {{ totalQueries }}</span></p>
         <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ brandMentionRate }}% of queries</p>
       </div>
     </div>
@@ -30,6 +30,10 @@ const props = defineProps({
     required: true
   },
   brandMentionRate: {
+    type: Number,
+    required: true
+  },
+  totalQueries: {
     type: Number,
     required: true
   }

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bridgit LLM Traffic Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f9fafb;
+            color: #111827;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .period-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            background-color: #D36641;
+            color: white;
+        }
+
+        /* Two Column Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Summary Stats */
+        .summary-stats {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 1.5rem;
+        }
+
+        .summary-stats h2 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .total-sessions {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #D36641;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 1.5rem;
+        }
+
+        .chart-section h2 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Bar Chart */
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-label {
+            min-width: 140px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            text-align: right;
+        }
+
+        .bar-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 32px;
+            background-color: #f3f4f6;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #D36641 0%, #E88968 100%);
+            border-radius: 0.375rem;
+            transition: width 1s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+        }
+
+        .bar-value {
+            min-width: 80px;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            text-align: right;
+        }
+
+        .bar-percentage {
+            font-size: 0.75rem;
+            color: #6b7280;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        /* Conversion Rate Bars - smaller compact version */
+        .bar-chart-small {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .bar-item-small {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .bar-label-small {
+            min-width: 110px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+            text-align: right;
+        }
+
+        .bar-container-small {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .bar-track-small {
+            flex: 1;
+            height: 24px;
+            background-color: #f3f4f6;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+
+        .bar-fill-small {
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5 0%, #7C3AED 100%);
+            border-radius: 0.25rem;
+            transition: width 1s ease-out;
+        }
+
+        .bar-value-small {
+            min-width: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            text-align: right;
+        }
+
+        /* Comparison Cards */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .comparison-card.highlight {
+            border: 2px solid #10B981;
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+        }
+
+        .comparison-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .comparison-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 0.5rem;
+        }
+
+        .comparison-card.highlight .comparison-value {
+            color: #10B981;
+        }
+
+        .comparison-subtext {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .comparison-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Three Column Grid for LLM breakdown */
+        .comparison-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Table Styles */
+        .table-section {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .table-section h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f3f4f6;
+        }
+
+        .table-scroll {
+            max-height: 500px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .data-table thead {
+            background-color: #f9fafb;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .data-table th {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .data-table th:last-child,
+        .data-table td:last-child {
+            text-align: right;
+        }
+
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2) {
+            text-align: center;
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.15s;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .data-table td {
+            padding: 0.875rem 1rem;
+            color: #111827;
+        }
+
+        .data-table .page-url {
+            color: #1e293b;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            font-weight: 500;
+            max-width: 500px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .data-table .metric-value {
+            font-weight: 600;
+            color: #0D1B2A;
+        }
+
+        .data-table .conversion-rate {
+            font-weight: 700;
+        }
+
+        .data-table .conversion-high {
+            color: #059669;
+        }
+
+        .data-table .conversion-zero {
+            color: #9ca3af;
+        }
+
+        .table-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f3f4f6;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        /* Query Strategy Diagram */
+        .strategy-diagram {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #f3f4f6;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .core-node {
+            background: linear-gradient(135deg, #D36641 0%, #E88968 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.15);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .core-node h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .core-node .query-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .core-node .label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .connector-line {
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, #D36641, #e5e7eb);
+            margin-bottom: 1rem;
+        }
+
+        .branches-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .branch-node {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            transition: all 0.2s;
+            position: relative;
+            text-align: center;
+        }
+
+        .branch-node:hover {
+            border-color: #D36641;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
+        }
+
+        .branch-node h5 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #0D1B2A;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+            min-height: 2.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .branch-node .query-count {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #D36641;
+            margin-bottom: 0.25rem;
+        }
+
+        .branch-node .label {
+            font-size: 0.65rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .mentions-badge {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-radius: 0.25rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .total-summary {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: #f9fafb;
+            border-radius: 0.5rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .total-summary .total-count {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0D1B2A;
+            margin-bottom: 0.25rem;
+        }
+
+        .total-summary .total-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding: 1.5rem;
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Animation */
+        @keyframes slideIn {
+            from {
+                width: 0;
+            }
+        }
+
+        .bar-fill {
+            animation: slideIn 1s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Bridgit LLM Traffic Analysis</h1>
+            <p class="subtitle">Session Traffic by Channel Group - GA4 Main Site</p>
+            <span class="period-label">October 1 - 31, 2025</span>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="content-grid">
+            <!-- Summary Stats -->
+            <div class="summary-stats">
+                <h2>Total Sessions</h2>
+                <div class="total-sessions">32,334</div>
+                <div class="total-label">Across All Channels</div>
+            </div>
+
+            <!-- Traffic by Channel Chart -->
+            <div class="chart-section">
+                <h2>Sessions by Channel</h2>
+
+                <div class="bar-chart">
+                <!-- Organic Search -->
+                <div class="bar-item">
+                    <div class="bar-label">Organic Search</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 100%;"></div>
+                        </div>
+                        <div class="bar-value">22,485</div>
+                        <div class="bar-percentage">69.5%</div>
+                    </div>
+                </div>
+
+                <!-- Direct -->
+                <div class="bar-item">
+                    <div class="bar-label">Direct</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 27.4%;"></div>
+                        </div>
+                        <div class="bar-value">6,172</div>
+                        <div class="bar-percentage">19.1%</div>
+                    </div>
+                </div>
+
+                <!-- Referral -->
+                <div class="bar-item">
+                    <div class="bar-label">Referral</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 10.0%;"></div>
+                        </div>
+                        <div class="bar-value">2,247</div>
+                        <div class="bar-percentage">6.9%</div>
+                    </div>
+                </div>
+
+                <!-- Paid Search -->
+                <div class="bar-item">
+                    <div class="bar-label">Paid Search</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 3.3%;"></div>
+                        </div>
+                        <div class="bar-value">734</div>
+                        <div class="bar-percentage">2.3%</div>
+                    </div>
+                </div>
+
+                <!-- Organic Social -->
+                <div class="bar-item">
+                    <div class="bar-label">Organic Social</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 1.2%;"></div>
+                        </div>
+                        <div class="bar-value">265</div>
+                        <div class="bar-percentage">0.8%</div>
+                    </div>
+                </div>
+
+                <!-- Unassigned -->
+                <div class="bar-item">
+                    <div class="bar-label">Unassigned</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 1.2%;"></div>
+                        </div>
+                        <div class="bar-value">259</div>
+                        <div class="bar-percentage">0.8%</div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="bar-item">
+                    <div class="bar-label">Email</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.7%;"></div>
+                        </div>
+                        <div class="bar-value">151</div>
+                        <div class="bar-percentage">0.5%</div>
+                    </div>
+                </div>
+
+                <!-- Organic Video -->
+                <div class="bar-item">
+                    <div class="bar-label">Organic Video</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.04%;"></div>
+                        </div>
+                        <div class="bar-value">10</div>
+                        <div class="bar-percentage">0.03%</div>
+                    </div>
+                </div>
+
+                <!-- Paid Social -->
+                <div class="bar-item">
+                    <div class="bar-label">Paid Social</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.03%;"></div>
+                        </div>
+                        <div class="bar-value">6</div>
+                        <div class="bar-percentage">0.02%</div>
+                    </div>
+                </div>
+
+                <!-- Cross-network -->
+                <div class="bar-item">
+                    <div class="bar-label">Cross-network</div>
+                    <div class="bar-container">
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 0.02%;"></div>
+                        </div>
+                        <div class="bar-value">5</div>
+                        <div class="bar-percentage">0.02%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Conversion Rate Section -->
+        <div class="content-grid">
+            <!-- Placeholder for left side balance -->
+            <div></div>
+
+            <!-- Conversion Rate Chart -->
+            <div class="chart-section">
+                <h2>Key Event Rate by Channel (Top 8)</h2>
+
+                <div class="bar-chart-small">
+                    <!-- Organic Video -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Organic Video</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 100%;"></div>
+                            </div>
+                            <div class="bar-value-small">10.00%</div>
+                        </div>
+                    </div>
+
+                    <!-- Direct -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Direct</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 45.0%;"></div>
+                            </div>
+                            <div class="bar-value-small">4.50%</div>
+                        </div>
+                    </div>
+
+                    <!-- Perplexity -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Perplexity</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 13.3%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.33%</div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Email</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 13.2%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.32%</div>
+                        </div>
+                    </div>
+
+                    <!-- Referral -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Referral</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 12.9%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.29%</div>
+                        </div>
+                    </div>
+
+                    <!-- Organic Social -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Organic Social</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 11.3%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.13%</div>
+                        </div>
+                    </div>
+
+                    <!-- Paid Search -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Paid Search</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 10.9%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.09%</div>
+                        </div>
+                    </div>
+
+                    <!-- ChatGPT -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">ChatGPT</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 10.1%;"></div>
+                            </div>
+                            <div class="bar-value-small">1.01%</div>
+                        </div>
+                    </div>
+
+                    <!-- Organic Search -->
+                    <div class="bar-item-small">
+                        <div class="bar-label-small">Organic Search</div>
+                        <div class="bar-container-small">
+                            <div class="bar-track-small">
+                                <div class="bar-fill-small" style="width: 4.6%;"></div>
+                            </div>
+                            <div class="bar-value-small">0.46%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LLM Traffic Performance -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>LLM Traffic Performance</h1>
+            <p class="subtitle">Traffic Volume & Conversion Rate Analysis</p>
+        </div>
+
+        <!-- Volume Comparison -->
+        <div class="comparison-grid">
+            <!-- Total Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">Total Sessions</div>
+                <div class="comparison-value">32,334</div>
+                <div class="comparison-subtext">All Traffic Sources</div>
+            </div>
+
+            <!-- LLM Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">LLM Sessions</div>
+                <div class="comparison-value">372</div>
+                <div class="comparison-subtext">ChatGPT: 297 | Perplexity: 75</div>
+                <div class="comparison-badge" style="background-color: #dbeafe; color: #1e40af;">1.15% of Total Traffic</div>
+            </div>
+        </div>
+
+        <!-- Conversion Rate Comparison -->
+        <div class="comparison-grid">
+            <!-- Overall Average -->
+            <div class="comparison-card">
+                <div class="comparison-label">Overall Average Rate</div>
+                <div class="comparison-value">2.21%</div>
+                <div class="comparison-subtext">All Traffic Sources</div>
+            </div>
+
+            <!-- LLM Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">Combined LLM Rate</div>
+                <div class="comparison-value">1.61%</div>
+                <div class="comparison-subtext">6 Key Events from LLM Traffic</div>
+                <div class="comparison-badge" style="background-color: #fef3c7; color: #92400e;">ChatGPT: 1.01% | Perplexity: 1.33%</div>
+            </div>
+        </div>
+
+        <!-- LLM vs Organic Search Comparison -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>LLM Traffic vs Organic Search</h1>
+            <p class="subtitle">Direct Channel Performance Comparison</p>
+        </div>
+
+        <!-- Volume Comparison -->
+        <div class="comparison-grid">
+            <!-- Organic Search Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">Organic Search Sessions</div>
+                <div class="comparison-value">22,485</div>
+                <div class="comparison-subtext">Traditional Search Traffic</div>
+            </div>
+
+            <!-- LLM Traffic -->
+            <div class="comparison-card">
+                <div class="comparison-label">LLM Sessions</div>
+                <div class="comparison-value">372</div>
+                <div class="comparison-subtext">AI-Referred Traffic</div>
+                <div class="comparison-badge" style="background-color: #fef3c7; color: #92400e;">1.65% of Organic Search Volume</div>
+            </div>
+        </div>
+
+        <!-- Conversion Rate Comparison -->
+        <div class="comparison-grid">
+            <!-- Organic Search -->
+            <div class="comparison-card">
+                <div class="comparison-label">Organic Search Rate</div>
+                <div class="comparison-value">0.46%</div>
+                <div class="comparison-subtext">Traditional Search Conversion</div>
+            </div>
+
+            <!-- LLM Traffic -->
+            <div class="comparison-card highlight">
+                <div class="comparison-label">LLM Traffic Rate</div>
+                <div class="comparison-value">1.61%</div>
+                <div class="comparison-subtext">AI Search Conversion</div>
+                <div class="comparison-badge">+250% Higher than Organic Search</div>
+            </div>
+        </div>
+
+        <!-- Engagement Metrics -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>Engagement Quality Comparison</h1>
+            <p class="subtitle">LLM Traffic vs Overall Site Engagement</p>
+        </div>
+
+        <div class="comparison-grid-3">
+            <!-- ChatGPT Engagement -->
+            <div class="comparison-card">
+                <div class="comparison-label">ChatGPT Engagement Rate</div>
+                <div class="comparison-value">52.9%</div>
+                <div class="comparison-subtext">157 of 297 sessions engaged</div>
+                <div class="comparison-badge" style="background-color: #dbeafe; color: #1e40af;">21.2s Avg Time</div>
+            </div>
+
+            <!-- Perplexity Engagement -->
+            <div class="comparison-card">
+                <div class="comparison-label">Perplexity Engagement Rate</div>
+                <div class="comparison-value">54.7%</div>
+                <div class="comparison-subtext">41 of 75 sessions engaged</div>
+                <div class="comparison-badge" style="background-color: #dbeafe; color: #1e40af;">25.9s Avg Time</div>
+            </div>
+
+            <!-- Organic Search Engagement -->
+            <div class="comparison-card">
+                <div class="comparison-label">Organic Search Engagement</div>
+                <div class="comparison-value">64.3%</div>
+                <div class="comparison-subtext">14,456 of 22,485 sessions</div>
+                <div class="comparison-badge" style="background-color: #dbeafe; color: #1e40af;">33.6s Avg Time</div>
+            </div>
+        </div>
+
+        <!-- Landing Pages Table -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>LLM Landing Page Performance</h1>
+            <p class="subtitle">Detailed breakdown of all LLM-referred landing pages (ChatGPT + Perplexity)</p>
+        </div>
+
+        <div class="table-section">
+            <h2>Landing Pages by Sessions & Conversion Rate</h2>
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Landing Page</th>
+                            <th>Sessions</th>
+                            <th>Conversion Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="page-url">(not set)</td>
+                            <td class="metric-value">59</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/labor-vs-material-cost-in-construction-6-things-to-keep-in-mind/</td>
+                            <td class="metric-value">54</td>
+                            <td class="conversion-rate conversion-high">3.70%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/50-largest-general-contractors-in-the-united-states/</td>
+                            <td class="metric-value">23</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/40-largest-construction-companies-in-canada/</td>
+                            <td class="metric-value">18</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/top-construction-companies-in-texas/</td>
+                            <td class="metric-value">15</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/</td>
+                            <td class="metric-value">13</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/construction-estimating-software/</td>
+                            <td class="metric-value">13</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/how-to-calculate-construction-labor-cost/</td>
+                            <td class="metric-value">10</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/top-construction-companies-in-australia/</td>
+                            <td class="metric-value">10</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/top-construction-companies-in-illinois/</td>
+                            <td class="metric-value">10</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/profit-margin-in-construction/</td>
+                            <td class="metric-value">9</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/top-construction-companies-in-atlanta/</td>
+                            <td class="metric-value">9</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/8-top-challenges-in-construction-industry/</td>
+                            <td class="metric-value">8</td>
+                            <td class="conversion-rate conversion-high">12.50%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/general-conditions-construction-cost-estimating/</td>
+                            <td class="metric-value">7</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/largest-construction-companies-in-michigan/</td>
+                            <td class="metric-value">6</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/top-construction-companies-in-the-uk/</td>
+                            <td class="metric-value">5</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/complete-guide-to-construction-job-titles-and-descriptions/</td>
+                            <td class="metric-value">4</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/largest-construction-companies-in-pennsylvania/</td>
+                            <td class="metric-value">4</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/guide-construction-human-resource-planning/</td>
+                            <td class="metric-value">4</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/about/</td>
+                            <td class="metric-value">3</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/100-top-design-firms-in-the-us/</td>
+                            <td class="metric-value">3</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/blog/top-construction-companies-in-massachusetts/</td>
+                            <td class="metric-value">3</td>
+                            <td class="conversion-rate conversion-zero">0.00%</td>
+                        </tr>
+                        <tr>
+                            <td class="page-url">/bridgit-ai/</td>
+                            <td class="metric-value">1</td>
+                            <td class="conversion-rate conversion-high">100.00%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-footer">
+                <p>Showing top performing pages | 87 total landing pages from LLM traffic</p>
+            </div>
+        </div>
+
+        <!-- Query Analysis Strategy -->
+        <div class="header" style="margin-top: 3rem;">
+            <h1>Query Analysis Strategy</h1>
+            <p class="subtitle">Comprehensive approach to identifying and testing high-value queries</p>
+        </div>
+
+        <div class="strategy-diagram">
+            <div class="tree-container">
+                <!-- Core Node -->
+                <div class="core-node">
+                    <h4>Foundation</h4>
+                    <div class="query-count">50</div>
+                    <div class="label">Must-Win Queries</div>
+                </div>
+
+                <!-- Connector -->
+                <div class="connector-line"></div>
+
+                <!-- Branch Nodes -->
+                <div class="branches-grid">
+                    <div class="branch-node">
+                        <h5>Workforce Planning</h5>
+                        <div class="query-count">113</div>
+                        <div class="label">Queries Analyzed</div>
+                        <div class="mentions-badge">59 mentions</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Construction Software</h5>
+                        <div class="query-count">110</div>
+                        <div class="label">Queries Analyzed</div>
+                        <div class="mentions-badge">74 mentions</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Resource Allocation</h5>
+                        <div class="query-count">42</div>
+                        <div class="label">Queries Analyzed</div>
+                        <div class="mentions-badge">21 mentions</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Construction Workforce Planning</h5>
+                        <div class="query-count">28</div>
+                        <div class="label">Queries Analyzed</div>
+                        <div class="mentions-badge">16 mentions</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Resource Forecasting</h5>
+                        <div class="query-count">19</div>
+                        <div class="label">Queries Analyzed</div>
+                        <div class="mentions-badge">6 mentions</div>
+                    </div>
+
+                    <div class="branch-node">
+                        <h5>Workforce Management</h5>
+                        <div class="query-count">17</div>
+                        <div class="label">Queries Analyzed</div>
+                        <div class="mentions-badge">8 mentions</div>
+                    </div>
+                </div>
+
+                <!-- Total Summary -->
+                <div class="total-summary">
+                    <div class="total-count">329</div>
+                    <div class="total-label">Total Queries Analyzed Across All Categories</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Generated for Bridgit | Data from Google Analytics 4</p>
+            <p style="margin-top: 0.5rem;">LLM Traffic Analysis - October 2025</p>
+        </div>
+    </div>
+</body>
+</html>

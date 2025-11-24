@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citebots Visualization Library - UX Component Spec</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Animation utilities */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.5s ease-out;
+        }
+
+        /* Ring gauge animation */
+        @keyframes drawArc {
+            from { stroke-dashoffset: 339.3; }
+            to { stroke-dashoffset: var(--arc-offset); }
+        }
+
+        .progress-arc {
+            animation: drawArc 1s ease-out forwards;
+        }
+
+        /* Horizontal bar animation */
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: var(--bar-width); }
+        }
+
+        .progress-bar {
+            animation: expandWidth 1s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <!-- Header -->
+    <div class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 py-8">
+        <div class="max-w-7xl mx-auto px-6">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-2">Citebots Visualization Library</h1>
+            <p class="text-gray-600 dark:text-gray-400">Reusable UI/UX component specifications for dashboards and reports</p>
+            <div class="flex items-center gap-4 mt-4 text-sm text-gray-500 dark:text-gray-400">
+                <span class="inline-flex items-center px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-500/20">
+                    Version 1.0
+                </span>
+                <span>Last updated: Nov 2025</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 py-12">
+
+        <!-- Table of Contents -->
+        <nav class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 mb-12">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Component Library</h2>
+            <ul class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                <li><a href="#metric-cards" class="text-orange-600 dark:text-orange-400 hover:underline">1. Metric Cards</a></li>
+                <li><a href="#ring-gauge" class="text-orange-600 dark:text-orange-400 hover:underline">2. Ring Gauge</a></li>
+                <li><a href="#comparison-bars" class="text-orange-600 dark:text-orange-400 hover:underline">3. Comparison Bars</a></li>
+                <li><a href="#sentiment-widget" class="text-orange-600 dark:text-orange-400 hover:underline">4. Sentiment Widget</a></li>
+                <li><a href="#data-tables" class="text-orange-600 dark:text-orange-400 hover:underline">5. Data Tables</a></li>
+                <li><a href="#insight-boxes" class="text-orange-600 dark:text-orange-400 hover:underline">6. Insight Boxes</a></li>
+                <li><a href="#badges" class="text-orange-600 dark:text-orange-400 hover:underline">7. Badges & Tags</a></li>
+                <li><a href="#cards" class="text-orange-600 dark:text-orange-400 hover:underline">8. Card Containers</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section 1: Metric Cards -->
+        <section id="metric-cards" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">1. Metric Cards</h2>
+                <p class="text-gray-600 dark:text-gray-400">Large KPI display cards with icons and hover effects</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Metric Card Example 1 -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Total Queries</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white">1,247</p>
+                        </div>
+                        <div class="flex-shrink-0 ml-6">
+                            <div class="w-16 h-16 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-2xl flex items-center justify-center">
+                                <svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Card Example 2 -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Brand Mentions</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white">742</p>
+                        </div>
+                        <div class="flex-shrink-0 ml-6">
+                            <div class="w-16 h-16 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-2xl flex items-center justify-center">
+                                <svg class="w-8 h-8 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Card Example 3 -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25 hover:scale-[0.98] active:scale-[0.96]">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="text-gray-600 dark:text-gray-400 font-medium mb-2">Win Rate</p>
+                            <p class="text-3xl font-bold text-gray-900 dark:text-white">68%</p>
+                        </div>
+                        <div class="flex-shrink-0 ml-6">
+                            <div class="w-16 h-16 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-2xl flex items-center justify-center">
+                                <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>Padding:</strong> 2rem (32px) all sides</li>
+                    <li><strong>Border:</strong> 1px solid with 50% opacity, rounded-2xl (16px)</li>
+                    <li><strong>Hover Effect:</strong> Scale to 98%, enhanced shadow, border opacity to 100%</li>
+                    <li><strong>Active Effect:</strong> Scale to 96%</li>
+                    <li><strong>Icon Container:</strong> 64px × 64px, rounded-2xl, color-matched background with 10% opacity</li>
+                    <li><strong>Title Font:</strong> Medium weight, gray-600</li>
+                    <li><strong>Value Font:</strong> 3xl (30px), bold weight</li>
+                    <li><strong>Color Palette:</strong> blue, orange, green, purple, indigo (matched to semantic meaning)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 2: Ring Gauge -->
+        <section id="ring-gauge" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">2. Ring Gauge (Circular Progress)</h2>
+                <p class="text-gray-600 dark:text-gray-400">SVG-based circular percentage displays</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Ring Gauge Example 1 -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8">
+                    <h4 class="text-center text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">Citation Rate</h4>
+                    <div class="flex justify-center">
+                        <svg viewBox="0 0 120 120" class="w-40 h-40">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#374151" stroke-width="7" opacity="0.2"/>
+                            <path d="M 60 6 A 54 54 0 1 1 16.36 82.36" fill="none" stroke="#f97316" stroke-width="8" stroke-linecap="round"/>
+                            <circle cx="60" cy="60" r="46" fill="#1e293b"/>
+                            <text x="60" y="55" text-anchor="middle" font-size="36" font-weight="700" fill="#ffffff">72</text>
+                            <text x="60" y="75" text-anchor="middle" font-size="12" fill="#999999">%</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Ring Gauge Example 2 -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8">
+                    <h4 class="text-center text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">SEO Score</h4>
+                    <div class="flex justify-center">
+                        <svg viewBox="0 0 120 120" class="w-40 h-40">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#374151" stroke-width="7" opacity="0.2"/>
+                            <path d="M 60 6 A 54 54 0 1 1 33.64 106.36" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round"/>
+                            <circle cx="60" cy="60" r="46" fill="#1e293b"/>
+                            <text x="60" y="55" text-anchor="middle" font-size="36" font-weight="700" fill="#ffffff">85</text>
+                            <text x="60" y="75" text-anchor="middle" font-size="12" fill="#999999">%</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Ring Gauge Example 3 -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8">
+                    <h4 class="text-center text-sm font-medium text-gray-600 dark:text-gray-400 mb-4">Performance</h4>
+                    <div class="flex justify-center">
+                        <svg viewBox="0 0 120 120" class="w-40 h-40">
+                            <circle cx="60" cy="60" r="54" fill="none" stroke="#374151" stroke-width="7" opacity="0.2"/>
+                            <path d="M 60 6 A 54 54 0 0 1 113.64 77.64" fill="none" stroke="#3b82f6" stroke-width="8" stroke-linecap="round"/>
+                            <circle cx="60" cy="60" r="46" fill="#1e293b"/>
+                            <text x="60" y="55" text-anchor="middle" font-size="36" font-weight="700" fill="#ffffff">54</text>
+                            <text x="60" y="75" text-anchor="middle" font-size="12" fill="#999999">%</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>ViewBox:</strong> 120 × 120</li>
+                    <li><strong>Outer Radius:</strong> 54px</li>
+                    <li><strong>Inner Radius:</strong> 46px</li>
+                    <li><strong>Background Circle:</strong> Stroke width 7px, gray-700 at 20% opacity</li>
+                    <li><strong>Progress Arc:</strong> Stroke width 8px, rounded linecap, color-coded by value</li>
+                    <li><strong>Inner Fill:</strong> Dark slate (#1e293b) with subtle shadow</li>
+                    <li><strong>Value Text:</strong> 36px, bold (700), white</li>
+                    <li><strong>Label Text:</strong> 12px, gray at 70% opacity</li>
+                    <li><strong>Animation:</strong> Draw arc on load (1s ease-out)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: Comparison Bars -->
+        <section id="comparison-bars" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">3. Comparison Bars</h2>
+                <p class="text-gray-600 dark:text-gray-400">Horizontal progress bars for competitive analysis</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white">Brand vs Competitors</h3>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Client Brand -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-900 dark:text-white">Your Brand</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-500/20">
+                                65%
+                            </span>
+                        </div>
+                        <div class="relative h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+                            <div class="absolute top-0 left-0 h-full bg-orange-500 rounded-full transition-all duration-1000" style="width: 65%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Competitor 1 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-900 dark:text-white">Competitor A</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/20">
+                                58%
+                            </span>
+                        </div>
+                        <div class="relative h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+                            <div class="absolute top-0 left-0 h-full bg-gray-400 dark:bg-gray-500 rounded-full transition-all duration-1000" style="width: 58%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Competitor 2 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-900 dark:text-white">Competitor B</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/20">
+                                42%
+                            </span>
+                        </div>
+                        <div class="relative h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+                            <div class="absolute top-0 left-0 h-full bg-gray-400 dark:bg-gray-500 rounded-full transition-all duration-1000" style="width: 42%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Competitor 3 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium text-gray-900 dark:text-white">Competitor C</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/20">
+                                33%
+                            </span>
+                        </div>
+                        <div class="relative h-4 bg-gray-100 dark:bg-gray-700/50 rounded-full overflow-hidden">
+                            <div class="absolute top-0 left-0 h-full bg-gray-400 dark:bg-gray-500 rounded-full transition-all duration-1000" style="width: 33%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>Bar Height:</strong> 16px (h-4)</li>
+                    <li><strong>Bar Background:</strong> gray-100 (light) / gray-700/50 (dark), fully rounded</li>
+                    <li><strong>Bar Spacing:</strong> 1rem (16px) between rows</li>
+                    <li><strong>Client Bar Color:</strong> Orange-500 (primary brand color)</li>
+                    <li><strong>Competitor Bar Color:</strong> Gray-400 (neutral)</li>
+                    <li><strong>Badge Style:</strong> Rounded-full, 12px text, colored background with border</li>
+                    <li><strong>Animation:</strong> Width transition 1s duration</li>
+                    <li><strong>Label Font:</strong> Medium weight</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 4: Sentiment Widget -->
+        <section id="sentiment-widget" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">4. Sentiment Distribution Widget</h2>
+                <p class="text-gray-600 dark:text-gray-400">Sentiment analysis with score display and distribution bars</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-4-8V3a1 1 0 011-1h2a1 1 0 011 1v3M7 21h10a2 2 0 002-2v-5a2 2 0 00-2-2H7a2 2 0 00-2 2v5a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Brand Sentiment Analysis</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Overall sentiment in brand mentions</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50/50 dark:bg-gray-700/30 rounded-xl p-4">
+                    <!-- Average Score -->
+                    <div class="text-center mb-6">
+                        <div class="text-4xl font-bold text-green-600 dark:text-green-400 mb-2">+0.7</div>
+                        <p class="text-gray-600 dark:text-gray-400">Average Sentiment Score</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Based on 247 analyzed queries</p>
+                    </div>
+
+                    <!-- Distribution -->
+                    <div class="space-y-4">
+                        <h4 class="font-medium text-gray-700 dark:text-gray-300">Sentiment Distribution</h4>
+
+                        <!-- Positive -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-4 h-4 rounded-full bg-green-500"></div>
+                                <span class="font-medium text-gray-900 dark:text-white">Positive</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">178 (72%)</span>
+                                <div class="w-20 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div class="h-2 bg-green-500 rounded-full transition-all duration-700" style="width: 72%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Neutral -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-4 h-4 rounded-full bg-gray-500"></div>
+                                <span class="font-medium text-gray-900 dark:text-white">Neutral</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">54 (22%)</span>
+                                <div class="w-20 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div class="h-2 bg-gray-500 rounded-full transition-all duration-700" style="width: 22%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Negative -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-4 h-4 rounded-full bg-red-500"></div>
+                                <span class="font-medium text-gray-900 dark:text-white">Negative</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">15 (6%)</span>
+                                <div class="w-20 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
+                                    <div class="h-2 bg-red-500 rounded-full transition-all duration-700" style="width: 6%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>Container:</strong> Two-layer (outer white card, inner gray-50/50 background)</li>
+                    <li><strong>Score Display:</strong> 4xl (36px), bold, color-coded (+green, -red, 0 gray)</li>
+                    <li><strong>Distribution Indicators:</strong> 16px circles with matching sentiment colors</li>
+                    <li><strong>Mini Progress Bars:</strong> 80px width, 8px height</li>
+                    <li><strong>Color Coding:</strong> Green (positive), Gray (neutral), Red (negative)</li>
+                    <li><strong>Spacing:</strong> 1rem between distribution items</li>
+                    <li><strong>Typography:</strong> Medium weight for labels, bold for the main score</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5: Data Tables -->
+        <section id="data-tables" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">5. Data Tables</h2>
+                <p class="text-gray-600 dark:text-gray-400">Expandable, filterable data tables with nested content</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/50 dark:border-indigo-500/20 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Query Analysis</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Showing 3 of 247 queries</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50/50 dark:bg-gray-700/30 rounded-xl p-4">
+                    <div class="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-700/50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Query</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Platform</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Intent</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Brand</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/25 transition-colors cursor-pointer">
+                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">Best project management software for teams</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">ChatGPT</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #fef3c7; color: #b45309;">Commercial</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span class="text-xs text-gray-600 dark:text-gray-400">Cited</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/25 transition-colors cursor-pointer">
+                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">How to improve team collaboration remotely</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Perplexity</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #dbeafe; color: #1e40af;">Informational</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="text-gray-400 dark:text-gray-500">-</span>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/25 transition-colors cursor-pointer">
+                                    <td class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100">Asana vs Monday.com comparison</td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">ChatGPT</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #ede9fe; color: #6d28d9;">Comparison</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm">
+                                        <div class="flex items-center gap-1">
+                                            <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span class="text-xs text-gray-600 dark:text-gray-400">Mentioned</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>Two-Layer Design:</strong> Outer card + inner gray background with rounded corners</li>
+                    <li><strong>Table Border:</strong> Subtle gray-200 border with rounded-lg</li>
+                    <li><strong>Header Background:</strong> gray-50 (light) / gray-700/50 (dark)</li>
+                    <li><strong>Header Text:</strong> Uppercase, 12px, medium weight, gray-500</li>
+                    <li><strong>Row Hover:</strong> gray-50 background with smooth transition</li>
+                    <li><strong>Cell Padding:</strong> 1.5rem horizontal, 1rem vertical</li>
+                    <li><strong>Expandable Rows:</strong> Chevron icon that rotates 90° on expand</li>
+                    <li><strong>Status Indicators:</strong> Color-coded badges and checkmarks</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Insight Boxes -->
+        <section id="insight-boxes" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">6. Insight Boxes</h2>
+                <p class="text-gray-600 dark:text-gray-400">Contextual information and recommendations</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Orange Insight Box -->
+                <div class="bg-orange-50 dark:bg-orange-500/10 border border-orange-200/50 dark:border-orange-500/20 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-orange-100 dark:bg-orange-500/20 border border-orange-200/50 dark:border-orange-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-3 h-3 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-orange-800 dark:text-orange-300 mb-1">Competitive Position</h5>
+                            <p class="text-sm text-orange-700 dark:text-orange-400 leading-relaxed">
+                                Excellent! Your brand significantly outperforms competitors by 12%, showing strong market dominance in LLM responses.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blue Insight Box -->
+                <div class="bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-blue-100 dark:bg-blue-500/20 border border-blue-200/50 dark:border-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-3 h-3 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-blue-800 dark:text-blue-300 mb-1">Optimization Opportunity</h5>
+                            <p class="text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
+                                Consider creating more in-depth content for "comparison" queries where competitors are currently outperforming by 18%.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Green Insight Box -->
+                <div class="bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-green-100 dark:bg-green-500/20 border border-green-200/50 dark:border-green-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-green-800 dark:text-green-300 mb-1">Strong Performance</h5>
+                            <p class="text-sm text-green-700 dark:text-green-400 leading-relaxed">
+                                Your brand maintains a 72% citation rate in informational queries, exceeding industry benchmarks.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Red Insight Box -->
+                <div class="bg-red-50 dark:bg-red-500/10 border border-red-200/50 dark:border-red-500/20 rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-6 h-6 bg-red-100 dark:bg-red-500/20 border border-red-200/50 dark:border-red-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <svg class="w-3 h-3 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h5 class="font-medium text-red-800 dark:text-red-300 mb-1">Attention Required</h5>
+                            <p class="text-sm text-red-700 dark:text-red-400 leading-relaxed">
+                                Brand mentions dropped 15% in transactional queries. Review and update product-focused content.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>Background:</strong> Color-50 (light) / Color-500/10 (dark) with matching border</li>
+                    <li><strong>Border:</strong> Color-200/50 (light) / Color-500/20 (dark)</li>
+                    <li><strong>Icon Container:</strong> 24px × 24px, nested background layers, rounded-lg</li>
+                    <li><strong>Icon Size:</strong> 12px (w-3 h-3)</li>
+                    <li><strong>Title Font:</strong> Medium weight, color-800 (light) / color-300 (dark)</li>
+                    <li><strong>Body Font:</strong> Small (14px), color-700 (light) / color-400 (dark)</li>
+                    <li><strong>Color Themes:</strong> Orange (info), Blue (tip), Green (success), Red (warning)</li>
+                    <li><strong>Padding:</strong> 1rem all sides</li>
+                    <li><strong>Corner Radius:</strong> rounded-xl (12px)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 7: Badges & Tags -->
+        <section id="badges" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">7. Badges & Status Tags</h2>
+                <p class="text-gray-600 dark:text-gray-400">Color-coded status indicators and labels</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-8">
+                <div class="space-y-6">
+                    <!-- Platform Badges -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Platform Badges</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">ChatGPT</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">Perplexity</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">Claude</span>
+                        </div>
+                    </div>
+
+                    <!-- Intent Badges -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Query Intent Badges</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #dbeafe; color: #1e40af;">Informational</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #fef3c7; color: #b45309;">Commercial</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #d1fae5; color: #065f46;">Navigational</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #fee2e2; color: #b91c1c;">Transactional</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #ede9fe; color: #6d28d9;">Comparison</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" style="background-color: #cffafe; color: #0891b2;">Local</span>
+                        </div>
+                    </div>
+
+                    <!-- Competition Level Badges -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Competition Level</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">Defending</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Opportunity</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400">Competitive</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">Competitor Advantage</span>
+                        </div>
+                    </div>
+
+                    <!-- Response Match Badges -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Response Match</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Exact</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">Partial</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400">None</span>
+                        </div>
+                    </div>
+
+                    <!-- Domain Type Badges -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Domain Type</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Client</span>
+                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">Competitor</span>
+                        </div>
+                    </div>
+
+                    <!-- Percentage Badges -->
+                    <div>
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Percentage Badges</h4>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-300 border border-orange-200/50 dark:border-orange-500/20">65%</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 dark:bg-gray-500/10 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-500/20">42%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>Standard Badge:</strong> px-2.5 py-0.5, rounded-full, 12px text, medium weight</li>
+                    <li><strong>Compact Badge:</strong> px-1.5 py-0.5, rounded (not full), 12px text</li>
+                    <li><strong>Percentage Badge:</strong> px-3 py-1, rounded-full with border, larger padding</li>
+                    <li><strong>Background Pattern:</strong> Color-100 (light) / Color-900/30 (dark)</li>
+                    <li><strong>Text Pattern:</strong> Color-800 (light) / Color-400 (dark)</li>
+                    <li><strong>Border (when used):</strong> Color-200/50 (light) / Color-500/20 (dark)</li>
+                    <li><strong>Semantic Colors:</strong> Green (success/positive), Red (error/negative), Orange (warning/primary), Blue (info), Purple (special), Yellow (caution), Gray (neutral)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 8: Card Containers -->
+        <section id="cards" class="mb-16">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">8. Card Container System</h2>
+                <p class="text-gray-600 dark:text-gray-400">Nested card layouts with parent-child containers</p>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Parent-Only Card -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 border border-blue-200/50 dark:border-blue-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Parent Card (Single Layer)</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Clean white/gray background with icon header</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 dark:text-gray-300">This is a standard single-layer card with header icon, title, and content area. Used for simple widgets that don't require nested containers.</p>
+                </div>
+
+                <!-- Parent-Child Card -->
+                <div class="bg-white dark:bg-gray-800 border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 transition-all duration-200 hover:border-gray-300/50 dark:hover:border-gray-600/50 hover:shadow-lg dark:hover:shadow-gray-900/25">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-green-50 dark:bg-green-500/10 border border-green-200/50 dark:border-green-500/20 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Parent Card (Two Layers)</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">With nested child container</p>
+                        </div>
+                    </div>
+
+                    <!-- Child Container -->
+                    <div class="bg-gray-50/50 dark:bg-gray-700/30 rounded-xl p-4">
+                        <h4 class="font-medium text-gray-700 dark:text-gray-300 mb-3">Child Container</h4>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">This gray-50/50 (light) or gray-700/30 (dark) container sits inside the parent card. It provides visual hierarchy and groups related content together. Commonly used for tables, charts, or grouped data.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Spec Details -->
+            <div class="mt-6 bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6">
+                <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Design Specifications</h3>
+                <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                    <li><strong>Parent Card Background:</strong> white (light) / gray-800 (dark)</li>
+                    <li><strong>Parent Border:</strong> gray-200/50 (light) / gray-700/50 (dark), 1px solid</li>
+                    <li><strong>Parent Corner Radius:</strong> rounded-2xl (16px)</li>
+                    <li><strong>Parent Padding:</strong> 1.5rem (24px)</li>
+                    <li><strong>Parent Hover:</strong> Enhanced border, shadow-lg, subtle lift effect</li>
+                    <li><strong>Header Icon Container:</strong> 40px × 40px, color-50/10 background, rounded-xl</li>
+                    <li><strong>Header Icon Size:</strong> 20px (w-5 h-5)</li>
+                    <li><strong>Child Container Background:</strong> gray-50/50 (light) / gray-700/30 (dark)</li>
+                    <li><strong>Child Corner Radius:</strong> rounded-xl (12px)</li>
+                    <li><strong>Child Padding:</strong> 1rem (16px)</li>
+                    <li><strong>Spacing:</strong> 1.5rem gap between header and child container</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Design Principles -->
+        <section class="mb-16">
+            <div class="bg-gradient-to-br from-orange-50 to-blue-50 dark:from-gray-800 dark:to-gray-700 border border-orange-200/50 dark:border-gray-600/50 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Design Principles</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Color System</h3>
+                        <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                            <li><strong>Primary Brand:</strong> Orange-500 (#f97316)</li>
+                            <li><strong>Success/Positive:</strong> Green-500/600</li>
+                            <li><strong>Warning/Alert:</strong> Orange-500/600</li>
+                            <li><strong>Error/Negative:</strong> Red-500/600</li>
+                            <li><strong>Info/Secondary:</strong> Blue-500/600</li>
+                            <li><strong>Neutral:</strong> Gray-400/500/600</li>
+                            <li><strong>Special Actions:</strong> Purple/Indigo-500/600</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Typography</h3>
+                        <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                            <li><strong>Font Family:</strong> System UI stack (native fonts)</li>
+                            <li><strong>Display:</strong> 4xl (36px), Bold (700)</li>
+                            <li><strong>Headings:</strong> xl-2xl (20-24px), Bold/Semibold (600-700)</li>
+                            <li><strong>Body:</strong> sm-base (14-16px), Regular (400) / Medium (500)</li>
+                            <li><strong>Small:</strong> xs-sm (12-14px), Regular/Medium</li>
+                            <li><strong>Labels:</strong> xs (12px), Medium (500), Uppercase</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Spacing & Layout</h3>
+                        <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                            <li><strong>Card Padding:</strong> 1.5rem - 2rem (24-32px)</li>
+                            <li><strong>Section Gaps:</strong> 1rem - 1.5rem (16-24px)</li>
+                            <li><strong>Component Spacing:</strong> 0.75rem - 1rem (12-16px)</li>
+                            <li><strong>Inline Elements:</strong> 0.5rem - 0.75rem (8-12px)</li>
+                            <li><strong>Border Radius:</strong> rounded-xl/2xl (12-16px) for cards</li>
+                            <li><strong>Border Radius:</strong> rounded-lg (8px) for nested items</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">Interactive States</h3>
+                        <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                            <li><strong>Hover:</strong> Border opacity +50%, shadow-lg, subtle lift</li>
+                            <li><strong>Active:</strong> Scale 96% (pressed effect)</li>
+                            <li><strong>Transitions:</strong> 200ms duration, ease-out timing</li>
+                            <li><strong>Animations:</strong> 700ms-1s for data visualizations</li>
+                            <li><strong>Loading States:</strong> Spinning border animation</li>
+                            <li><strong>Focus:</strong> Ring-2 with brand color</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-100 dark:bg-gray-800/50 rounded-xl p-6 text-center">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                This visualization library is designed for the Citebots platform.
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-500">
+                All components are built with Tailwind CSS and support both light and dark modes.
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

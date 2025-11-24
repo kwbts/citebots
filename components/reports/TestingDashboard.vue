@@ -321,7 +321,7 @@ const brandMentionData = computed(() => {
         }
       }
       categories[value].total++
-      if (query.brand_mentioned) {
+      if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
         categories[value].mentioned++
       }
     })
@@ -521,9 +521,9 @@ const filteredPages = computed(() => {
   }).slice(0, 10) // Limit to 10 entries
 })
 
-// Brand mention metrics from analysis_queries
+// Brand mention metrics from analysis_queries (excluding implicit mentions)
 const brandMentions = computed(() => {
-  return filteredQueries.value.filter(q => q.brand_mentioned === true).length
+  return filteredQueries.value.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit').length
 })
 
 const brandMentionRate = computed(() => {
@@ -704,7 +704,7 @@ const prepareAnalysisJourneyData = () => {
 
         const keywordData = keywordMap.get(keyword)
         keywordData.queries++
-        if (query.brand_mentioned) keywordData.brandMentions++
+        if (query.brand_mentioned && query.brand_mention_type !== 'implicit') keywordData.brandMentions++
 
         // Add to category counts
         if (!keywordCategoryMap.has(category)) {
@@ -800,12 +800,12 @@ const prepareAnalysisJourneyData = () => {
         intent: q.query_intent || 'Unknown',
         type: q.query_type || 'Unknown',
         platform: q.data_source,
-        brandMentioned: q.brand_mentioned || false
+        brandMentioned: (q.brand_mentioned && q.brand_mention_type !== 'implicit') || false
       })),
 
       // Responses
       totalResponses: queries.length,
-      brandMentions: queries.filter(q => q.brand_mentioned).length,
+      brandMentions: queries.filter(q => q.brand_mentioned && q.brand_mention_type !== 'implicit').length,
       brandPagesCited: pageAnalyses?.filter(p => p.is_client_domain).length || 0,
       responseData: queries.map(q => ({
         query: q.query_text,

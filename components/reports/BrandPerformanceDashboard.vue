@@ -201,7 +201,7 @@ export default {
       
       const queries = props.data.analysis_queries
       const totalQueries = queries.length
-      const mentionedQueries = queries.filter(q => q.brand_mentioned === true).length
+      const mentionedQueries = queries.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit').length
       const mentionRate = totalQueries > 0 ? (mentionedQueries / totalQueries) * 100 : 0
       
       return {
@@ -215,15 +215,15 @@ export default {
       if (!props.data?.analysis_queries) return { count: 0, percentage: 0, totalMentions: 0 }
       
       const queries = props.data.analysis_queries
-      const brandMentions = queries.filter(q => q.brand_mentioned === true)
-      
+      const brandMentions = queries.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit')
+
       // Count queries where brand is mentioned but no citation to client domain
       const noCitationMentions = brandMentions.filter(q => {
         if (!q.associated_pages || !Array.isArray(q.associated_pages)) return true
         
-        return !q.associated_pages.some(page => 
-          page.is_client_domain === true || 
-          page.brand_mentioned === true ||
+        return !q.associated_pages.some(page =>
+          page.is_client_domain === true ||
+          (page.brand_mentioned === true && page.brand_mention_type !== 'implicit') ||
           (page.citation_url && props.client?.domain && page.citation_url.includes(props.client.domain))
         )
       })
@@ -250,11 +250,11 @@ export default {
           platformStats[platform] = { total: 0, mentioned: 0 }
         }
         platformStats[platform].total++
-        if (query.brand_mentioned) {
+        if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
           platformStats[platform].mentioned++
         }
       })
-      
+
       return Object.entries(platformStats).map(([platform, stats]) => ({
         name: platform,
         label: getPlatformLabel(platform),
@@ -278,7 +278,7 @@ export default {
           intentStats[intent] = { total: 0, mentioned: 0 }
         }
         intentStats[intent].total++
-        if (query.brand_mentioned) {
+        if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
           intentStats[intent].mentioned++
         }
       })
@@ -299,7 +299,7 @@ export default {
           categoryStats[category] = { total: 0, mentioned: 0 }
         }
         categoryStats[category].total++
-        if (query.brand_mentioned) {
+        if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
           categoryStats[category].mentioned++
         }
       })
@@ -320,7 +320,7 @@ export default {
           funnelStats[stage] = { total: 0, mentioned: 0 }
         }
         funnelStats[stage].total++
-        if (query.brand_mentioned) {
+        if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
           funnelStats[stage].mentioned++
         }
       })
@@ -340,8 +340,8 @@ export default {
       if (!props.data?.analysis_queries) return { distribution: [], averageSentiment: 0, totalQueries: 0 }
       
       const queries = props.data.analysis_queries
-      const sentimentQueries = queries.filter(q => 
-        q.brand_mentioned && q.brand_sentiment !== null && q.brand_sentiment !== undefined
+      const sentimentQueries = queries.filter(q =>
+        q.brand_mentioned && q.brand_mention_type !== 'implicit' && q.brand_sentiment !== null && q.brand_sentiment !== undefined
       )
       
       if (sentimentQueries.length === 0) {
@@ -377,7 +377,7 @@ export default {
           outcomeStats[outcome] = { total: 0, brandMentioned: 0, competitorMentioned: 0 }
         }
         outcomeStats[outcome].total++
-        if (query.brand_mentioned) {
+        if (query.brand_mentioned && query.brand_mention_type !== 'implicit') {
           outcomeStats[outcome].brandMentioned++
         }
         if (query.competitor_mentioned_names?.length > 0) {
@@ -406,10 +406,10 @@ export default {
       if (!props.data?.analysis_queries) return []
       
       const queries = props.data.analysis_queries
-      const brandMentions = queries.filter(q => q.brand_mentioned === true)
+      const brandMentions = queries.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit')
       const noCitationMentions = brandMentions.filter(q => {
         if (!q.associated_pages || !Array.isArray(q.associated_pages)) return true
-        return !q.associated_pages.some(page => page.is_client_domain === true || page.brand_mentioned === true)
+        return !q.associated_pages.some(page => page.is_client_domain === true || (page.brand_mentioned === true && page.brand_mention_type !== 'implicit'))
       })
       
       // Group by intent for opportunities

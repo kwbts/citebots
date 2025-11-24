@@ -154,7 +154,7 @@
               </td>
               <td class="p-3 text-sm">
                 <div class="flex items-center gap-2">
-                  <span v-if="query.brand_mentioned" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400">
+                  <span v-if="query.brand_mentioned && query.brand_mention_type !== 'implicit'" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-500/20 text-orange-700 dark:text-orange-400">
                     {{ getBrandMentionTypeLabel(query.brand_mention_type) }}
                   </span>
                   <span v-else class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-600/20 text-gray-700 dark:text-gray-400">
@@ -361,11 +361,11 @@ const availablePlatforms = computed(() => {
 const filteredQueries = computed(() => {
   let filtered = [...props.queries]
 
-  // Apply brand mention filter
+  // Apply brand mention filter (excluding implicit mentions from "mentioned")
   if (filterType.value === 'mentioned') {
-    filtered = filtered.filter(q => q.brand_mentioned === true)
+    filtered = filtered.filter(q => q.brand_mentioned === true && q.brand_mention_type !== 'implicit')
   } else if (filterType.value === 'not-mentioned') {
-    filtered = filtered.filter(q => q.brand_mentioned !== true)
+    filtered = filtered.filter(q => q.brand_mentioned !== true || q.brand_mention_type === 'implicit')
   }
 
   // Apply platform filter
